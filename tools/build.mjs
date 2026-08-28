@@ -1,0 +1,220 @@
+/**
+ * Static site generator for arvandsport.com.
+ *
+ * Reads content/*.json (real content pulled from the live WordPress install by
+ * tools/extract.mjs) and writes a fully static dist/ that mirrors the live
+ * URL structure, so no existing link or indexed URL changes.
+ */
+import { readFile, writeFile, mkdir, rm, cp, readdir, stat } from 'node:fs/promises';
+import { join, dirname, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const DIST = join(ROOT, 'dist');
+
+const site = JSON.parse(await readFile(join(ROOT, 'content/site.json'), 'utf8'));
+const players = JSON.parse(await readFile(join(ROOT, 'content/players.json'), 'utf8'));
+const news = JSON.parse(await readFile(join(ROOT, 'content/news.json'), 'utf8'));
+
+const { renderHome } = await import('../src/templates/home.mjs');
+const { renderPlayerIndex, renderPlayer } = await import('../src/templates/players.mjs');
+const { renderNewsIndex, renderArticle } = await import('../src/templates/news.mjs');
+const { renderRegistration } = await import('../src/templates/registration.mjs');
+const { renderArchive } = await import('../src/templates/archive.mjs');
+const { renderNotFound } = await import('../src/templates/notfound.mjs');
+const { renderRedirect } = await import('../src/templates/redirect.mjs');
+
+const ctx = { site, players, news };
+
+/* --------------------------------------------------------------- helpers */
+
+async function emit(route, html) {
+  const file = route === '/404.html' ? join(DIST, '404.html') : join(DIST, route, 'index.html');
+  await mkdir(dirname(file), { recursive: true });
+  await writeFile(file, html);
+  return route;
+}
+
+async function walk(dir, base = dir) {
+  const out = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await walk(full, base)));
+    else out.push(relative(base, full));
+  }
+  return out;
+}
+
+/** Concatenate the stylesheet parts in a deterministic, meaningful order. */
+const CSS_ORDER = [
+  'tokens.css',
+  'base.css',
+  'motion.css',
+  'layout.css',
+  'components.css',
+  'pages.css',
+];
+
+async function buildCss() {
+  const parts = [];
+  for (const name of CSS_ORDER) {
+    parts.push(`/* ===== ${name} ===== */`);
+    parts.push(await readFile(join(ROOT, 'src/styles', name), 'utf8'));
+  }
+  await mkdir(join(DIST, 'assets/css'), { recursive: true });
+  await writeFile(join(DIST, 'assets/css/main.css'), parts.join('\n\n'));
+}
+
+/* ------------------------------------------------------------------ pages */
+
+await rm(DIST, { recursive: true, force: true });
+await mkdir(DIST, { recursive: true });
+
+const routes = [];
+
+routes.push(await emit('/', renderHome(ctx)));
+routes.push(await emit('/player', renderPlayerIndex(ctx)));
+for (const player of players) {
+  routes.push(await emit(`/player/${player.slug}`, renderPlayer({ ...ctx, player })));
+}
+routes.push(await emit('/news', renderNewsIndex(ctx)));
+for (const article of news) {
+  routes.push(await emit(`/news/${article.slug}`, renderArticle({ ...ctx, article })));
+}
+routes.push(await emit('/registration', renderRegistration(ctx)));
+
+/* Author archive — the live site exposes /author/arvand-admin/. */
+routes.push(
+  await emit(
+    '/author/arvand-admin',
+    renderArchive({
+      ...ctx,
+      heading: 'Arvand-admin',
+      kicker: 'Author archive',
+      posts: news,
+      canonicalPath: '/author/arvand-admin/',
+    }),
+  ),
+);
+
+/* Category archives, as WordPress publishes them. */
+routes.push(
+  await emit(
+    '/category/news',
+    renderArchive({ ...ctx, heading: 'News', kicker: 'Category', posts: news, canonicalPath: '/category/news/' }),
+  ),
+);
+routes.push(
+  await emit(
+    '/category/player',
+    renderArchive({
+      ...ctx,
+      heading: 'Player',
+      kicker: 'Category',
+      posts: players.map((p) => ({
+        title: p.name,
+        url: p.url,
+        image: p.image,
+        date: p.date,
+        excerpt: [p.position.detail, p.club].filter(Boolean).join(' · '),
+      })),
+      canonicalPath: '/category/player/',
+    }),
+  ),
+);
+
+/* Date archives, one per year and per year/month that actually has posts. */
+const allPosts = [
+  ...news.map((n) => ({ title: n.title, url: n.url, image: n.image, date: n.date, excerpt: n.excerpt })),
+  ...players.map((p) => ({
+    title: p.name,
+    url: p.url,
+    image: p.image,
+    date: p.date,
+    excerpt: [p.position.detail, p.club].filter(Boolean).join(' · '),
+  })),
+].sort((a, b) => (a.date < b.date ? 1 : -1));
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const byYear = new Map();
+const byMonth = new Map();
+for (const post of allPosts) {
+  const [y, m] = post.date.split('T')[0].split('-');
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y).push(post);
+  const key = `${y}/${m}`;
+  if (!byMonth.has(key)) byMonth.set(key, []);
+  byMonth.get(key).push(post);
+}
+for (const [year, posts] of byYear) {
+  routes.push(
+    await emit(`/${year}`, renderArchive({ ...ctx, heading: year, kicker: 'Archive', posts, canonicalPath: `/${year}/` })),
+  );
+}
+for (const [key, posts] of byMonth) {
+  const [year, month] = key.split('/');
+  routes.push(
+    await emit(`/${key}`, renderArchive({
+      ...ctx,
+      heading: `${MONTHS[Number(month) - 1]} ${year}`,
+      kicker: 'Archive',
+      posts,
+      canonicalPath: `/${key}/`,
+    })),
+  );
+}
+
+/* URL preservation: two live URLs that must keep resolving.
+ * - /player/amir-roustae/ is how the homepage roster links to Amir Roustaei
+ *   (the live link drops the trailing "i" of the post slug).
+ * - /profile-2/ is an orphaned WordPress page that renders the registration
+ *   screen; it carries no content of its own. */
+routes.push(await emit('/player/amir-roustae', renderRedirect({ ...ctx, to: '/player/amir-roustaei/' })));
+routes.push(await emit('/profile-2', renderRedirect({ ...ctx, to: '/registration/' })));
+
+await emit('/404.html', renderNotFound(ctx));
+
+/* ------------------------------------------------------------ static + css */
+
+await buildCss();
+await cp(join(ROOT, 'static'), DIST, { recursive: true });
+await mkdir(join(DIST, 'assets/js'), { recursive: true });
+await cp(join(ROOT, 'src/scripts'), join(DIST, 'assets/js'), { recursive: true });
+
+/* --------------------------------------------------------- sitemap / robots */
+
+const origin = site.brand.url;
+const lastmod = (route) => {
+  if (route === '/') return news[0].modified;
+  const player = players.find((p) => p.url === `${route}/`);
+  if (player) return player.modified;
+  const article = news.find((n) => n.url === `${route}/`);
+  if (article) return article.modified;
+  return news[0].modified;
+};
+const indexable = routes.filter((r) => !['/player/amir-roustae', '/profile-2'].includes(r));
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${indexable
+  .map((r) => {
+    const loc = r === '/' ? `${origin}/` : `${origin}${r}/`;
+    return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod(r).split('T')[0]}</lastmod>\n  </url>`;
+  })
+  .join('\n')}
+</urlset>
+`;
+await writeFile(join(DIST, 'sitemap.xml'), sitemap);
+
+await writeFile(
+  join(DIST, 'robots.txt'),
+  `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
+);
+
+/* ------------------------------------------------------------------ report */
+
+const files = await walk(DIST);
+let bytes = 0;
+for (const f of files) bytes += (await stat(join(DIST, f))).size;
+console.log(`pages:  ${routes.length + 1}`);
+console.log(`files:  ${files.length}`);
+console.log(`size:   ${(bytes / 1024 / 1024).toFixed(2)} MB`);

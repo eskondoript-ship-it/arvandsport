@@ -1,0 +1,66 @@
+/* ---------------------------------------------------------------- motion
+ * Every animated element is authored so that its *final* state is the
+ * default. JS only sets a start state once it has confirmed motion is
+ * allowed, which means no-JS and reduced-motion visitors see finished
+ * content with no flash and nothing hidden.
+ */
+
+.js [data-reveal],
+.js [data-split] .word,
+.js .player-card,
+.js .news-card,
+.js .service,
+.js .person,
+.js .stat,
+.js .office { will-change: transform, opacity; }
+
+/* Set by motion.js only when animation will actually run. */
+.motion-ready [data-reveal],
+.motion-ready [data-anim-hidden] { opacity: 0; }
+
+[data-split] .word { display: inline-block; overflow: hidden; padding-block: .06em; margin-block: -.06em; }
+[data-split] .word__inner { display: inline-block; }
+[data-split] .ch { display: inline-block; }
+
+.page-transition {
+  position: fixed; inset: 0; z-index: 300; display: grid; place-items: center;
+  pointer-events: none; visibility: hidden;
+}
+.page-transition.is-active { visibility: visible; }
+.page-transition__panel {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, var(--navy-600), var(--navy-900));
+  transform: scaleY(0); transform-origin: bottom;
+}
+.page-transition__mark { position: relative; width: 96px; opacity: 0; }
+
+.hero__scroll-line { animation: scroll-hint 2.4s var(--ease-in-out) infinite; }
+@keyframes scroll-hint {
+  0%, 100% { transform: scaleY(.3); transform-origin: top; }
+  50%      { transform: scaleY(1);  transform-origin: top; }
+}
+
+.marquee__track { animation: marquee 38s linear infinite; }
+@keyframes marquee { to { transform: translateX(-100%); } }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+
+/* Set by motion.js when it detects that GSAP's ticker never advanced, so a
+ * stalled rAF can never leave a page half-drawn. */
+.motion-failsafe [data-reveal],
+.motion-failsafe [data-anim-hidden] { opacity: 1 !important; }
+.motion-failsafe [data-split] .word__inner,
+.motion-failsafe [data-split] .ch { transform: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .motion-ready [data-reveal],
+  .motion-ready [data-anim-hidden] { opacity: 1 !important; transform: none !important; }
+  .page-transition { display: none; }
+  .marquee__track { animation: none; }
+  .marquee { overflow-x: auto; }
+}

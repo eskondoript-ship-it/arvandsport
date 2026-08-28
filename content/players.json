@@ -1,0 +1,871 @@
+[
+  {
+    "id": 2718,
+    "slug": "ahoora-zand",
+    "name": "Ahoora Zand",
+    "firstName": "Ahoora",
+    "lastName": "Zand",
+    "url": "/player/ahoora-zand/",
+    "image": "/assets/img/players/ahoora-zand.png",
+    "date": "2025-09-11T02:44:45",
+    "modified": "2025-09-11T02:51:17",
+    "position": {
+      "raw": "Attack – Centre-Forward",
+      "group": "Attack",
+      "detail": "Centre-Forward"
+    },
+    "club": "Shams Azar Qazvin",
+    "citizenship": [
+      "Iran"
+    ],
+    "nationality": "Iran",
+    "height": "",
+    "foot": "",
+    "birth": "13.05.2007",
+    "placeOfBirth": "",
+    "joined": "29.07.2025",
+    "contractExpires": "",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "13.05.2007"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran"
+      },
+      {
+        "label": "Position",
+        "value": "Attack – Centre-Forward"
+      },
+      {
+        "label": "Current club",
+        "value": "Shams Azar Qazvin"
+      },
+      {
+        "label": "Joined",
+        "value": "29.07.2025"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/2007-05-13",
+        "label": "13.05.2007"
+      },
+      {
+        "href": "https://www.transfermarkt.com/shams-azar-ghazvin/startseite/verein/87232",
+        "label": "Shams Azar Qazvin"
+      }
+    ]
+  },
+  {
+    "id": 2230,
+    "slug": "ali-al-mosawe",
+    "name": "Ali Al-Mosawe",
+    "firstName": "Ali",
+    "lastName": "Al-Mosawe",
+    "url": "/player/ali-al-mosawe/",
+    "image": "/assets/img/players/ali-al-mosawe.png",
+    "date": "2024-01-22T22:09:22",
+    "modified": "2024-01-22T22:09:22",
+    "position": {
+      "raw": "Attack – Left Winger",
+      "group": "Attack",
+      "detail": "Left Winger"
+    },
+    "club": "CD Gouveia",
+    "citizenship": [
+      "Iraq",
+      "Denmark"
+    ],
+    "nationality": "Iraq",
+    "height": "",
+    "foot": "left",
+    "birth": "Jan 28, 2002 (21)",
+    "placeOfBirth": "",
+    "joined": "Jul 1, 2023",
+    "contractExpires": "Jun 30, 2024",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Jan 28, 2002 (21)"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iraq – Denmark"
+      },
+      {
+        "label": "Position",
+        "value": "Attack – Left Winger"
+      },
+      {
+        "label": "Foot",
+        "value": "left"
+      },
+      {
+        "label": "Current club",
+        "value": "CD Gouveia"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 1, 2023"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2024"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/2002-01-28",
+        "label": "Jan 28, 2002 (21)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/cd-gouveia/startseite/verein/31808",
+        "label": "CD Gouveia"
+      }
+    ]
+  },
+  {
+    "id": 2224,
+    "slug": "ali-alipour",
+    "name": "Ali Alipour",
+    "firstName": "Ali",
+    "lastName": "Alipour",
+    "url": "/player/ali-alipour/",
+    "image": "/assets/img/players/ali-alipour.png",
+    "date": "2024-01-22T21:58:46",
+    "modified": "2024-01-22T21:59:03",
+    "position": {
+      "raw": "Attack – Centre-Forward",
+      "group": "Attack",
+      "detail": "Centre-Forward"
+    },
+    "club": "Gil Vicente FC",
+    "citizenship": [
+      "Iran"
+    ],
+    "nationality": "Iran",
+    "height": "1,81 m",
+    "foot": "both",
+    "birth": "Nov 11, 1995 (28)",
+    "placeOfBirth": "Qaemshahr, Mazandaran",
+    "joined": "Jul 1, 2022",
+    "contractExpires": "Jun 30, 2024",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Nov 11, 1995 (28)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Qaemshahr, Mazandaran"
+      },
+      {
+        "label": "Height",
+        "value": "1,81 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran"
+      },
+      {
+        "label": "Position",
+        "value": "Attack – Centre-Forward"
+      },
+      {
+        "label": "Foot",
+        "value": "both"
+      },
+      {
+        "label": "Current club",
+        "value": "Gil Vicente FC"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 1, 2022"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2024"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/1995-11-11",
+        "label": "Nov 11, 1995 (28)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/gil-vicente-fc/startseite/verein/2424",
+        "label": "Gil Vicente FC"
+      }
+    ]
+  },
+  {
+    "id": 2242,
+    "slug": "ali-pourdara",
+    "name": "Ali Pourdara",
+    "firstName": "Ali",
+    "lastName": "Pourdara",
+    "url": "/player/ali-pourdara/",
+    "image": "/assets/img/players/ali-pourdara.png",
+    "date": "2024-01-22T22:27:47",
+    "modified": "2024-01-22T22:29:15",
+    "position": {
+      "raw": "midfield – Central Midfield",
+      "group": "Midfield",
+      "detail": "Central Midfield"
+    },
+    "club": "Kuwait SC",
+    "citizenship": [
+      "Iran",
+      "Kuwait"
+    ],
+    "nationality": "Iran",
+    "height": "1,72 m",
+    "foot": "both",
+    "birth": "Aug 4, 2001 (22)",
+    "placeOfBirth": "Kuwait",
+    "joined": "Nov 1, 2020",
+    "contractExpires": "Jun 30, 2029",
+    "contractOption": "club option 3 years",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Aug 4, 2001 (22)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Kuwait"
+      },
+      {
+        "label": "Height",
+        "value": "1,72 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran – Kuwait"
+      },
+      {
+        "label": "Position",
+        "value": "midfield – Central Midfield"
+      },
+      {
+        "label": "Foot",
+        "value": "both"
+      },
+      {
+        "label": "Current club",
+        "value": "Kuwait SC"
+      },
+      {
+        "label": "Joined",
+        "value": "Nov 1, 2020"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2029"
+      },
+      {
+        "label": "Contract option",
+        "value": "club option 3 years"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/2001-08-04",
+        "label": "Aug 4, 2001 (22)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/kuwait-sc/startseite/verein/15482",
+        "label": "Kuwait SC"
+      }
+    ]
+  },
+  {
+    "id": 2215,
+    "slug": "amir-roustaei",
+    "name": "Amir Roustaei",
+    "firstName": "Amir",
+    "lastName": "Roustaei",
+    "url": "/player/amir-roustaei/",
+    "image": "/assets/img/players/amir-roustaei.png",
+    "date": "2024-01-22T21:45:46",
+    "modified": "2024-01-23T10:13:06",
+    "position": {
+      "raw": "Attack – Centre-Forward",
+      "group": "Attack",
+      "detail": "Centre-Forward"
+    },
+    "club": "Sitra Club",
+    "citizenship": [
+      "Iran"
+    ],
+    "nationality": "Iran",
+    "height": "1,82 m",
+    "foot": "Right",
+    "birth": "Aug 5, 1997 (26)",
+    "placeOfBirth": "Tehran",
+    "joined": "Jul 28, 2023",
+    "contractExpires": "Jun 30, 2024",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Aug 5, 1997 (26)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Tehran"
+      },
+      {
+        "label": "Height",
+        "value": "1,82 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran"
+      },
+      {
+        "label": "Position",
+        "value": "Attack – Centre-Forward"
+      },
+      {
+        "label": "Foot",
+        "value": "Right"
+      },
+      {
+        "label": "Current club",
+        "value": "Sitra Club"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 28, 2023"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2024"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/1997-08-05",
+        "label": "Aug 5, 1997 (26)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/sitra-club/startseite/verein/13514",
+        "label": "Sitra Club"
+      }
+    ]
+  },
+  {
+    "id": 2240,
+    "slug": "eslit-sala",
+    "name": "Eslit Sala",
+    "firstName": "Eslit",
+    "lastName": "Sala",
+    "url": "/player/eslit-sala/",
+    "image": "/assets/img/players/eslit-sala.png",
+    "date": "2024-01-22T22:23:07",
+    "modified": "2024-01-22T22:23:07",
+    "position": {
+      "raw": "Defender – Centre-Back",
+      "group": "Defender",
+      "detail": "Centre-Back"
+    },
+    "club": "KF Vllaznia",
+    "citizenship": [
+      "Albania"
+    ],
+    "nationality": "Albania",
+    "height": "1,79 m",
+    "foot": "Right",
+    "birth": "May 9, 2000 (23)",
+    "placeOfBirth": "",
+    "joined": "Jul 1, 2023",
+    "contractExpires": "Jun 30, 2026",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "May 9, 2000 (23)"
+      },
+      {
+        "label": "Height",
+        "value": "1,79 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Albania"
+      },
+      {
+        "label": "Position",
+        "value": "Defender – Centre-Back"
+      },
+      {
+        "label": "Foot",
+        "value": "Right"
+      },
+      {
+        "label": "Current club",
+        "value": "KF Vllaznia"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 1, 2023"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2026"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/2000-05-09",
+        "label": "May 9, 2000 (23)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/kf-vllaznia/startseite/verein/8671",
+        "label": "KF Vllaznia"
+      }
+    ]
+  },
+  {
+    "id": 2728,
+    "slug": "farzad-tajik",
+    "name": "Farzad Tajik",
+    "firstName": "Farzad",
+    "lastName": "Tajik",
+    "url": "/player/farzad-tajik/",
+    "image": "/assets/img/players/farzad-tajik.png",
+    "date": "2025-09-11T02:52:26",
+    "modified": "2025-09-11T03:10:18",
+    "position": {
+      "raw": "Midfield – Central Midfield",
+      "group": "Midfield",
+      "detail": "Central Midfield"
+    },
+    "club": "FC Sorkh Poshan Herat",
+    "citizenship": [
+      "Afghanistan"
+    ],
+    "nationality": "Afghanistan",
+    "height": "",
+    "foot": "Right",
+    "birth": "14.02.2007",
+    "placeOfBirth": "",
+    "joined": "Jul 1, 2018",
+    "contractExpires": "",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "14.02.2007"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Afghanistan"
+      },
+      {
+        "label": "Position",
+        "value": "Midfield – Central Midfield"
+      },
+      {
+        "label": "Foot",
+        "value": "Right"
+      },
+      {
+        "label": "Current club",
+        "value": "FC Sorkh Poshan Herat"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 1, 2018"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/sanat-naft-fc/startseite/verein/20962",
+        "label": "FC Sorkh Poshan Herat"
+      }
+    ]
+  },
+  {
+    "id": 2235,
+    "slug": "jafar-salmani",
+    "name": "Jafar Salmani",
+    "firstName": "Jafar",
+    "lastName": "Salmani",
+    "url": "/player/jafar-salmani/",
+    "image": "/assets/img/players/jafar-salmani.png",
+    "date": "2024-01-22T22:16:39",
+    "modified": "2024-01-22T22:30:22",
+    "position": {
+      "raw": "Defender – Left-Back",
+      "group": "Defender",
+      "detail": "Left-Back"
+    },
+    "club": "Esteghlal FC",
+    "citizenship": [
+      "Iran"
+    ],
+    "nationality": "Iran",
+    "height": "1,76 m",
+    "foot": "Left",
+    "birth": "Jan 12, 1997 (27)",
+    "placeOfBirth": "Shadegan, Khuzestan",
+    "joined": "Aug 30, 2021",
+    "contractExpires": "Jun 30, 2024",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Jan 12, 1997 (27)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Shadegan, Khuzestan"
+      },
+      {
+        "label": "Height",
+        "value": "1,76 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran"
+      },
+      {
+        "label": "Position",
+        "value": "Defender – Left-Back"
+      },
+      {
+        "label": "Foot",
+        "value": "Left"
+      },
+      {
+        "label": "Current club",
+        "value": "Esteghlal FC"
+      },
+      {
+        "label": "Joined",
+        "value": "Aug 30, 2021"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2024"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/1997-01-12",
+        "label": "Jan 12, 1997 (27)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/esteghlal-fc/startseite/verein/1076",
+        "label": "Esteghlal FC"
+      }
+    ]
+  },
+  {
+    "id": 2127,
+    "slug": "mario-fontanella",
+    "name": "Mario Fontanella",
+    "firstName": "Mario",
+    "lastName": "Fontanella",
+    "url": "/player/mario-fontanella/",
+    "image": "/assets/img/players/mario-fontanella.png",
+    "date": "2024-01-21T14:03:27",
+    "modified": "2024-01-21T17:07:08",
+    "position": {
+      "raw": "Attack – Centre-Forward",
+      "group": "Attack",
+      "detail": "Centre-Forward"
+    },
+    "club": "Al-Yarmouk SC (Kuwait)",
+    "citizenship": [
+      "Italy"
+    ],
+    "nationality": "Italy",
+    "height": "1,75 m",
+    "foot": "Right",
+    "birth": "Jun 28, 1989 (34)",
+    "placeOfBirth": "Napoli",
+    "joined": "Jul 17, 2023",
+    "contractExpires": "Jun 30, 2024",
+    "contractOption": "",
+    "outfitter": "Umbro",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Jun 28, 1989 (34)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Napoli"
+      },
+      {
+        "label": "Height",
+        "value": "1,75 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Italy"
+      },
+      {
+        "label": "Position",
+        "value": "Attack – Centre-Forward"
+      },
+      {
+        "label": "Foot",
+        "value": "Right"
+      },
+      {
+        "label": "Current club",
+        "value": "Al-Yarmouk SC (Kuwait)"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 17, 2023"
+      },
+      {
+        "label": "Contract – expires",
+        "value": "Jun 30, 2024"
+      },
+      {
+        "label": "Outfitter",
+        "value": "Umbro"
+      }
+    ],
+    "note": "Mario Fontanella (born 28 June 1989) is an Italian footballer who plays as a forward for Al-Muharraq in the Bahraini Premier League.",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.co.in/aktuell/waspassiertheute/aktuell/new/datum/1989-06-28",
+        "label": "Jun 28, 1989 (34)"
+      },
+      {
+        "href": "https://www.transfermarkt.co.in/al-yarmouk-kuwait/startseite/verein/29285",
+        "label": "Al-Yarmouk SC (Kuwait)"
+      }
+    ]
+  },
+  {
+    "id": 2089,
+    "slug": "mehdi-taremi",
+    "name": "Mehdi Taremi",
+    "firstName": "Mehdi",
+    "lastName": "Taremi",
+    "url": "/player/mehdi-taremi/",
+    "image": "/assets/img/players/mehdi-taremi.png",
+    "date": "2024-01-20T22:56:56",
+    "modified": "2024-01-22T21:48:51",
+    "position": {
+      "raw": "Centre-Forward",
+      "group": "Attack",
+      "detail": "Centre-Forward"
+    },
+    "club": "FC Porto",
+    "citizenship": [
+      "Iran"
+    ],
+    "nationality": "Iran",
+    "height": "1,85 m",
+    "foot": "Right",
+    "birth": "Jul 18, 1992 (31)",
+    "placeOfBirth": "Bushehr",
+    "joined": "Aug 31, 2020",
+    "contractExpires": "Jun 30, 2024",
+    "contractOption": "",
+    "outfitter": "Nike",
+    "internationalTeam": "Iran",
+    "caps": "79",
+    "goals": "43",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Jul 18, 1992 (31)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Bushehr"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran"
+      },
+      {
+        "label": "Height",
+        "value": "1,85 m"
+      },
+      {
+        "label": "Position",
+        "value": "Centre-Forward"
+      },
+      {
+        "label": "Current international",
+        "value": "Iran"
+      },
+      {
+        "label": "Caps/Goals",
+        "value": "79 / 43"
+      },
+      {
+        "label": "Foot",
+        "value": "Right"
+      },
+      {
+        "label": "Current club",
+        "value": "FC Porto"
+      },
+      {
+        "label": "Joined",
+        "value": "Aug 31, 2020"
+      },
+      {
+        "label": "Contract expires",
+        "value": "Jun 30, 2024"
+      },
+      {
+        "label": "Outfitter",
+        "value": "Nike"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/iran/startseite/verein/3582",
+        "label": "Iran"
+      },
+      {
+        "href": "https://www.transfermarkt.com/mehdi-taremi/nationalmannschaft/spieler/307058/verein_id/3582",
+        "label": "79"
+      },
+      {
+        "href": "https://www.transfermarkt.com/fc-porto/startseite/verein/720",
+        "label": "FC Porto"
+      }
+    ]
+  },
+  {
+    "id": 2265,
+    "slug": "payam-parsa",
+    "name": "Payam Parsa",
+    "firstName": "Payam",
+    "lastName": "Parsa",
+    "url": "/player/payam-parsa/",
+    "image": "/assets/img/players/payam-parsa.png",
+    "date": "2024-01-22T23:40:56",
+    "modified": "2024-01-22T23:40:56",
+    "position": {
+      "raw": "Goalkeeper",
+      "group": "Goalkeeper",
+      "detail": "Goalkeeper"
+    },
+    "club": "Sanat Naft FC",
+    "citizenship": [
+      "Iran"
+    ],
+    "nationality": "Iran",
+    "height": "1,83 m",
+    "foot": "Right",
+    "birth": "Jul 22, 2002 (21)",
+    "placeOfBirth": "Abadan",
+    "joined": "Jul 1, 2018",
+    "contractExpires": "",
+    "contractOption": "",
+    "outfitter": "",
+    "internationalTeam": "",
+    "caps": "",
+    "goals": "",
+    "bio": [
+      {
+        "label": "Date of birth/Age",
+        "value": "Jul 22, 2002 (21)"
+      },
+      {
+        "label": "Place of birth",
+        "value": "Abadan"
+      },
+      {
+        "label": "Height",
+        "value": "1,83 m"
+      },
+      {
+        "label": "Citizenship",
+        "value": "Iran"
+      },
+      {
+        "label": "Position",
+        "value": "Goalkeeper"
+      },
+      {
+        "label": "Foot",
+        "value": "Right"
+      },
+      {
+        "label": "Current club",
+        "value": "Sanat Naft FC"
+      },
+      {
+        "label": "Joined",
+        "value": "Jul 1, 2018"
+      }
+    ],
+    "note": "",
+    "links": [
+      {
+        "href": "https://www.transfermarkt.com/aktuell/waspassiertheute/aktuell/new/datum/2002-07-22",
+        "label": "Jul 22, 2002 (21)"
+      },
+      {
+        "href": "https://www.transfermarkt.com/sanat-naft-fc/startseite/verein/20962",
+        "label": "Sanat Naft FC"
+      }
+    ]
+  }
+]

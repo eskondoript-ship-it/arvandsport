@@ -1,0 +1,281 @@
+{
+  "_provenance": "Every string in this file is copy taken verbatim from arvandsport.com (crawled via https://arvandsport.com/ and its WordPress REST API). Nothing here is written for the rebuild.",
+  "brand": {
+    "name": "ARVAND SPORT",
+    "shortName": "Arvand Sport",
+    "tagline": "A STREAM TO SUCCESS",
+    "description": "A STREAM TO SUCCESS",
+    "url": "https://arvandsport.com",
+    "logo": "/assets/img/brand/logo-wordmark.png",
+    "logoFooter": "/assets/img/brand/logo-footer.png",
+    "mark": "/assets/img/brand/mark.png",
+    "colors": {
+      "primary": "#003458",
+      "secondary": "#0F1C2A",
+      "text": "#3D3D3D",
+      "accent": "#3E64FF",
+      "white": "#FFFFFF",
+      "iceLight": "#ECFCFF",
+      "cyan": "#05EDFF"
+    }
+  },
+  "nav": [
+    { "label": "Home", "href": "/#home" },
+    { "label": "Services", "href": "/#services" },
+    { "label": "Players", "href": "/#players" },
+    { "label": "Our Team", "href": "/#team" },
+    { "label": "News", "href": "/news/" },
+    { "label": "Registration", "href": "/registration/" },
+    { "label": "Contact us", "href": "/#contacts" }
+  ],
+  "hero": {
+    "title": "ARVAND SPORT",
+    "tagline": "A STREAM TO SUCCESS",
+    "background": "/assets/img/ui/hero-bg.jpeg",
+    "smoke": "/assets/img/ui/smoke.png"
+  },
+  "about": {
+    "eyebrow": "About Arvand sport",
+    "paragraphs": [
+      "<strong>Arvand Sports</strong> is one of the top international and reputable football agencies with more than 25 years of experience. As FIFA-licensed football agent and FIFA-licensed match agent, we have represented many prominent players, top managers and big teams in the world of football and we continuously provide world-class services to our clients.",
+      "At <strong>Arvand Sports</strong>, we aim to provide our clients with the best opportunities in football world by relying on our technical knowledge and extensive international connections."
+    ]
+  },
+  "stats": [
+    { "label": "Years of experience", "value": 25, "suffix": "" },
+    { "label": "Countries", "value": 46, "suffix": "" },
+    { "label": "Clubs", "value": 80, "suffix": "+" },
+    { "label": "Players", "value": 230, "suffix": "+" }
+  ],
+  "serviceGroups": [
+    {
+      "id": "player-services",
+      "title": "Player Services",
+      "intro": "We take pride in our dedicated and dynamic team serving as the backbone of this platform. Our team members are experienced professionals with expertise in various fields such as sports, law, marketing, media and information technology. The primary goal of our team is to provide high quality services and comprehensive support to users. Our commitment to fair and transparent collaboration with customers reflects our trust and strong connection with the sport community.",
+      "items": [
+        {
+          "title": "Player Representation",
+          "icon": "/assets/img/services/representation.png",
+          "body": "Arvand Sport uses its worldwide abilities to conduct intelligent negotiations in order to find the best playing position and maximize the earning potentials. Yes! a full battle and we are ready for that!"
+        },
+        {
+          "title": "Career planning",
+          "icon": "/assets/img/services/career-planning.png",
+          "body": "In order to be successful throughout your professional career, you need to make many smart and purposeful decisions. Our professional team will help you make the best decisions from the beginning to the end of your professional career."
+        },
+        {
+          "title": "Financial Advisory",
+          "icon": "/assets/img/services/financial-advisory.png",
+          "body": "As you strive for success on the pitch, our professionals are working to build a secure and stable financial future for you. We always have excellent recommendations in the field of financial plans and investment opportunities for you."
+        },
+        {
+          "title": "Technical improvement",
+          "icon": "/assets/img/services/technical-improvement.png",
+          "body": "Our professional technical team analyzes your performance game by game during the season, and offers specific and private training sessions to improve your personal quality. We help you to know how to become an impact player."
+        },
+        {
+          "title": "Legal Advice",
+          "icon": "/assets/img/services/legal-advice.png",
+          "body": "You will be under the legal support of Arvand Sport. So, don't worry about legal issues and conditions; just focus on your work."
+        },
+        {
+          "title": "Physical performance",
+          "icon": "/assets/img/services/physical-performance.png",
+          "body": "At this level, you need physical strength, high physical readiness and a specific nutrition plan to maximize your physical capabilities on the pitch. Our specialists help you to reach your best physical condition."
+        },
+        {
+          "title": "Comprehensive Support",
+          "icon": "/assets/img/services/comprehensive-support.png",
+          "body": "You are a member of Arvand Sport big family. Therefore the quality of your life, both during your playing career and in retirement will be important to us. Our life coaches and mentors will always be available to provide guidance and support for you."
+        },
+        {
+          "title": "Sport psychology",
+          "icon": "/assets/img/services/sport-psychology.png",
+          "body": "Proactive mentality, problem-solving skills, self-confidence, and control over the thoughts and emotions play a key role in your success. You need a winning mindset, and our team assists you to build that up."
+        }
+      ]
+    },
+    {
+      "id": "management-services",
+      "title": "Management Services",
+      "intro": "Our expert team, comprised of experienced individuals, possesses comprehensive solutions to meet the diverse needs of managers, clubs, and organizations.",
+      "items": [
+        {
+          "title": "Club Representation",
+          "icon": "/assets/img/services/representation.png",
+          "body": "With over 20 years of experience at the top level of football and strong international connections with teams worldwide, Arvand Sport is ready to assist clubs in discovering new talents, player transfer, establishing connections between clubs, negotiating transfer fees and more."
+        },
+        {
+          "title": "Management Representation",
+          "icon": "/assets/img/services/management-representation.png",
+          "body": "We help professional coaches, capable managers and sport investors in choosing the right club, negotiating contracts, finding sponsors and exploring investment opportunities in the sport industry."
+        },
+        {
+          "title": "Sport events management",
+          "icon": "/assets/img/services/sport-events.png",
+          "body": "Avand Sport as licensed FIFA match agent is able to hold and organize training camps, friendly matches both nationally and internationally."
+        },
+        {
+          "title": "Legal Advice",
+          "icon": "/assets/img/services/legal-advice-clubs.png",
+          "body": "You will be under the legal support of Arvand Sport. So, don't worry about legal issues and conditions; just focus on your work."
+        }
+      ]
+    }
+  ],
+  "playersSection": {
+    "title": "Players",
+    "intro": "We have signed some highly skilled professional football players who contribute to our strong and successful team. Their commitment and passion for the sport make us proud to have them as part of our family."
+  },
+  "formerClients": {
+    "title": "Former Clients",
+    "items": [
+      { "name": "Alireza Beiranvand", "image": "/assets/img/clients/alireza-beiranvand.png" },
+      { "name": "Omid Alishah", "image": "/assets/img/clients/omid-alishah.png" },
+      { "name": "S.Hossein Hosseini", "image": "/assets/img/clients/hossein-hosseini.png" },
+      { "name": "Kamal Mamyabinia", "image": "/assets/img/clients/kamal-mamyabinia.png" },
+      { "name": "Mehdi Ghayedi", "image": "/assets/img/clients/mehdi-ghayedi.png" },
+      { "name": "Fabio Januario", "image": "/assets/img/clients/fabio-januario.png" },
+      { "name": "Ahmad Noorollahi", "image": "/assets/img/clients/ahmad-noorollahi.png" }
+    ]
+  },
+  "coaches": {
+    "title": "Coaches & Academy",
+    "items": [
+      { "name": "Farivar Torabi", "image": "/assets/img/coaches/farivar-torabi.png" },
+      { "name": "Shervin Teymoori", "image": "/assets/img/coaches/shervin-teymoori.png" },
+      { "name": "Arian Karimi", "image": "/assets/img/coaches/arian-karimi.png" }
+    ]
+  },
+  "team": {
+    "title": "Arvand Sport Team",
+    "intro": "Our dedicated and dynamic team of professionals, with diverse expertise and unwavering passion, collaborates seamlessly to achieve excellence in every aspect, making them the driving force behind our success.",
+    "lead": {
+      "name": "AliReza Nikoomanesh",
+      "role": "Arvand Sport CEO",
+      "image": "/assets/img/team/alireza-nikoomanesh.jpg",
+      "paragraphs": [
+        "Ali Reza Nikoomanesh, as a successful and prominent international player-programm manager, boosts over 25 years of professional experience in the field.",
+        "As a FIFA licensed agent and FIFA licensed match agent, he takes pride in being recognized globally as a leading figure in the management and development of football players.",
+        "His extensive track record and broad expertise not only establish him a successful manager, but also position him as a vital and influential source of knowledge for advancing the football industry, committed to international standards and the continual improvement of player development, Alireza Nikoomanesh is esteemed as a highly respected and valuable figure in football management."
+      ]
+    },
+    "talent": {
+      "name": "Arvand Talent",
+      "image": "/assets/img/team/arvand-talent-logo.png",
+      "body": "<strong>Arvand Talent</strong>, part of <strong>Arvand Sports</strong>, focuses on discovering and developing young football talents. With expert coaching, advanced facilities, and strong links to professional clubs, it provides a platform for aspiring players to grow and achieve their goals."
+    },
+    "members": [
+      { "name": "Rasoul Kazemi", "role": "Financial Manager", "image": "/assets/img/team/rasoul-kazemi.jpg" },
+      { "name": "Amir hesam Shalbaf Shirvani", "role": "Legal Manager", "image": "/assets/img/team/amirhesam-shalbaf-shirvani.jpg" }
+    ]
+  },
+  "partners": {
+    "title": "Partners and Sponsors",
+    "items": [
+      { "name": "UXL", "image": "/assets/img/partners/uxl.png" },
+      { "name": "FIFA", "image": "/assets/img/partners/fifa.png" },
+      { "name": "DFB", "image": "/assets/img/partners/dfb.png" },
+      { "name": "Portuguese Primeira Liga", "image": "/assets/img/partners/primeira-liga.png" },
+      { "name": "Aspire", "image": "/assets/img/partners/aspire.png" },
+      { "name": "New Balance", "image": "/assets/img/partners/new-balance.png" },
+      { "name": "adidas", "image": "/assets/img/partners/adidas.png" },
+      { "name": "Football Factory", "image": "/assets/img/partners/football-factory.png" }
+    ]
+  },
+  "contact": {
+    "title": "Contact us",
+    "map": "/assets/img/ui/map.png",
+    "offices": [
+      {
+        "country": "United States",
+        "phone": "+1 747 4776764",
+        "address": "1473 ASTER CRT, WINTER PARK, FL, 32792"
+      },
+      {
+        "country": "CANADA",
+        "phone": "+1 647 890 2420",
+        "address": "9608 yonge st toronto ontario L4c0x4"
+      },
+      {
+        "country": "Arvand Talent",
+        "phone": "+1 647 6692786",
+        "email": "moetoka@arvandsport.com"
+      },
+      {
+        "country": "IRAN",
+        "phone": "+98 9102527991",
+        "address": "Unit 203, 2nd Floor, No. 67, Kaj Abadi St., Jordan, Tehran, Iran"
+      },
+      {
+        "country": "Portugal",
+        "phone": "+351 968 775 375",
+        "address": "Soon..."
+      }
+    ],
+    "emails": ["Info@Arvandsport.com", "Arvandsport@gmail.com"],
+    "social": [
+      { "label": "Whatsapp", "href": "https://wa.me/16478902420?text=Hello+arvandsport+team", "icon": "whatsapp" },
+      { "label": "Instagram", "href": "https://www.instagram.com/arvandsport/?hl=en", "icon": "instagram" }
+    ]
+  },
+  "footer": {
+    "blurb": "At Arvand Sports, we aim to provide our clients with the best opportunities in football world by relying on our technical knowledge and extensive international connections.",
+    "links": [
+      { "label": "Player / Coach Registration", "href": "/registration/" },
+      { "label": "Our Players and Clients", "href": "/player/" },
+      { "label": "Our Partners & Sponsors", "href": "/#partners" }
+    ],
+    "copyright": "Copy Right 2022-2023 © All rights reserved for Arvandsport.com",
+    "credit": { "label": "7Studio.net", "href": "https://7studio.net" },
+    "subscribeLabel": "Subscribe",
+    "subscribePlaceholder": "Email"
+  },
+  "pages": {
+    "players": {
+      "title": "Arvand Sport`s Players",
+      "searchPlaceholder": "Search"
+    },
+    "news": {
+      "title": "Latest news about Arvand Sport",
+      "subtitle": "Exclusive news - The use of this content is allowed only by inserting the news link",
+      "searchPlaceholder": "Search"
+    },
+    "registration": {
+      "title": "Registration",
+      "kicker": "Your message will be reviewed and we will respond to you at the earliest possible time.",
+      "intro": "If you believe in your competence and ability, and you are interested in being part of Arvand Sports family",
+      "submitLabel": "Send"
+    },
+    "homeNews": { "title": "Latest News", "moreLabel": "See more" }
+  },
+  "wordpress": {
+    "_note": "The live site runs Elementor Pro forms. Both forms below POST to WordPress' admin-ajax.php with action=elementor_pro_forms_send_form; the ids and field names are exactly what the live markup submits, so the rebuilt forms reach the same handler and the same inbox.",
+    "ajaxUrl": "https://arvandsport.com/wp-admin/admin-ajax.php",
+    "action": "elementor_pro_forms_send_form",
+    "recaptchaSiteKey": "6LdL6K4rAAAAAGhZI1VQc7FVFTFJ-TKKzcJGwqPE",
+    "registrationForm": {
+      "postId": "1568",
+      "formId": "ff436cd",
+      "refererTitle": "Registration",
+      "queriedId": "1568",
+      "fields": {
+        "name": "form_fields[name]",
+        "nationality": "form_fields[field_3a21472]",
+        "position": "form_fields[field_44d8452]",
+        "email": "form_fields[email]",
+        "phone": "form_fields[field_c633377]",
+        "message": "form_fields[message]",
+        "honeypot": "form_fields[field_03b5567]"
+      },
+      "positionOptions": ["Player", "coach", "other "]
+    },
+    "subscribeForm": {
+      "postId": "95",
+      "formId": "2592ccd",
+      "refererTitle": "Arvand Sport",
+      "queriedId": "95",
+      "fields": { "email": "form_fields[email]" }
+    }
+  }
+}
