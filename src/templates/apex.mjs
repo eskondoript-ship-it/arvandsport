@@ -23,7 +23,7 @@ import { esc, attr, ICONS } from './layout.mjs';
  */
 
 export function apex(site) {
-  const [lead, tail] = ['A STREAM', 'SUCCESS'];
+  const [lead, tail] = ['ARVAND', 'SPORT'];
 
   return `<section class="apex" id="home" data-apex aria-labelledby="apex-title">
   <div class="apex__pin" data-apex-pin>

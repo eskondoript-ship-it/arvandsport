@@ -666,10 +666,10 @@ a.office__row:hover { color: var(--white); }
   width: 100%; margin-inline: auto;
   /* Sized so the pair plus the gap fits the viewport: the halves must not run
      off the edge, and nowrap means they will if the type is a step too big. */
-  gap: clamp(110px, 22vw, 340px);
+  gap: clamp(120px, 24vw, 380px);
   font-family: "Playfair Display", "Bodoni MT", Didot, "Times New Roman", Georgia, serif;
   font-weight: 400; font-style: normal;
-  font-size: clamp(2rem, 6.2vw, 6.4rem);
+  font-size: clamp(2.6rem, 8.8vw, 9.5rem);
   line-height: .9; letter-spacing: .01em; text-transform: uppercase;
   white-space: nowrap;
 }
