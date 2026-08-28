@@ -9,6 +9,8 @@
  * or with reduced motion, every page renders complete and static.
  */
 import { gsap, ScrollTrigger, canAnimate, $$, prefersReducedMotion } from './env.js';
+import { splitWords, splitChars, splitLines, unsplit, scramble } from './text.js';
+import { initScenes, killScenes } from './scenes.js';
 
 const triggers = new Set();
 
@@ -19,8 +21,9 @@ function track(st) {
 
 /** Tear down everything this module created, before a page transition swap. */
 export function teardownMotion(root = document) {
+  killScenes();
   for (const st of triggers) {
-    if (!root.contains(st.trigger) || root === document) st.kill();
+    if (!root.contains(st.trigger) || root === document) st.kill(true);
   }
   triggers.clear();
 }
@@ -71,30 +74,9 @@ function revealCards(root) {
 
 /* ------------------------------------------------ split heading reveals */
 
-/** Wrap a heading's words so they can rise out of an overflow-hidden mask. */
-function splitHeading(el) {
-  if (el.dataset.splitDone) return [...el.querySelectorAll('.word__inner')];
-  const words = el.textContent.trim().split(/\s+/);
-  el.textContent = '';
-  const inners = [];
-  words.forEach((word, i) => {
-    const outer = document.createElement('span');
-    outer.className = 'word';
-    const inner = document.createElement('span');
-    inner.className = 'word__inner';
-    inner.textContent = word;
-    outer.appendChild(inner);
-    el.appendChild(outer);
-    if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
-    inners.push(inner);
-  });
-  el.dataset.splitDone = '1';
-  return inners;
-}
-
 function animateSplits(root) {
   for (const el of $$('[data-split]', root)) {
-    const inners = splitHeading(el);
+    const inners = splitWords(el);
     gsap.set(inners, { yPercent: 115 });
     track(
       ScrollTrigger.create({
@@ -105,10 +87,63 @@ function animateSplits(root) {
       }),
     );
   }
+
+  /* Per-character stagger, for the few headings that earn the extra weight. */
+  for (const el of $$('[data-split-chars]', root)) {
+    const chars = splitChars(el);
+    gsap.set(chars, { yPercent: 120, opacity: 0 });
+    track(
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 90%',
+        once: true,
+        onEnter: () => gsap.to(chars, { yPercent: 0, opacity: 1, duration: 0.9, ease: 'expo.out', stagger: 0.018 }),
+      }),
+    );
+  }
+
+  /* Paragraphs rise line by line. Line grouping is a function of width, so
+   * the wrappers are unwound as soon as the reveal finishes — after that the
+   * text is plain again and reflows normally on resize. */
+  for (const el of $$('[data-split-lines]', root)) {
+    const inners = splitLines(el);
+    gsap.set(inners, { yPercent: 110, opacity: 0 });
+    track(
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 88%',
+        once: true,
+        onEnter: () =>
+          gsap.to(inners, {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: 'expo.out',
+            stagger: 0.07,
+            onComplete: () => unsplit(el),
+          }),
+      }),
+    );
+  }
+}
+
+/* ---------------------------------------------------------- nav scramble */
+
+function scrambleLinks(root) {
+  for (const link of $$('[data-scramble]', root)) {
+    let cancel = null;
+    link.addEventListener('pointerenter', () => {
+      cancel?.();
+      cancel = scramble(link);
+    });
+    link.addEventListener('pointerleave', () => cancel?.());
+  }
 }
 
 /* ------------------------------------------------------------ counters */
 
+/* Counters driven by a scrubbed scene carry data-scrub-counter instead, so
+ * they are not also animated on entry by this generic handler. */
 function animateCounters(root) {
   for (const el of $$('[data-counter]', root)) {
     const target = Number(el.dataset.counter) || 0;
@@ -277,11 +312,16 @@ let probe = null;
 /** Give up on animation entirely and show every page in its finished state. */
 function engageFailsafe() {
   document.documentElement.classList.add('motion-failsafe');
+  /* kill(true) reverts pinning, so a stalled scene cannot leave the pin
+   * spacer behind as a block of empty page. */
   teardownMotion();
   gsap.globalTimeline.clear();
-  gsap.set('[data-reveal], .word__inner, .ch, [data-hero-eyebrow], [data-hero-actions] > *, [data-hero-scroll], .player-card, .news-card, .service, .person, .office', {
-    clearProps: 'all',
-  });
+  gsap.set(
+    '[data-reveal], .word__inner, .line__inner, .ch, [data-hero-eyebrow], [data-hero-actions] > *,' +
+      ' [data-hero-scroll], .player-card, .news-card, .service, .person, .office, [data-clip],' +
+      ' [data-strike] *, [data-rail-track]',
+    { clearProps: 'all' },
+  );
 }
 
 function failsafe() {
@@ -313,14 +353,20 @@ export function initMotion(root = document) {
   parallaxMedia(root);
   magnetise(root);
   tiltCards(root);
+  scrambleLinks(root);
+  initScenes(root);
   ScrollTrigger.refresh();
   failsafe();
 }
 
-/** If the visitor flips the OS setting mid-visit, stop animating immediately. */
-export function watchMotionPreference() {
+/**
+ * If the visitor flips the OS setting mid-visit, stop animating immediately.
+ * @param {() => void} [onDisable] extra teardown, e.g. removing the cursor.
+ */
+export function watchMotionPreference(onDisable) {
   window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => {
     if (prefersReducedMotion()) {
+      onDisable?.();
       teardownMotion();
       gsap?.globalTimeline.clear();
       document.documentElement.classList.remove('motion-ready');

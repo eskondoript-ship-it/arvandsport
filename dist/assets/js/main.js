@@ -4,6 +4,7 @@ import { initMotion, teardownMotion, watchMotionPreference } from './motion.js';
 import { initHeader, syncChrome } from './header.js';
 import { initRoster, initNewsSearch } from './roster.js';
 import { initForms } from './forms.js';
+import { initCursor, destroyCursor } from './cursor.js';
 import { initTransitions } from './transitions.js';
 
 function initPage(container = document) {
@@ -15,7 +16,8 @@ function initPage(container = document) {
 
 ready(() => {
   initHeader();
-  watchMotionPreference();
+  watchMotionPreference(destroyCursor);
+  initCursor();
   initPage();
 
   initTransitions((container, pathname, doc) => {

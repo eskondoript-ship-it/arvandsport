@@ -20,13 +20,34 @@
     }
   },
   "nav": [
-    { "label": "Home", "href": "/#home" },
-    { "label": "Services", "href": "/#services" },
-    { "label": "Players", "href": "/#players" },
-    { "label": "Our Team", "href": "/#team" },
-    { "label": "News", "href": "/news/" },
-    { "label": "Registration", "href": "/registration/" },
-    { "label": "Contact us", "href": "/#contacts" }
+    {
+      "label": "Home",
+      "href": "/#home"
+    },
+    {
+      "label": "Services",
+      "href": "/#services"
+    },
+    {
+      "label": "Players",
+      "href": "/#players"
+    },
+    {
+      "label": "Our Team",
+      "href": "/#team"
+    },
+    {
+      "label": "News",
+      "href": "/news/"
+    },
+    {
+      "label": "Registration",
+      "href": "/registration/"
+    },
+    {
+      "label": "Contact us",
+      "href": "/#contacts"
+    }
   ],
   "hero": {
     "title": "ARVAND SPORT",
@@ -42,10 +63,26 @@
     ]
   },
   "stats": [
-    { "label": "Years of experience", "value": 25, "suffix": "" },
-    { "label": "Countries", "value": 46, "suffix": "" },
-    { "label": "Clubs", "value": 80, "suffix": "+" },
-    { "label": "Players", "value": 230, "suffix": "+" }
+    {
+      "label": "Years of experience",
+      "value": 25,
+      "suffix": ""
+    },
+    {
+      "label": "Countries",
+      "value": 46,
+      "suffix": ""
+    },
+    {
+      "label": "Clubs",
+      "value": 80,
+      "suffix": "+"
+    },
+    {
+      "label": "Players",
+      "value": 230,
+      "suffix": "+"
+    }
   ],
   "serviceGroups": [
     {
@@ -130,21 +167,51 @@
   "formerClients": {
     "title": "Former Clients",
     "items": [
-      { "name": "Alireza Beiranvand", "image": "/assets/img/clients/alireza-beiranvand.png" },
-      { "name": "Omid Alishah", "image": "/assets/img/clients/omid-alishah.png" },
-      { "name": "S.Hossein Hosseini", "image": "/assets/img/clients/hossein-hosseini.png" },
-      { "name": "Kamal Mamyabinia", "image": "/assets/img/clients/kamal-mamyabinia.png" },
-      { "name": "Mehdi Ghayedi", "image": "/assets/img/clients/mehdi-ghayedi.png" },
-      { "name": "Fabio Januario", "image": "/assets/img/clients/fabio-januario.png" },
-      { "name": "Ahmad Noorollahi", "image": "/assets/img/clients/ahmad-noorollahi.png" }
+      {
+        "name": "Alireza Beiranvand",
+        "image": "/assets/img/clients/alireza-beiranvand.png"
+      },
+      {
+        "name": "Omid Alishah",
+        "image": "/assets/img/clients/omid-alishah.png"
+      },
+      {
+        "name": "S.Hossein Hosseini",
+        "image": "/assets/img/clients/hossein-hosseini.png"
+      },
+      {
+        "name": "Kamal Mamyabinia",
+        "image": "/assets/img/clients/kamal-mamyabinia.png"
+      },
+      {
+        "name": "Mehdi Ghayedi",
+        "image": "/assets/img/clients/mehdi-ghayedi.png"
+      },
+      {
+        "name": "Fabio Januario",
+        "image": "/assets/img/clients/fabio-januario.png"
+      },
+      {
+        "name": "Ahmad Noorollahi",
+        "image": "/assets/img/clients/ahmad-noorollahi.png"
+      }
     ]
   },
   "coaches": {
     "title": "Coaches & Academy",
     "items": [
-      { "name": "Farivar Torabi", "image": "/assets/img/coaches/farivar-torabi.png" },
-      { "name": "Shervin Teymoori", "image": "/assets/img/coaches/shervin-teymoori.png" },
-      { "name": "Arian Karimi", "image": "/assets/img/coaches/arian-karimi.png" }
+      {
+        "name": "Farivar Torabi",
+        "image": "/assets/img/coaches/farivar-torabi.png"
+      },
+      {
+        "name": "Shervin Teymoori",
+        "image": "/assets/img/coaches/shervin-teymoori.png"
+      },
+      {
+        "name": "Arian Karimi",
+        "image": "/assets/img/coaches/arian-karimi.png"
+      }
     ]
   },
   "team": {
@@ -166,21 +233,53 @@
       "body": "<strong>Arvand Talent</strong>, part of <strong>Arvand Sports</strong>, focuses on discovering and developing young football talents. With expert coaching, advanced facilities, and strong links to professional clubs, it provides a platform for aspiring players to grow and achieve their goals."
     },
     "members": [
-      { "name": "Rasoul Kazemi", "role": "Financial Manager", "image": "/assets/img/team/rasoul-kazemi.jpg" },
-      { "name": "Amir hesam Shalbaf Shirvani", "role": "Legal Manager", "image": "/assets/img/team/amirhesam-shalbaf-shirvani.jpg" }
+      {
+        "name": "Rasoul Kazemi",
+        "role": "Financial Manager",
+        "image": "/assets/img/team/rasoul-kazemi.jpg"
+      },
+      {
+        "name": "Amir hesam Shalbaf Shirvani",
+        "role": "Legal Manager",
+        "image": "/assets/img/team/amirhesam-shalbaf-shirvani.jpg"
+      }
     ]
   },
   "partners": {
     "title": "Partners and Sponsors",
     "items": [
-      { "name": "UXL", "image": "/assets/img/partners/uxl.png" },
-      { "name": "FIFA", "image": "/assets/img/partners/fifa.png" },
-      { "name": "DFB", "image": "/assets/img/partners/dfb.png" },
-      { "name": "Portuguese Primeira Liga", "image": "/assets/img/partners/primeira-liga.png" },
-      { "name": "Aspire", "image": "/assets/img/partners/aspire.png" },
-      { "name": "New Balance", "image": "/assets/img/partners/new-balance.png" },
-      { "name": "adidas", "image": "/assets/img/partners/adidas.png" },
-      { "name": "Football Factory", "image": "/assets/img/partners/football-factory.png" }
+      {
+        "name": "UXL",
+        "image": "/assets/img/partners/uxl.png"
+      },
+      {
+        "name": "FIFA",
+        "image": "/assets/img/partners/fifa.png"
+      },
+      {
+        "name": "DFB",
+        "image": "/assets/img/partners/dfb.png"
+      },
+      {
+        "name": "Portuguese Primeira Liga",
+        "image": "/assets/img/partners/primeira-liga.png"
+      },
+      {
+        "name": "Aspire",
+        "image": "/assets/img/partners/aspire.png"
+      },
+      {
+        "name": "New Balance",
+        "image": "/assets/img/partners/new-balance.png"
+      },
+      {
+        "name": "adidas",
+        "image": "/assets/img/partners/adidas.png"
+      },
+      {
+        "name": "Football Factory",
+        "image": "/assets/img/partners/football-factory.png"
+      }
     ]
   },
   "contact": {
@@ -213,21 +312,44 @@
         "address": "Soon..."
       }
     ],
-    "emails": ["Info@Arvandsport.com", "Arvandsport@gmail.com"],
+    "emails": [
+      "Info@Arvandsport.com",
+      "Arvandsport@gmail.com"
+    ],
     "social": [
-      { "label": "Whatsapp", "href": "https://wa.me/16478902420?text=Hello+arvandsport+team", "icon": "whatsapp" },
-      { "label": "Instagram", "href": "https://www.instagram.com/arvandsport/?hl=en", "icon": "instagram" }
+      {
+        "label": "Whatsapp",
+        "href": "https://wa.me/16478902420?text=Hello+arvandsport+team",
+        "icon": "whatsapp"
+      },
+      {
+        "label": "Instagram",
+        "href": "https://www.instagram.com/arvandsport/?hl=en",
+        "icon": "instagram"
+      }
     ]
   },
   "footer": {
     "blurb": "At Arvand Sports, we aim to provide our clients with the best opportunities in football world by relying on our technical knowledge and extensive international connections.",
     "links": [
-      { "label": "Player / Coach Registration", "href": "/registration/" },
-      { "label": "Our Players and Clients", "href": "/player/" },
-      { "label": "Our Partners & Sponsors", "href": "/#partners" }
+      {
+        "label": "Player / Coach Registration",
+        "href": "/registration/"
+      },
+      {
+        "label": "Our Players and Clients",
+        "href": "/player/"
+      },
+      {
+        "label": "Our Partners & Sponsors",
+        "href": "/#partners"
+      }
     ],
     "copyright": "Copy Right 2022-2023 © All rights reserved for Arvandsport.com",
-    "credit": { "label": "7Studio.net", "href": "https://7studio.net" },
+    "credit": {
+      "label": "7Studio.net",
+      "href": "https://7studio.net"
+    },
     "subscribeLabel": "Subscribe",
     "subscribePlaceholder": "Email"
   },
@@ -247,7 +369,10 @@
       "intro": "If you believe in your competence and ability, and you are interested in being part of Arvand Sports family",
       "submitLabel": "Send"
     },
-    "homeNews": { "title": "Latest News", "moreLabel": "See more" }
+    "homeNews": {
+      "title": "Latest News",
+      "moreLabel": "See more"
+    }
   },
   "wordpress": {
     "_note": "The live site runs Elementor Pro forms. Both forms below POST to WordPress' admin-ajax.php with action=elementor_pro_forms_send_form; the ids and field names are exactly what the live markup submits, so the rebuilt forms reach the same handler and the same inbox.",
@@ -268,14 +393,28 @@
         "message": "form_fields[message]",
         "honeypot": "form_fields[field_03b5567]"
       },
-      "positionOptions": ["Player", "coach", "other "]
+      "positionOptions": [
+        "Player",
+        "coach",
+        "other "
+      ]
     },
     "subscribeForm": {
       "postId": "95",
       "formId": "2592ccd",
       "refererTitle": "Arvand Sport",
       "queriedId": "95",
-      "fields": { "email": "form_fields[email]" }
+      "fields": {
+        "email": "form_fields[email]"
+      }
     }
+  },
+  "strike": {
+    "_note": "Scroll-scrubbed feature scene. `image` is the only asset it needs — swap the path for a different (licensed) cutout of the player and the scene picks it up. Caps and goals are the player's real figures from the WordPress post.",
+    "playerSlug": "mehdi-taremi",
+    "image": "/assets/img/players/mehdi-taremi.png",
+    "kicker": "Client spotlight",
+    "lead": "Represented since 2020",
+    "caption": "Scroll to take the shot"
   }
 }

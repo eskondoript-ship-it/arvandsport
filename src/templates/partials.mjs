@@ -73,3 +73,13 @@ export function statBlock(stat, index = 0) {
   <span class="stat__label">${esc(stat.label)}</span>
 </div>`;
 }
+
+/** A football, drawn rather than downloaded — the live site has no ball asset. */
+export const BALL_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+  <circle cx="50" cy="50" r="48" fill="#fff"/>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#0b1523" stroke-width="2"/>
+  <path fill="#0b1523" d="M50 22l14 10-5.5 16.5h-17L36 32z"/>
+  <path fill="#0b1523" d="M24.5 41l6 4.5-2.5 7.5-7.5.5-2-8zM75.5 41l-6 4.5 2.5 7.5 7.5.5 2-8z"/>
+  <path fill="#0b1523" d="M38 66l12 8 12-8-4.5-9h-15z"/>
+  <path fill="#0b1523" d="M28 72l7-1 3 8-6 3zM72 72l-7-1-3 8 6 3z"/>
+</svg>`;

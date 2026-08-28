@@ -40,7 +40,11 @@
   50%      { transform: scaleY(1);  transform-origin: top; }
 }
 
-.marquee__track { animation: marquee 38s linear infinite; }
+.marquee__track {
+  /* --marquee-speed and --marquee-direction are driven by scroll velocity. */
+  animation: marquee calc(38s / var(--marquee-speed, 1)) linear infinite;
+  animation-direction: var(--marquee-direction, normal);
+}
 @keyframes marquee { to { transform: translateX(-100%); } }
 .marquee:hover .marquee__track { animation-play-state: paused; }
 
@@ -48,8 +52,10 @@
  * stalled rAF can never leave a page half-drawn. */
 .motion-failsafe [data-reveal],
 .motion-failsafe [data-anim-hidden] { opacity: 1 !important; }
-.motion-failsafe [data-split] .word__inner,
-.motion-failsafe [data-split] .ch { transform: none !important; }
+.motion-failsafe .word__inner,
+.motion-failsafe .line__inner,
+.motion-failsafe .ch { transform: none !important; opacity: 1 !important; }
+.motion-failsafe [data-clip] { clip-path: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -63,4 +69,8 @@
   .page-transition { display: none; }
   .marquee__track { animation: none; }
   .marquee { overflow-x: auto; }
+  .cursor { display: none; }
+  /* Scrubbed scenes never initialise, so their finished frame is what shows. */
+  .rail { overflow-x: auto; }
+  .strike__hint { display: none; }
 }

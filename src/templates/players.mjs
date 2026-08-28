@@ -43,7 +43,7 @@ export function renderPlayerIndex({ site, players }) {
 <section class="page-hero page-hero--players">
   <div class="shell">
     <p class="page-hero__kicker" data-reveal>${esc(players.length)} professionals represented worldwide</p>
-    <h1 class="page-hero__title" data-split>${esc(site.pages.players.title)}</h1>
+    <h1 class="page-hero__title" data-split-chars>${esc(site.pages.players.title)}</h1>
     <p class="page-hero__intro" data-reveal>${esc(site.playersSection.intro)}</p>
   </div>
   <div class="page-hero__glow" aria-hidden="true"></div>
@@ -103,7 +103,7 @@ export function renderPlayer({ site, players, player }) {
     <div class="player-hero__grid">
       <div class="player-hero__copy">
         <p class="player-hero__badge" data-reveal>${esc(player.position.group)}</p>
-        <h1 class="player-hero__name" data-split>${esc(player.name)}</h1>
+        <h1 class="player-hero__name" data-split-chars>${esc(player.name)}</h1>
         <p class="player-hero__summary" data-reveal>${esc(summary)}</p>
         <ul class="player-hero__quick" data-reveal>
           ${player.club ? `<li><span>Club</span><strong>${esc(player.club)}</strong></li>` : ''}

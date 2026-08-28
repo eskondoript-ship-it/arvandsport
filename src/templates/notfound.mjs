@@ -5,7 +5,7 @@ export function renderNotFound({ site }) {
 <section class="page-hero page-hero--404">
   <div class="shell">
     <p class="page-hero__kicker" data-reveal>404</p>
-    <h1 class="page-hero__title" data-split>This page is off the pitch</h1>
+    <h1 class="page-hero__title" data-split-chars>This page is off the pitch</h1>
     <p class="page-hero__intro" data-reveal>The page you were looking for has moved or never existed.</p>
     <div class="hero__actions" data-reveal>
       <a class="btn btn--solid btn--lg" href="/" data-magnetic><span>Back home</span>${ICONS.arrow}</a>

@@ -67,7 +67,7 @@ function header(site, current) {
   const links = site.nav
     .map(
       (item) =>
-        `<li class="nav__item"><a class="nav__link${isActive(item.href)}" href="${attr(item.href)}"><span>${esc(item.label)}</span></a></li>`,
+        `<li class="nav__item"><a class="nav__link${isActive(item.href)}" href="${attr(item.href)}"><span data-scramble>${esc(item.label)}</span></a></li>`,
     )
     .join('');
   return `

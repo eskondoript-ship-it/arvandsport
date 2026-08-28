@@ -8,7 +8,7 @@ export function renderRegistration({ site }) {
 <section class="page-hero page-hero--register">
   <div class="shell">
     <p class="page-hero__kicker" data-reveal>${esc(site.pages.registration.kicker)}</p>
-    <h1 class="page-hero__title" data-split>${esc(site.pages.registration.title)}</h1>
+    <h1 class="page-hero__title" data-split-chars>${esc(site.pages.registration.title)}</h1>
     <p class="page-hero__intro" data-reveal>${esc(site.pages.registration.intro)}</p>
   </div>
   <div class="page-hero__glow" aria-hidden="true"></div>

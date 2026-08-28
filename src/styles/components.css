@@ -236,3 +236,24 @@ fieldset.field { border: 0; padding: 0; }
 .crumbs a { color: var(--fg-muted); }
 .crumbs a:hover { color: var(--accent); }
 .crumbs svg { font-size: .85em; color: var(--accent); }
+
+/* --------------------------------------------------------------- cursor */
+.cursor { position: fixed; inset: 0; z-index: 400; pointer-events: none; opacity: 0; transition: opacity .3s var(--ease-out); }
+.cursor.is-visible { opacity: 1; }
+.cursor__dot, .cursor__ring { position: absolute; top: 0; left: 0; border-radius: 50%; will-change: transform; }
+.cursor__dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--accent); }
+.cursor__ring {
+  width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  border: 1px solid var(--line-strong);
+  transition: width .3s var(--ease-out), height .3s var(--ease-out), margin .3s var(--ease-out),
+              background .3s var(--ease-out), border-color .3s var(--ease-out);
+}
+.cursor.is-active .cursor__ring {
+  width: 58px; height: 58px; margin: -29px 0 0 -29px;
+  background: rgba(5, 237, 255, .1); border-color: var(--accent);
+}
+.cursor.is-down .cursor__ring { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+
+/* ----------------------------------------------------------- line masks */
+[data-split-lines] .line { display: block; overflow: hidden; padding-block: .08em; margin-block: -.08em; }
+[data-split-lines] .line__inner { display: block; }

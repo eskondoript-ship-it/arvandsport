@@ -1,5 +1,5 @@
 import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
-import { sectionHead, playerCard, articleCard, personCard, statBlock } from './partials.mjs';
+import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG } from './partials.mjs';
 
 function hero(site) {
   return `<section class="hero" id="home" data-hero>
@@ -28,7 +28,7 @@ function about(site) {
   <div class="shell about__grid">
     <div class="about__copy">
       ${sectionHead({ kicker: site.about.eyebrow, title: 'Twenty-five years at the top level of football' })}
-      ${site.about.paragraphs.map((p) => `<p class="about__para" data-reveal>${p}</p>`).join('')}
+      ${site.about.paragraphs.map((p) => `<p class="about__para" data-split-lines>${p}</p>`).join('')}
       <a class="btn btn--line" href="/#services" data-reveal data-magnetic><span>What we do</span>${ICONS.arrow}</a>
     </div>
     <div class="about__stats" data-stats>
@@ -42,7 +42,7 @@ function about(site) {
 function serviceGroup(group, groupIndex) {
   return `<div class="services__group" id="${attr(group.id)}">
   ${sectionHead({ kicker: groupIndex === 0 ? 'What we do' : '', title: group.title, intro: esc(group.intro) })}
-  <div class="services__grid">
+  <div class="services__grid" data-deal>
     ${group.items
       .map(
         (item, i) => `<article class="service" style="--i:${i}" data-reveal data-tilt>
@@ -77,12 +77,85 @@ function roster(site, players) {
 </section>`;
 }
 
+
+/**
+ * The scroll-scrubbed strike sequence.
+ *
+ * Everything here is real: the cutout is the site's own image of Mehdi Taremi,
+ * and the payoff numbers are his caps and goals as published on his profile.
+ * The kick is choreography — a run-up, a plant, a ball leaving the boot — not
+ * a doctored photograph.
+ *
+ * The markup is authored as the finished frame: player planted, ball at the
+ * net, copy visible. JS sets the start states and scrubs from there, so the
+ * no-JS and reduced-motion renderings are a composed still.
+ */
+function strike(site, players) {
+  const config = site.strike;
+  const player = players.find((p) => p.slug === config.playerSlug);
+  if (!player) return '';
+
+  const speedLines = Array.from({ length: 7 }, (_, i) => `<span style="--i:${i}"></span>`).join('');
+  /* Net mesh, drawn as two crossing line sets. */
+  const mesh = [
+    ...Array.from({ length: 13 }, (_, i) => `<line x1="${i * 20}" y1="0" x2="${i * 20}" y2="160" />`),
+    ...Array.from({ length: 9 }, (_, i) => `<line x1="0" y1="${i * 20}" x2="240" y2="${i * 20}" />`),
+  ].join('');
+
+  return `<section class="strike" data-strike aria-labelledby="strike-title">
+  <div class="strike__pin" data-strike-pin>
+    <svg class="strike__pitch" data-strike-pitch viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <line data-draw x1="0" y1="470" x2="1200" y2="470" />
+      <line data-draw x1="120" y1="300" x2="120" y2="600" />
+      <path data-draw d="M780 600 L780 360 L1140 360 L1140 600" />
+      <path data-draw d="M900 600 L900 460 L1140 460 L1140 600" />
+      <circle data-draw cx="420" cy="470" r="90" />
+    </svg>
+
+    <div class="strike__speed" data-strike-speed aria-hidden="true">${speedLines}</div>
+
+    <figure class="strike__player" data-strike-player>
+      <img src="${attr(config.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
+    </figure>
+
+    <span class="strike__flash" data-strike-flash aria-hidden="true"></span>
+    <div class="strike__ball" data-strike-ball aria-hidden="true">
+      <span class="strike__tail" data-strike-tail></span>
+      <span class="strike__ball-core" data-strike-spin>${BALL_SVG}</span>
+    </div>
+
+    <div class="strike__net-box" data-strike-netbox aria-hidden="true">
+      <svg class="strike__net" data-strike-net viewBox="0 0 240 160">
+        <g class="strike__mesh">${mesh}</g>
+        <rect class="strike__frame" x="1" y="1" width="238" height="158" />
+      </svg>
+    </div>
+    <span class="strike__shock" data-strike-shock aria-hidden="true"></span>
+
+    <div class="strike__copy" data-strike-copy>
+      <p class="strike__kicker">${esc(config.kicker)}</p>
+      <h2 class="strike__title" id="strike-title" data-strike-title>${esc(player.name)}</h2>
+      <p class="strike__sub">${esc([player.position.detail, player.club].filter(Boolean).join(' · '))}</p>
+      <dl class="strike__stats" data-strike-stats>
+        <div><dt>Caps</dt><dd><span data-scrub-counter="${attr(player.caps)}">${esc(player.caps)}</span></dd></div>
+        <div><dt>Goals</dt><dd><span data-scrub-counter="${attr(player.goals)}">${esc(player.goals)}</span></dd></div>
+      </dl>
+      <a class="btn btn--solid" href="${attr(player.url)}" data-magnetic><span>Full profile</span>${ICONS.arrow}</a>
+    </div>
+
+    <p class="strike__hint" aria-hidden="true">${esc(config.caption)}</p>
+  </div>
+</section>`;
+}
+
 function clients(site) {
   return `<section class="clients section" id="clients">
   <div class="shell">
     ${sectionHead({ kicker: 'Track record', title: site.formerClients.title })}
-    <div class="clients__grid">
-      ${site.formerClients.items.map((c, i) => personCard(c, i)).join('')}
+    <div class="rail" data-rail>
+      <div class="rail__track" data-rail-track>
+        ${site.formerClients.items.map((c, i) => personCard(c, i)).join('')}
+      </div>
     </div>
     ${sectionHead({ kicker: 'Arvand Talent', title: site.coaches.title })}
     <div class="clients__grid clients__grid--coaches">
@@ -98,7 +171,7 @@ function team(site) {
   <div class="shell">
     ${sectionHead({ kicker: 'Who we are', title: t.title, intro: esc(t.intro) })}
     <div class="team__lead" data-reveal>
-      <figure class="team__lead-media">
+      <figure class="team__lead-media" data-clip>
         <img src="${attr(t.lead.image)}" alt="${attr(t.lead.name)}" width="1024" height="1024" loading="lazy" decoding="async">
       </figure>
       <div class="team__lead-copy">
@@ -123,7 +196,7 @@ function latestNews(site, news) {
   return `<section class="latest section" id="news">
   <div class="shell">
     ${sectionHead({ kicker: 'Newsroom', title: site.pages.homeNews.title })}
-    <div class="latest__grid">
+    <div class="latest__grid" data-skew>
       ${articleCard(lead, 0, { featured: true })}
       ${rest.map((a, i) => articleCard(a, i + 1)).join('')}
     </div>
@@ -152,7 +225,7 @@ function contact(site) {
   <div class="shell">
     ${sectionHead({ kicker: 'Say hello', title: site.contact.title })}
     <div class="contact__grid">
-      <div class="contact__map" data-reveal>
+      <div class="contact__map" data-reveal data-clip>
         <img src="${attr(site.contact.map)}" alt="Arvand Sport offices around the world" width="1200" height="620" loading="lazy" decoding="async">
       </div>
       <ul class="contact__offices">
@@ -205,6 +278,7 @@ export function renderHome({ site, players, news }) {
       about(site),
       services(site),
       roster(site, players),
+      strike(site, players),
       clients(site),
       team(site),
       latestNews(site, news),

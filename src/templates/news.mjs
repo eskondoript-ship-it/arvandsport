@@ -7,7 +7,7 @@ export function renderNewsIndex({ site, news }) {
 <section class="page-hero page-hero--news">
   <div class="shell">
     <p class="page-hero__kicker" data-reveal>${esc(site.pages.news.subtitle)}</p>
-    <h1 class="page-hero__title" data-split>${esc(site.pages.news.title)}</h1>
+    <h1 class="page-hero__title" data-split-chars>${esc(site.pages.news.title)}</h1>
     <label class="field field--search field--hero" data-reveal>
       <span class="u-sr-only">${esc(site.pages.news.searchPlaceholder)}</span>
       ${ICONS.search}

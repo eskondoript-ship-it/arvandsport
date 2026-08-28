@@ -96,18 +96,60 @@ reCAPTCHA key's domain list and allow it in the WordPress CORS headers.
 GSAP 3.13 with ScrollTrigger and ScrollToPlugin, vendored under
 `static/vendor/gsap/` (no CDN, no runtime third-party dependency).
 
+### The strike sequence
+
+A pinned, scroll-scrubbed set piece on the home page, built around the site's
+own cutout of Mehdi Taremi. The visitor scrubs it themselves — 320% of viewport
+height drives one timeline:
+
+| Scrub | Stage |
+| --- | --- |
+| 0.00–0.18 | pitch markings draw themselves in (`stroke-dashoffset`), his name rises letter by letter |
+| 0.18–0.38 | run-up — the figure drives in from the left, speed lines streak behind |
+| 0.38–0.45 | plant — squash and stretch, contact flash |
+| 0.45–0.72 | the strike — ball fires along a parabola, spinning 1080°, comet tail behind it |
+| 0.66–0.85 | the net takes it — mesh ripples and settles on an elastic ease, shockwave ring expands |
+| 0.84–1.00 | payoff — his real record counts up: 79 caps, 43 goals |
+
+Two things worth knowing about how it is built:
+
+* **The kick is choreography, not a photograph.** The live site's only image of
+  Taremi is a static studio portrait, and no photo of him striking a ball was
+  invented or sourced from elsewhere. The shot reads through the run-up, the
+  plant and the ball leaving frame. `content/site.json` → `strike.image` is the
+  single swap point if a licensed action cutout is ever supplied.
+* **The flight is measured, not guessed.** `flightX`/`flightY` read
+  `offsetLeft`/`offsetTop` off the ball and the net's wrapper — layout values
+  that transforms do not disturb — so the ball lands in the goal at any
+  viewport size. (The net is wrapped in a `div` for exactly this reason: SVG
+  elements have no `offset*` properties.) The values are functions, so
+  `invalidateOnRefresh` re-measures them after a resize.
+
+### Everything else
+
 * **Hero** — masked per-letter title reveal, staggered tagline, dual-layer
-  parallax on the stadium plate and the smoke overlay.
+  parallax on the stadium plate and smoke, and a blurred recede on exit.
 * **Scroll reveals** — batched `ScrollTrigger` entries for cards, services,
-  people and offices; per-heading word masks.
+  people and offices.
+* **Text** — hand-rolled splitters in `src/scripts/text.js` (GSAP's SplitText is
+  a Club plugin): word masks for headings, character staggers for page titles,
+  measured line masks for body copy, and a character scramble on nav hover.
+  Line wrappers are unwound once revealed, so text reflows normally afterwards.
+* **Clip reveals** — figures wipe in behind a moving `clip-path` edge.
+* **Deal-in cards** — service cards arrive from depth on a scrubbed `rotateX`.
+* **Horizontal rail** — the former-clients row scrolls sideways while pinned.
+* **Velocity effects** — scroll speed skews content slightly and drives the
+  partner marquee, which speeds up and reverses with scroll direction.
 * **Counters** — the four real figures (25 / 46 / 80 / 230) count up on entry.
+  Scene-driven counters use `data-scrub-counter` so the generic handler does
+  not also animate them.
 * **Page transitions** — internal links are intercepted, the next document is
-  fetched and its container swapped behind a wipe; `popstate` and prefetch on
-  hover are handled. Any failure hands the navigation back to the browser.
-* **Micro-interactions** — magnetic buttons, cursor-tracking tilt and radial
-  highlight on service cards, hover-scaled media, an infinite partner marquee,
-  a scroll-progress bar, and a header that hides going down and returns going up.
-* **Roster filtering** — FLIP-style transforms so cards glide between layouts.
+  fetched and its container swapped behind a wipe; `popstate` and hover
+  prefetch are handled. Any failure hands the navigation back to the browser.
+* **Pointer** — a custom two-part cursor that lags and swells over targets,
+  magnetic buttons, cursor-tracking tilt and radial highlight on service cards.
+* **Chrome** — scroll-progress bar, a header that hides going down and returns
+  going up, drifting watermark behind player heroes.
 
 ### Motion safety
 
@@ -125,6 +167,8 @@ than no animation:
    ticker actually advanced; if not, `.motion-failsafe` is set and every page
    snaps to its finished state. Hidden tabs are skipped and re-checked on
    `visibilitychange`, so a legitimately backgrounded tab still gets its intro.
+   Teardown uses `kill(true)`, which reverts pinning — a stalled scene can
+   never leave its pin spacer behind as a block of empty page.
 
 ## Repository layout
 

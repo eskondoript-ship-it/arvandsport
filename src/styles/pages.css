@@ -200,3 +200,112 @@ a.office__row:hover { color: var(--white); }
 .form__grid { display: grid; gap: 1.1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 620px) { .form__grid { grid-template-columns: 1fr; } }
 .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.6rem; }
+
+/* ---------------------------------------------------------------- strike
+ * The scrubbed Taremi sequence. Authored as the finished frame so the
+ * no-JS / reduced-motion rendering is a composed still; motion.js sets the
+ * start states and scrolls through them.
+ */
+.strike { position: relative; background: linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900)); }
+.strike__pin {
+  position: relative; overflow: hidden;
+  min-height: min(100svh, 780px);
+  display: grid; align-items: end;
+  padding: calc(var(--header-h) + 2rem) var(--gutter) clamp(2rem, 6vh, 4rem);
+}
+.strike__pitch { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .28; }
+.strike__pitch line, .strike__pitch path, .strike__pitch circle {
+  fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke;
+}
+
+.strike__player {
+  position: absolute; left: clamp(-1rem, 1vw, 3rem); bottom: -4%; z-index: 2; margin: 0;
+  width: clamp(230px, 33vw, 440px);
+  filter: drop-shadow(0 30px 50px rgba(0, 0, 0, .6));
+  /* The source asset is a FIFA-style card, frame included. Fading the lower
+   * edge grounds the figure on the pitch instead of leaving a card hovering. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 97%);
+}
+.strike__player img { width: 100%; height: auto; }
+
+.strike__speed { position: absolute; left: 0; bottom: 22%; z-index: 1; display: grid; gap: 10px; width: clamp(120px, 22vw, 280px); }
+.strike__speed span {
+  display: block; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  opacity: .5; margin-left: calc(var(--i) * 9px);
+}
+
+.strike__ball {
+  position: absolute; z-index: 3;
+  left: clamp(10rem, 27vw, 24rem); bottom: clamp(4rem, 14vh, 8rem);
+  width: clamp(36px, 4.4vw, 66px); aspect-ratio: 1;
+}
+.strike__ball-core { display: block; width: 100%; height: 100%; }
+.strike__ball svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .55)); }
+/* Comet streak. It sits on the untransformed wrapper so it never spins with
+ * the ball, and points back along the flight. */
+.strike__tail {
+  position: absolute; top: 50%; right: 55%; z-index: -1;
+  width: clamp(90px, 13vw, 220px); height: 34%;
+  transform-origin: right center; translate: 0 -50%;
+  border-radius: 999px;
+  background: linear-gradient(270deg, rgba(5, 237, 255, .85), rgba(5, 237, 255, 0));
+}
+
+.strike__flash {
+  position: absolute; z-index: 3; left: clamp(8rem, 25vw, 21rem); bottom: clamp(2.5rem, 11vh, 6.5rem);
+  width: clamp(80px, 12vw, 170px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .95), rgba(5, 237, 255, .35) 45%, transparent 70%);
+  opacity: 0; pointer-events: none;
+}
+
+/* Kept clear of the copy panel, which lands bottom-right. The wrapper carries
+ * the layout position so JS can measure it; the svg inside carries the
+ * animation. */
+.strike__net-box {
+  position: absolute; z-index: 1; right: clamp(1.5rem, 7vw, 9rem); top: clamp(4.5rem, 17vh, 11rem);
+  width: clamp(170px, 25vw, 340px);
+}
+.strike__net { width: 100%; height: auto; transform-origin: center bottom; }
+.strike__mesh line { stroke: rgba(236, 252, 255, .32); stroke-width: 1; }
+.strike__frame { fill: none; stroke: var(--white); stroke-width: 3; }
+
+.strike__shock {
+  position: absolute; z-index: 2; right: clamp(6rem, 16vw, 20rem); top: clamp(9rem, 26vh, 18rem);
+  width: clamp(70px, 10vw, 150px); aspect-ratio: 1; border-radius: 50%;
+  border: 2px solid var(--accent); opacity: 0;
+}
+
+.strike__copy {
+  position: relative; z-index: 4; justify-self: end; max-width: 27rem;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  backdrop-filter: blur(14px);
+}
+.strike__kicker { font-size: var(--step--1); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.strike__title { font-size: var(--step-3); text-transform: uppercase; letter-spacing: -.03em; margin-top: .4rem; }
+.strike__sub { color: var(--fg-muted); font-size: var(--step--1); margin-top: .35rem; }
+.strike__stats { display: flex; gap: clamp(1.5rem, 4vw, 3rem); margin: 1.3rem 0; }
+.strike__stats dt { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--fg-faint); }
+.strike__stats dd { margin: .2rem 0 0; font-size: var(--step-3); font-weight: 800; line-height: 1; letter-spacing: -.04em; }
+.strike__hint {
+  position: absolute; inset: auto auto clamp(.8rem, 2vh, 1.4rem) 50%; transform: translateX(-50%);
+  font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: var(--fg-faint); white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .strike__pin { align-content: end; gap: 1.2rem; }
+  .strike__player { width: 44vw; opacity: .55; }
+  .strike__copy { justify-self: stretch; max-width: none; }
+  .strike__net-box { width: 42vw; top: clamp(4rem, 13vh, 8rem); right: 1rem; }
+  .strike__ball { left: 30vw; bottom: 34vh; }
+  .strike__hint { display: none; }
+}
+
+/* ------------------------------------------------------- horizontal rail */
+.rail { position: relative; overflow: hidden; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
+.rail__track { display: flex; gap: clamp(.9rem, 2vw, 1.5rem); width: max-content; }
+.rail__track > * { width: clamp(160px, 20vw, 230px); flex: none; }
+@media (max-width: 720px) { .rail { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
