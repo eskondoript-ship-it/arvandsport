@@ -47,7 +47,7 @@ function about(site) {
 function serviceGroup(group, groupIndex) {
   return `<div class="services__group" id="${attr(group.id)}">
   ${sectionHead({ kicker: groupIndex === 0 ? 'What we do' : '', title: group.title, intro: esc(group.intro), n: groupIndex === 0 ? '02' : '03' })}
-  <div class="services__grid" data-deal>
+  <div class="services__grid">
     ${group.items
       .map(
         (item, i) => `<article class="service" style="--i:${i}" data-reveal data-tilt>

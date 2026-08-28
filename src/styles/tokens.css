@@ -71,7 +71,10 @@
     --accent-2:    var(--blue-500);
 
     --card-bg:     linear-gradient(180deg, #ffffff, #efe9dc);
-    --scene-bg:    linear-gradient(180deg, var(--paper), #e7e0d0 55%, var(--paper));
+    /* The strike scene is white stroke art on a dark ground — the figure,
+       the net and its mesh are all drawn in white, so a pale backdrop erases
+       most of them. It stays dark in both themes, like the hero. */
+    --scene-bg:    linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900));
     /* Sits over the dark image well, so it does not follow the theme. */
     --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
     --chip-bg:     rgba(255, 255, 255, .82);
@@ -102,7 +105,10 @@
   --accent-2:    var(--blue-500);
 
   --card-bg:     linear-gradient(180deg, #ffffff, #efe9dc);
-  --scene-bg:    linear-gradient(180deg, var(--paper), #e7e0d0 55%, var(--paper));
+  /* The strike scene is white stroke art on a dark ground — the figure,
+     the net and its mesh are all drawn in white, so a pale backdrop erases
+     most of them. It stays dark in both themes, like the hero. */
+  --scene-bg:    linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900));
   /* Sits over the dark image well, so it does not follow the theme. */
   --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
   --chip-bg:     rgba(255, 255, 255, .82);

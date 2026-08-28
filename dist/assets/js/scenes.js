@@ -254,29 +254,18 @@ function horizontalRail(root) {
 
 /* ------------------------------------------------------ stacking services */
 
-/** Service cards deal in from depth as the group scrolls through. */
-function dealCards(root) {
-  for (const grid of $$('[data-deal]', root)) {
-    const cards = [...grid.children];
-    if (!cards.length) continue;
-    gsap.set(cards, { transformPerspective: 1000 });
-    scene(
-      gsap.fromTo(
-        cards,
-        { z: -220, rotateX: 14, opacity: 0, y: 60 },
-        {
-          z: 0,
-          rotateX: 0,
-          opacity: 1,
-          y: 0,
-          ease: 'power2.out',
-          stagger: 0.06,
-          scrollTrigger: { trigger: grid, start: 'top 85%', end: 'top 35%', scrub: 0.7 },
-        },
-      ).scrollTrigger,
-    );
-  }
-}
+/* The service cards used to be dealt in from depth here, with a scrubbed
+ * fromTo that set rotateX:14 and z:-220 as its start state.
+ *
+ * Two problems, both real. Every .service already carries data-reveal, so the
+ * cards were driven by two systems at once. And fromTo writes its start state
+ * the moment it is built: if the ScrollTrigger then dies — as one of the two
+ * grids' did — the cards are stranded at a 14-degree tilt for the rest of the
+ * visit, which is what made them look sideways on the live site.
+ *
+ * The standard reveal already covers these cards, and it is the path with the
+ * failsafe behind it, so the extra layer is gone rather than patched.
+ */
 
 /* -------------------------------------------------------- velocity effects */
 
@@ -291,12 +280,27 @@ function velocityEffects(root) {
 
   const setSkew = skewTargets.map((el) => gsap.quickTo(el, 'skewY', { duration: 0.5, ease: 'power3.out' }));
 
+  /* onUpdate only fires while the page is actually scrolling, so whatever it
+   * wrote last is the value that stays. That left the news grid at a
+   * permanent slant once the visitor stopped — the cards read as crooked
+   * rather than as a moving flourish. An idle timer returns it to zero
+   * shortly after scrolling ends. */
+  let idle;
+  const settle = () => {
+    clearTimeout(idle);
+    idle = setTimeout(() => {
+      for (const set of setSkew) set(0);
+    }, 120);
+  };
+
   scene(
     ScrollTrigger.create({
       onUpdate: (self) => {
         const velocity = self.getVelocity();
-        const skew = gsap.utils.clamp(-6, 6, velocity / 320);
+        /* Halved: at six degrees the slant read as a layout fault mid-scroll. */
+        const skew = gsap.utils.clamp(-3, 3, velocity / 640);
         for (const set of setSkew) set(skew);
+        settle();
         for (const marquee of marquees) {
           const boost = gsap.utils.clamp(0.4, 4, Math.abs(velocity) / 900 + 0.4);
           marquee.style.setProperty('--marquee-speed', String(boost));
@@ -347,7 +351,6 @@ export function initScenes(root = document) {
   strikeScene(root);
   heroExit(root);
   horizontalRail(root);
-  dealCards(root);
   velocityEffects(root);
   clipReveals(root);
   watermarkDrift(root);

@@ -167,6 +167,7 @@
    The header only needs it while it is transparent over the hero — once it
    is stuck it paints --header-bg and follows the theme like everything else. */
 .hero,
+.strike,
 .site-header:not(.is-stuck) {
   --fg:          #eaf4fb;
   --fg-muted:    rgba(234, 244, 251, .68);

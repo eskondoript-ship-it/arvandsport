@@ -1,6 +1,11 @@
 /** Sticky header state, scroll progress bar and the mobile drawer. */
 import { $, $$, gsap, canAnimate } from './env.js';
 
+/* Held at module scope so a page swap can put the header back on screen: the
+ * bar is outside the swapped container, so it survives the transition with
+ * whatever state it had when the visitor clicked the link. */
+let resetHeaderState = () => {};
+
 export function initHeader() {
   const header = $('[data-header]');
   const progress = $('[data-scroll-progress]');
@@ -11,14 +16,43 @@ export function initHeader() {
   let last = window.scrollY;
   let ticking = false;
 
+  /* Direction has to beat a few pixels before the bar reacts. Comparing
+   * y > last alone let sub-pixel jitter and momentum settle flip it. */
+  const DIRECTION_THRESHOLD = 6;
+
+  /* Jumping to an in-page anchor scrolls downward, which would otherwise hide
+   * the bar the moment the visitor asked to go somewhere. Navigation holds it
+   * open, and the hold is released once scrolling has actually settled — a
+   * fixed timer was not enough, since a smooth jump outlasts it. */
+  /* An anchor jump is not one smooth run: the click is followed by a pause of
+   * roughly half a second with no scrolling at all, then a single large jump.
+   * An idle timer alone expired in that gap, so the hold is a deadline that
+   * survives the pause, and each scroll during it pushes the deadline out so
+   * the tail of the jump stays covered too. */
+  const HOLD_AFTER_NAV = 1500;
+  const HOLD_WHILE_MOVING = 300;
+  let holdUntil = 0;
+  const holdOpenNow = () => performance.now() < holdUntil;
+
   const update = () => {
     const y = window.scrollY;
     header.classList.toggle('is-stuck', y > 12);
-    /* Hide on the way down, reveal on the way up — but never while the
-     * drawer is open, and never in the first viewport. */
-    const hide = y > 320 && y > last && !menu?.classList.contains('is-open');
-    header.classList.toggle('is-hidden', hide);
-    last = y;
+
+    /* Hide on the way down, come back on the way up — but never while the
+     * drawer is open, never in the first viewport, and never mid-jump. */
+    const delta = y - last;
+    if (holdOpenNow()) {
+      header.classList.remove('is-hidden');
+      last = y;
+      holdUntil = Math.max(holdUntil, performance.now() + HOLD_WHILE_MOVING);
+    } else if (Math.abs(delta) > DIRECTION_THRESHOLD) {
+      const hide = y > 320 && delta > 0 && !menu?.classList.contains('is-open');
+      header.classList.toggle('is-hidden', hide);
+      last = y;
+    } else if (y <= 320) {
+      header.classList.remove('is-hidden');
+      last = y;
+    }
 
     if (progress) {
       const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -26,6 +60,24 @@ export function initHeader() {
     }
     ticking = false;
   };
+
+  resetHeaderState = () => {
+    holdUntil = performance.now() + HOLD_AFTER_NAV;
+    header.classList.remove('is-hidden');
+    last = window.scrollY;
+    header.classList.toggle('is-stuck', window.scrollY > 12);
+  };
+
+  /* Same-page anchors never swap the container, so syncChrome does not run:
+   * without this, the nav links scrolled the page down and took the bar with
+   * them. Covers both the click and a back/forward hash change. */
+  window.addEventListener('hashchange', resetHeaderState);
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest?.('a[href]');
+    if (!link) return;
+    const url = new URL(link.href, location.href);
+    if (url.pathname === location.pathname && url.hash) resetHeaderState();
+  });
 
   window.addEventListener(
     'scroll',
@@ -98,6 +150,9 @@ export function syncChrome(doc, pathname) {
     live.forEach((link, i) => link.setAttribute('href', next[i].getAttribute('href')));
   }
   syncNav(pathname);
+  /* A swap lands at the top of the new page without firing a scroll event, so
+   * a header that was hidden when the link was clicked would stay hidden. */
+  resetHeaderState();
 }
 
 /** Keep the nav's current-page marker in sync after a client-side swap. */
