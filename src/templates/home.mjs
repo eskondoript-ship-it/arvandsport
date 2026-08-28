@@ -1,35 +1,7 @@
 import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
 import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG, KICKER_SVG } from './partials.mjs';
+import { apex } from './apex.mjs';
 
-function hero(site) {
-  return `<section class="hero" id="home" data-hero>
-  <div class="hero__bg" data-hero-bg>
-    <picture>
-      <source type="image/webp" srcset="/assets/img/ui/hero-bg-640.webp 640w, /assets/img/ui/hero-bg-1024.webp 1024w, /assets/img/ui/hero-bg-1440.webp 1440w, /assets/img/ui/hero-bg-1920.webp 1920w" sizes="100vw">
-      <img src="${site.hero.background}" alt="" width="1920" height="1080" fetchpriority="high" decoding="async">
-    </picture>
-  </div>
-  <div class="hero__smoke" data-hero-smoke aria-hidden="true"></div>
-  <div class="hero__veil" aria-hidden="true"></div>
-  <div class="shell hero__inner">
-    <p class="hero__eyebrow" data-hero-eyebrow>FIFA-licensed football &amp; match agency</p>
-    <h1 class="hero__title" data-hero-title>${splitWords(site.hero.title, { letters: true })}</h1>
-    <p class="hero__tagline" data-hero-tagline>${splitWords(site.hero.tagline)}</p>
-    <div class="hero__actions" data-hero-actions>
-      <a class="btn btn--solid btn--lg" href="/player/" data-magnetic><span>Our players</span>${ICONS.arrow}</a>
-      <a class="btn btn--ghost btn--lg" href="/registration/" data-magnetic><span>Register</span></a>
-    </div>
-  </div>
-  <a class="hero__scroll" href="#about" data-hero-scroll aria-label="Scroll to content">
-    <span class="hero__scroll-line"></span><span>Scroll</span>
-  </a>
-  <div class="ticker" aria-hidden="true">
-    <div class="ticker__track">${Array(2).fill(
-      site.formerClients.items.concat(site.coaches.items).map((c) => `<span>${esc(c.name)}</span>`).join(''),
-    ).join('')}</div>
-  </div>
-</section>`;
-}
 
 export function about(site) {
   return `<section class="about section section--paper" id="about">
@@ -337,7 +309,7 @@ export function renderHome({ site, players, news }) {
         .map((o) => ({ '@type': 'PostalAddress', addressCountry: o.country, streetAddress: o.address })),
     },
     content: [
-      hero(site),
+      apex(site),
       about(site),
       servicesTeaser(site),
       roster(site, players),

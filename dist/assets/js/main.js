@@ -8,6 +8,7 @@ import { initForms } from './forms.js';
 import { initEmbeds } from './embed.js';
 import { initWire } from './wire.js';
 import { initDossier } from './dossier.js';
+import { initApex } from './apex.js';
 import { initCursor, destroyCursor } from './cursor.js';
 import { initTransitions } from './transitions.js';
 
@@ -18,6 +19,7 @@ function initPage(container = document) {
   initEmbeds(container);
   initWire(container);
   initDossier(container);
+  initApex(container);
   initMotion(container);
 }
 

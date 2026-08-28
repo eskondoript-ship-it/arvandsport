@@ -1616,3 +1616,122 @@ a.office__row:hover { color: var(--white); }
 }
 .closing__title { font-size: var(--step-3); text-transform: uppercase; letter-spacing: -.03em; }
 .closing__actions { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; margin-top: .6rem; }
+
+/* ------------------------------------------------------------------ apex
+   The opening set piece. Near-black ground, one huge thin serif line, and a
+   faceted ball held in the gap between its two halves — the ball overlaps the
+   words rather than sitting beside them, which is what makes the line read as
+   one object cut in half rather than two labels.
+
+   No display webfont is loaded: the site self-hosts Roboto only, and adding a
+   third-party font request would undo the work just done on phone load. The
+   stack names the faces worth having if the device already has one, and falls
+   back to the system serif, which still carries the editorial contrast. */
+.apex {
+  position: relative;
+  background: radial-gradient(120% 90% at 50% 42%, #10233a 0%, #060c16 46%, #03070d 100%);
+  color: #eaf4fb;
+  --accent: var(--cyan-400);
+  --fg-faint: rgba(234, 244, 251, .42);
+}
+.apex__pin {
+  position: relative; overflow: hidden;
+  min-height: 100svh;
+  display: grid; place-items: center;
+  padding: calc(var(--header-h) + 2.5rem) var(--gutter) clamp(2.5rem, 7vh, 5rem);
+}
+
+.apex__eyebrow {
+  position: absolute; top: calc(var(--header-h) + clamp(1rem, 4vh, 2.6rem)); left: var(--gutter);
+  font-size: .68rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+/* Display line ---------------------------------------------------------- */
+.apex__title { margin: 0; }
+.apex__display {
+  /* One line, split. The gap is the ball's seat: the two halves sit at the
+     outer edges and the object occupies the middle, so the line reads as one
+     phrase interrupted rather than as two stacked labels. */
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; margin-inline: auto;
+  /* Sized so the pair plus the gap fits the viewport: the halves must not run
+     off the edge, and nowrap means they will if the type is a step too big. */
+  gap: clamp(110px, 22vw, 340px);
+  font-family: "Playfair Display", "Bodoni MT", Didot, "Times New Roman", Georgia, serif;
+  font-weight: 400; font-style: normal;
+  font-size: clamp(2rem, 6.2vw, 6.4rem);
+  line-height: .9; letter-spacing: .01em; text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The object ------------------------------------------------------------ */
+.apex__object {
+  position: absolute; top: 50%; left: 50%; z-index: 2;
+  width: clamp(210px, 34vw, 430px); aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.apex__ball { width: 100%; height: 100%; display: block; overflow: visible; }
+.apex__facet { transform-box: fill-box; transform-origin: center; }
+/* A soft bloom under the facets so the core reads as lit from inside. */
+.apex__core {
+  position: absolute; inset: 26%; border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, rgba(5, 237, 255, .28) 38%, transparent 70%);
+  filter: blur(26px); opacity: .55;
+}
+
+/* Corner labels --------------------------------------------------------- */
+.apex__label {
+  position: absolute; z-index: 3;
+  font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+  line-height: 1.6; color: var(--fg-faint);
+}
+.apex__label--right { right: var(--gutter); top: 30%; text-align: right; }
+.apex__label--left { left: var(--gutter); top: 30%; }
+
+.apex__actions {
+  position: absolute; left: 50%; bottom: clamp(2.5rem, 9vh, 5.5rem); translate: -50% 0; z-index: 3;
+  display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center;
+}
+.apex__scroll {
+  position: absolute; right: var(--gutter); bottom: clamp(1rem, 3vh, 2rem); z-index: 3;
+  display: grid; justify-items: center; gap: .6rem;
+  font-size: .68rem; letter-spacing: .24em; text-transform: uppercase; color: var(--fg-faint);
+  writing-mode: vertical-rl;
+}
+.apex__scroll-line { display: block; width: 1px; height: 48px; background: linear-gradient(var(--accent), transparent); }
+
+/* The outlined button reads at about 3% contrast on this ground, which is
+   effectively invisible — it needs a real edge here. */
+.apex .btn--ghost {
+  --btn-bd: rgba(234, 244, 251, .38);
+  background: rgba(234, 244, 251, .06);
+  backdrop-filter: blur(6px);
+}
+.apex .btn--ghost:hover, .apex .btn--ghost:focus-visible { --btn-bd: transparent; }
+
+/* Phones ---------------------------------------------------------------- */
+@media (max-width: 760px) {
+  /* Stacked, the two halves need the ball behind them rather than between. */
+  /* No room to split a line on a phone: the halves stack and the ball sits
+     behind them rather than between. */
+  .apex__display {
+    flex-direction: column; justify-content: center; align-items: center;
+    gap: .1rem; font-size: clamp(2.7rem, 15vw, 4.6rem);
+  }
+  /* Behind the type here, not in front of it: with the halves stacked there
+     is no gap to sit in, and an object on top just greys out the letters. */
+  .apex__object { width: min(86vw, 400px); opacity: .5; z-index: 0; }
+  .apex__title { position: relative; z-index: 2; }
+  .apex__label--right { top: auto; bottom: 22%; }
+  .apex__label--left { bottom: 15%; }
+  .apex__scroll { display: none; }
+  .apex__actions { bottom: clamp(1.5rem, 5vh, 3rem); width: min(100%, 22rem); }
+  .apex__actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+
+/* Composed still when nothing is allowed to move. */
+@media (prefers-reduced-motion: reduce) {
+  .apex__facet { opacity: 1 !important; transform: none !important; }
+}
