@@ -26,13 +26,22 @@
 
   --font: "Roboto", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 
+  /* Paper band. Sections can flip to this ground by redefining the colour
+     tokens locally — see .section--paper. */
+  --paper: #f3efe6;
+  --sand: #e3c98d;
+
+  /* One corner is cut instead of rounded; it is the shape that carries most
+     of the new visual identity, so it lives here rather than in each rule. */
+  --cut: 14px;
+
   --step--1: clamp(.8rem, .76rem + .18vw, .89rem);
   --step-0:  clamp(.95rem, .9rem + .24vw, 1.06rem);
   --step-1:  clamp(1.14rem, 1.04rem + .45vw, 1.4rem);
   --step-2:  clamp(1.42rem, 1.24rem + .82vw, 2rem);
   --step-3:  clamp(1.8rem, 1.44rem + 1.6vw, 3rem);
   --step-4:  clamp(2.2rem, 1.5rem + 3.1vw, 4.5rem);
-  --step-5:  clamp(2.8rem, 1.4rem + 6.2vw, 8rem);
+  --step-5:  clamp(3rem, 1.2rem + 7.4vw, 9.5rem);
 
   --shell: 1180px;
   --gutter: clamp(1.1rem, 4vw, 2.5rem);
@@ -221,6 +230,25 @@ p { text-wrap: pretty; }
 
 .shell { width: min(100% - (var(--gutter) * 2), var(--shell)); margin-inline: auto; }
 .section { padding-block: var(--section-y); position: relative; }
+
+/* A light band, to break the run of dark sections. Everything downstream
+   reads its colour from tokens, so flipping the ground is a matter of
+   redefining them for this scope rather than restyling the contents. */
+.section--paper {
+  --fg: #0b1523;
+  --fg-muted: rgba(11, 21, 35, .72);
+  --fg-faint: rgba(11, 21, 35, .48);
+  --line: rgba(11, 21, 35, .16);
+  --line-strong: rgba(0, 52, 88, .45);
+  --accent: #00618f;
+  --surface: rgba(11, 21, 35, .04);
+  --surface-2: rgba(11, 21, 35, .07);
+  background: var(--paper);
+  color: var(--fg);
+}
+.section--paper .btn--solid { --btn-bg: var(--navy-600); --btn-fg: #fff; }
+.section--paper .btn--solid::before { background: linear-gradient(120deg, var(--navy-800), var(--navy-600)); }
+.section--paper .btn--solid:hover { color: #fff; }
 .section--tight { padding-block: clamp(2.5rem, 6vw, 5rem); }
 .main { position: relative; z-index: 2; }
 
@@ -361,7 +389,9 @@ p { text-wrap: pretty; }
   --btn-fg: var(--fg);
   --btn-bd: var(--line);
   position: relative; display: inline-flex; align-items: center; gap: .6rem;
-  padding: .78rem 1.5rem; border: 1px solid var(--btn-bd); border-radius: 999px;
+  padding: .8rem 1.6rem; border: 1px solid var(--btn-bd);
+  border-radius: 0;
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
   background: var(--btn-bg); color: var(--btn-fg);
   font-size: var(--step--1); font-weight: 600; letter-spacing: .02em;
   overflow: hidden; isolation: isolate;
@@ -384,15 +414,28 @@ p { text-wrap: pretty; }
 .btn--lg { padding: .95rem 1.9rem; font-size: var(--step-0); }
 
 /* ---------------------------------------------------------- section head */
-.section-head { max-width: 60ch; margin-bottom: clamp(2rem, 4vw, 3.2rem); }
+.section-head {
+  position: relative; max-width: 60ch;
+  margin-bottom: clamp(2rem, 4vw, 3.2rem);
+  padding-top: clamp(1.1rem, 2.4vw, 1.8rem);
+  border-top: 1px solid var(--line);
+}
+/* Section index, set from --n on the section head. */
+.section-head[data-n]::before {
+  content: attr(data-n);
+  position: absolute; top: clamp(.7rem, 1.8vw, 1.3rem); right: 0;
+  font-size: clamp(2.4rem, 7vw, 5.5rem); font-weight: 800; line-height: .8;
+  letter-spacing: -.06em; color: var(--fg); opacity: .07; pointer-events: none;
+}
 .section-head--center { margin-inline: auto; text-align: center; }
+.section-head--center::before { right: 50%; translate: 50% 0; }
 .section-head__kicker {
   display: inline-flex; align-items: center; gap: .6rem;
   font-size: var(--step--1); font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: .9rem;
+  color: var(--accent); margin-bottom: .7rem;
 }
 .section-head__dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(5, 237, 255, .16); }
-.section-head__title { font-size: var(--step-3); }
+.section-head__title { font-size: var(--step-3); text-transform: uppercase; letter-spacing: -.035em; }
 .section-head__intro { margin-top: 1rem; color: var(--fg-muted); }
 
 /* ---------------------------------------------------------- player cards */
@@ -411,143 +454,48 @@ p { text-wrap: pretty; }
  * edge poking out below the shield; the shield restores it for its content. */
 .player-card__link { position: relative; display: block; line-height: 0; }
 
-/* Rated cards get an electric palette; the rest keep the gold squad look. */
-.player-card--rated {
-  --edge: linear-gradient(158deg, #d8fbff 0%, #35d8ef 20%, #0b6fa8 42%, #b9f4ff 58%, #0a5f96 80%, #7fe7ff 100%);
-  --face-a: #123f78; --face-b: #0b2d5e; --face-c: #071c3d; --face-d: #04101f;
-  --bloom: rgba(90, 226, 255, .38);
-  --ink: #e8fbff;
+.player-card { position: relative; }
+.player-card[hidden] { display: none; }
+.player-card__link {
+  position: relative; display: block; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
+  transition: border-color .45s var(--ease-out), transform .45s var(--ease-out), box-shadow .45s var(--ease-out);
 }
-.player-card {
-  --edge: linear-gradient(158deg, #fcefc0 0%, #d8b45c 18%, #8d6d22 38%, #f6e3a4 55%, #7d5f1c 78%, #e8cf85 100%);
-  --face-a: #10456e; --face-b: #0a2a48; --face-c: #071c31; --face-d: #04101c;
-  --bloom: rgba(5, 237, 255, .3);
-  --ink: #f7e9bd;
-}
-
-/* Shield silhouette. Shared by the card face and the metal edge behind it. */
-.player-card__link,
-.player-card__shield { --shield: polygon(50% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%, 0% 5%); }
-
-/* The metal edge: a slightly larger shield sitting behind the face, with a
- * multi-stop gradient so it catches light along the bevel. */
-.player-card__link::before {
-  content: ""; position: absolute; inset: -2px; z-index: 0;
-  clip-path: var(--shield);
-  background: var(--edge);
-  transition: opacity .45s var(--ease-out), filter .45s var(--ease-out);
-}
-.player-card__link:hover::before { filter: brightness(1.12); }
-.player-card__link:focus-visible { outline: none; }
-.player-card__link:focus-visible::before { box-shadow: 0 0 0 3px var(--accent); }
-
-.player-card__shield {
-  position: relative; display: block; isolation: isolate; line-height: 1.25;
-  padding: clamp(.9rem, 2vw, 1.2rem) clamp(.8rem, 1.8vw, 1.1rem) clamp(1rem, 2.4vw, 1.5rem);
-  aspect-ratio: 53 / 76;
-  clip-path: var(--shield);
-  /* Faceted ground: crossed linear gradients read as cut planes, over a deep
-     navy body with a cyan bloom behind the player. Original artwork. */
-  background:
-    linear-gradient(118deg, rgba(255, 255, 255, .07) 0 14%, transparent 14.2% 30%,
-                    rgba(255, 255, 255, .05) 30.2% 42%, transparent 42.2% 66%,
-                    rgba(255, 255, 255, .06) 66.2% 76%, transparent 76.2%),
-    linear-gradient(212deg, rgba(5, 237, 255, .12) 0 18%, transparent 18.2% 46%,
-                    rgba(5, 237, 255, .09) 46.2% 58%, transparent 58.2%),
-    radial-gradient(90% 55% at 50% 26%, var(--bloom), transparent 62%),
-    linear-gradient(172deg, var(--face-a) 0%, var(--face-b) 34%, var(--face-c) 72%, var(--face-d) 100%);
-  transition: transform .55s var(--ease-out);
-}
-.player-card__link:hover .player-card__shield { transform: translateY(-8px) rotateX(5deg); }
-
-/* Light sweeping across the face on hover. */
-.player-card__shield::after {
-  content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
-  background: linear-gradient(104deg, transparent 38%, rgba(255, 255, 255, .16) 48%, transparent 58%);
-  transform: translateX(-120%);
-  transition: transform .85s var(--ease-out);
-}
-.player-card__link:hover .player-card__shield::after { transform: translateX(120%); }
-
-.player-card__ident {
-  position: absolute; top: clamp(1.1rem, 2.8vw, 1.9rem); left: clamp(.85rem, 2.1vw, 1.35rem);
-  z-index: 3; display: grid; justify-items: center; gap: .1rem;
-  color: var(--ink); text-align: center; text-shadow: 0 2px 6px rgba(0, 0, 0, .5);
-}
-.player-card__age {
-  display: grid; justify-items: center; font-size: clamp(1.55rem, 3.7vw, 2.4rem);
-  font-weight: 800; line-height: .88; letter-spacing: -.045em;
-}
-.player-card__age em {
-  font-style: normal; font-size: .28em; font-weight: 700;
-  letter-spacing: .24em; text-transform: uppercase; opacity: .7;
-}
-.player-card__pos {
-  font-size: clamp(.74rem, 1.55vw, .98rem); font-weight: 800; letter-spacing: .05em;
-}
-.player-card__nat {
-  margin-top: .25rem; padding: .12rem .42rem; border-radius: 3px;
-  background: color-mix(in srgb, var(--ink) 18%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
-  font-size: .56rem; font-weight: 800; letter-spacing: .12em;
-}
-/* Hairline separating the ident column from the render, as on a printed card. */
-.player-card__ident::after {
-  content: ""; position: absolute; top: -.2rem; right: -.55rem; bottom: -.2rem; width: 1px;
-  background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 55%, transparent), transparent);
-}
-
-.player-card__media { position: absolute; inset: 2% 0 33% 0; z-index: 1; display: block; overflow: hidden; }
+.player-card__link:hover { border-color: var(--line-strong); transform: translateY(-6px); box-shadow: var(--shadow); }
+.player-card__media { position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden; }
 .player-card__media img {
-  width: 90%; height: 100%; margin-inline-start: 10%;
-  object-fit: contain; object-position: bottom center;
-  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, .55));
-  transition: transform .8s var(--ease-out);
+  width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  transition: transform .8s var(--ease-out), filter .6s var(--ease-out);
+  filter: saturate(.85) contrast(1.05);
 }
-.player-card__link:hover .player-card__media img { transform: scale(1.06); }
-
-.player-card__name {
-  position: absolute; inset: auto 7% 29.5% 7%; z-index: 3; display: block;
-  padding-bottom: .38rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--ink) 45%, transparent);
-  color: var(--ink); font-size: clamp(.82rem, 1.75vw, 1.06rem); font-weight: 800;
-  letter-spacing: .01em; text-align: center; text-transform: uppercase;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, .55);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.player-card__link:hover .player-card__media img { transform: scale(1.06); filter: none; }
+.player-card__glow {
+  position: absolute; inset: auto 0 0; height: 65%;
+  background: linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
 }
-
-.player-card__stats {
-  position: absolute; inset: auto 8% 11.5% 8%; z-index: 3;
-  display: grid; grid-template-columns: 1fr 1px 1fr; gap: .12rem clamp(.45rem, 1.3vw, .9rem);
-  color: var(--ink);
+.player-card__badge {
+  position: absolute; top: .8rem; left: .8rem; z-index: 2;
+  padding: .28rem .7rem; border-radius: 999px;
+  background: rgba(11, 21, 35, .7); backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent);
 }
-/* Centre rule between the two stat columns. */
-.player-card__stats::before {
-  content: ""; grid-area: 1 / 2 / 4 / 3;
-  background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 45%, transparent), transparent);
+.player-card__body { position: relative; display: block; padding: 1rem 1.1rem 1.2rem; }
+.player-card__name { display: block; line-height: 1.06; }
+.player-card__name em { display: block; font-style: normal; font-size: var(--step--1); color: var(--fg-muted); }
+.player-card__name strong { display: block; font-size: var(--step-1); font-weight: 800; letter-spacing: -.02em; }
+.player-card__meta { display: flex; flex-wrap: wrap; gap: .3rem .7rem; margin-top: .5rem; font-size: var(--step--1); color: var(--fg-faint); }
+.player-card__meta span + span::before { content: "·"; margin-inline-end: .7rem; color: var(--accent); }
+.player-card__cta {
+  display: inline-flex; align-items: center; gap: .4rem; margin-top: .85rem;
+  font-size: var(--step--1); font-weight: 600; color: var(--accent);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);
 }
-.player-card__stat { display: flex; align-items: baseline; gap: .32rem; font-size: clamp(.62rem, 1.28vw, .8rem); }
-.player-card__stat:nth-child(1) { grid-area: 1 / 1; }
-.player-card__stat:nth-child(2) { grid-area: 2 / 1; }
-.player-card__stat:nth-child(3) { grid-area: 3 / 1; }
-.player-card__stat:nth-child(4) { grid-area: 1 / 3; }
-.player-card__stat:nth-child(5) { grid-area: 2 / 3; }
-.player-card__stat:nth-child(6) { grid-area: 3 / 3; }
-.player-card__stat b { font-weight: 800; letter-spacing: -.02em; }
-.player-card__stat i { font-style: normal; font-weight: 700; opacity: .68; letter-spacing: .05em; }
-
-.player-card__club {
-  position: absolute; inset: auto 14% 8.5% 14%; z-index: 3;
-  color: color-mix(in srgb, var(--ink) 62%, transparent); font-size: clamp(.5rem, 1vw, .62rem);
-  font-weight: 700; letter-spacing: .06em; text-align: center; text-transform: uppercase;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* Card-type flash (TOTS, etc.) down the left edge of a rated card. */
-.player-card__flair {
-  position: absolute; top: 46%; left: clamp(.35rem, 1vw, .6rem); z-index: 3;
-  color: var(--ink); font-size: .52rem; font-weight: 800; letter-spacing: .3em;
-  writing-mode: vertical-rl; transform: rotate(180deg); opacity: .8;
-}
+.player-card__link:hover .player-card__cta, .player-card__link:focus-visible .player-card__cta { opacity: 1; transform: none; }
+@media (hover: none) { .player-card__cta { opacity: 1; transform: none; } }
 
 /* ------------------------------------------------------------ news cards */
 .latest__grid {
@@ -1133,3 +1081,34 @@ a.office__row:hover { color: var(--white); }
 }
 .wire__item a:hover .wire__go { opacity: 1; translate: 4px -50%; }
 @media (hover: none) { .wire__go { opacity: .7; } }
+
+/* ---------------------------------------------------------------- ticker
+ * A broadcast-style name strip pinned to the foot of the hero. Decorative,
+ * so it is hidden from assistive tech and stilled under reduced motion.
+ */
+.ticker {
+  position: absolute; inset: auto 0 0 0; z-index: 3;
+  overflow: hidden; padding-block: .55rem;
+  border-block: 1px solid var(--line);
+  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  backdrop-filter: blur(8px);
+}
+.ticker__track {
+  display: flex; gap: 2.5rem; width: max-content;
+  animation: ticker 42s linear infinite;
+}
+.ticker__track span {
+  font-size: .74rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--fg-faint); white-space: nowrap;
+}
+.ticker__track span::after { content: "◆"; margin-inline-start: 2.5rem; color: var(--accent); opacity: .55; }
+@keyframes ticker { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker__track { animation: none; } .ticker { overflow-x: auto; } }
+
+/* The display line grows and is held to a measure. The constraint sits on the
+   text, not on .hero__inner — that element is the shell, and narrowing it
+   re-centres the whole block. */
+.hero__title { font-size: var(--step-5); max-width: 12ch; }
+.hero__tagline { max-width: 20ch; }
+.hero__eyebrow { max-width: max-content; }
+.hero { padding-bottom: clamp(5rem, 11vh, 9rem); }

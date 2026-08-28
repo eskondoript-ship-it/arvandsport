@@ -164,6 +164,21 @@ Two things worth knowing about how it is built:
   properties), so it sits on the striking boot at every viewport size rather
   than at a hand-tuned offset.
 
+### Visual language
+
+The design leans editorial rather than glassy: sections carry an oversized
+ghost index (01–09) above a hairline rule, buttons take a cut corner instead
+of a pill, the hero sets its display line hard left at a 12ch measure over a
+broadcast-style name ticker, and the About block flips to a light "paper"
+band to break the run of dark sections.
+
+The paper band is worth a note for anyone extending it. Nothing in it is
+restyled — it redefines the colour tokens for its own scope and everything
+downstream follows, because components read `--fg`, `--line`, `--accent` and
+friends rather than literal colours. Adding `section--paper` to any section
+is enough. (`--accent` does change there: the brand cyan is unreadable on
+cream, so the band substitutes a darker blue.)
+
 ### Everything else
 
 * **Hero** — masked per-letter title reveal, staggered tagline, dual-layer

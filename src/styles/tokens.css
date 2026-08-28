@@ -24,13 +24,22 @@
 
   --font: "Roboto", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 
+  /* Paper band. Sections can flip to this ground by redefining the colour
+     tokens locally — see .section--paper. */
+  --paper: #f3efe6;
+  --sand: #e3c98d;
+
+  /* One corner is cut instead of rounded; it is the shape that carries most
+     of the new visual identity, so it lives here rather than in each rule. */
+  --cut: 14px;
+
   --step--1: clamp(.8rem, .76rem + .18vw, .89rem);
   --step-0:  clamp(.95rem, .9rem + .24vw, 1.06rem);
   --step-1:  clamp(1.14rem, 1.04rem + .45vw, 1.4rem);
   --step-2:  clamp(1.42rem, 1.24rem + .82vw, 2rem);
   --step-3:  clamp(1.8rem, 1.44rem + 1.6vw, 3rem);
   --step-4:  clamp(2.2rem, 1.5rem + 3.1vw, 4.5rem);
-  --step-5:  clamp(2.8rem, 1.4rem + 6.2vw, 8rem);
+  --step-5:  clamp(3rem, 1.2rem + 7.4vw, 9.5rem);
 
   --shell: 1180px;
   --gutter: clamp(1.1rem, 4vw, 2.5rem);

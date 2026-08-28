@@ -20,14 +20,19 @@ function hero(site) {
   <a class="hero__scroll" href="#about" data-hero-scroll aria-label="Scroll to content">
     <span class="hero__scroll-line"></span><span>Scroll</span>
   </a>
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">${Array(2).fill(
+      site.formerClients.items.concat(site.coaches.items).map((c) => `<span>${esc(c.name)}</span>`).join(''),
+    ).join('')}</div>
+  </div>
 </section>`;
 }
 
 function about(site) {
-  return `<section class="about section" id="about">
+  return `<section class="about section section--paper" id="about">
   <div class="shell about__grid">
     <div class="about__copy">
-      ${sectionHead({ kicker: site.about.eyebrow, title: 'Twenty-five years at the top level of football' })}
+      ${sectionHead({ kicker: site.about.eyebrow, title: 'Twenty-five years at the top level of football', n: '01' })}
       ${site.about.paragraphs.map((p) => `<p class="about__para" data-split-lines>${p}</p>`).join('')}
       <a class="btn btn--line" href="/#services" data-reveal data-magnetic><span>What we do</span>${ICONS.arrow}</a>
     </div>
@@ -41,7 +46,7 @@ function about(site) {
 
 function serviceGroup(group, groupIndex) {
   return `<div class="services__group" id="${attr(group.id)}">
-  ${sectionHead({ kicker: groupIndex === 0 ? 'What we do' : '', title: group.title, intro: esc(group.intro) })}
+  ${sectionHead({ kicker: groupIndex === 0 ? 'What we do' : '', title: group.title, intro: esc(group.intro), n: groupIndex === 0 ? '02' : '03' })}
   <div class="services__grid" data-deal>
     ${group.items
       .map(
@@ -68,8 +73,8 @@ function services(site) {
 function roster(site, players) {
   return `<section class="roster section" id="players">
   <div class="shell">
-    ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro) })}
-    <div class="roster__grid">${players.map((p, i) => playerCard(p, i, { ratings: site.ratings?.[p.slug] })).join('')}</div>
+    ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro), n: '04' })}
+    <div class="roster__grid">${players.map((p, i) => playerCard(p, i)).join('')}</div>
     <div class="roster__more" data-reveal>
       <a class="btn btn--line" href="/player/" data-magnetic><span>All players</span>${ICONS.arrow}</a>
     </div>
@@ -165,7 +170,7 @@ function strike(site, players) {
 function clients(site) {
   return `<section class="clients section" id="clients">
   <div class="shell">
-    ${sectionHead({ kicker: 'Track record', title: site.formerClients.title })}
+    ${sectionHead({ kicker: 'Track record', title: site.formerClients.title, n: '05' })}
     <div class="rail" data-rail>
       <div class="rail__track" data-rail-track>
         ${site.formerClients.items.map((c, i) => personCard(c, i)).join('')}
@@ -183,7 +188,7 @@ function team(site) {
   const t = site.team;
   return `<section class="team section" id="team">
   <div class="shell">
-    ${sectionHead({ kicker: 'Who we are', title: t.title, intro: esc(t.intro) })}
+    ${sectionHead({ kicker: 'Who we are', title: t.title, intro: esc(t.intro), n: '06' })}
     <div class="team__lead" data-reveal>
       <figure class="team__lead-media" data-clip>
         <img src="${attr(t.lead.image)}" alt="${attr(t.lead.name)}" width="1024" height="1024" loading="lazy" decoding="async">
@@ -209,7 +214,7 @@ function latestNews(site, news) {
   const [lead, ...rest] = news.slice(0, 6);
   return `<section class="latest section" id="news">
   <div class="shell">
-    ${sectionHead({ kicker: 'Newsroom', title: site.pages.homeNews.title })}
+    ${sectionHead({ kicker: 'Newsroom', title: site.pages.homeNews.title, n: '07' })}
     <div class="latest__grid" data-skew>
       ${articleCard(lead, 0, { featured: true })}
       ${rest.map((a, i) => articleCard(a, i + 1)).join('')}
@@ -226,7 +231,7 @@ function partners(site) {
     .map((p) => `<li class="marquee__item"><img src="${attr(p.image)}" alt="${attr(p.name)}" loading="lazy" decoding="async"></li>`)
     .join('');
   return `<section class="partners section" id="partners">
-  <div class="shell">${sectionHead({ kicker: 'Network', title: site.partners.title, align: 'center' })}</div>
+  <div class="shell">${sectionHead({ kicker: 'Network', title: site.partners.title, align: 'center', n: '08' })}</div>
   <div class="marquee" data-marquee>
     <ul class="marquee__track">${row}</ul>
     <ul class="marquee__track" aria-hidden="true">${row}</ul>
@@ -237,7 +242,7 @@ function partners(site) {
 function contact(site) {
   return `<section class="contact section" id="contacts">
   <div class="shell">
-    ${sectionHead({ kicker: 'Say hello', title: site.contact.title })}
+    ${sectionHead({ kicker: 'Say hello', title: site.contact.title, n: '09' })}
     <div class="contact__grid">
       <div class="contact__map" data-reveal data-clip>
         <img src="${attr(site.contact.map)}" alt="Arvand Sport offices around the world" width="1200" height="620" loading="lazy" decoding="async">

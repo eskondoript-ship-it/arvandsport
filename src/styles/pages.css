@@ -379,3 +379,34 @@ a.office__row:hover { color: var(--white); }
 }
 .wire__item a:hover .wire__go { opacity: 1; translate: 4px -50%; }
 @media (hover: none) { .wire__go { opacity: .7; } }
+
+/* ---------------------------------------------------------------- ticker
+ * A broadcast-style name strip pinned to the foot of the hero. Decorative,
+ * so it is hidden from assistive tech and stilled under reduced motion.
+ */
+.ticker {
+  position: absolute; inset: auto 0 0 0; z-index: 3;
+  overflow: hidden; padding-block: .55rem;
+  border-block: 1px solid var(--line);
+  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  backdrop-filter: blur(8px);
+}
+.ticker__track {
+  display: flex; gap: 2.5rem; width: max-content;
+  animation: ticker 42s linear infinite;
+}
+.ticker__track span {
+  font-size: .74rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--fg-faint); white-space: nowrap;
+}
+.ticker__track span::after { content: "◆"; margin-inline-start: 2.5rem; color: var(--accent); opacity: .55; }
+@keyframes ticker { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker__track { animation: none; } .ticker { overflow-x: auto; } }
+
+/* The display line grows and is held to a measure. The constraint sits on the
+   text, not on .hero__inner — that element is the shell, and narrowing it
+   re-centres the whole block. */
+.hero__title { font-size: var(--step-5); max-width: 12ch; }
+.hero__tagline { max-width: 20ch; }
+.hero__eyebrow { max-width: max-content; }
+.hero { padding-bottom: clamp(5rem, 11vh, 9rem); }

@@ -1,5 +1,24 @@
 .shell { width: min(100% - (var(--gutter) * 2), var(--shell)); margin-inline: auto; }
 .section { padding-block: var(--section-y); position: relative; }
+
+/* A light band, to break the run of dark sections. Everything downstream
+   reads its colour from tokens, so flipping the ground is a matter of
+   redefining them for this scope rather than restyling the contents. */
+.section--paper {
+  --fg: #0b1523;
+  --fg-muted: rgba(11, 21, 35, .72);
+  --fg-faint: rgba(11, 21, 35, .48);
+  --line: rgba(11, 21, 35, .16);
+  --line-strong: rgba(0, 52, 88, .45);
+  --accent: #00618f;
+  --surface: rgba(11, 21, 35, .04);
+  --surface-2: rgba(11, 21, 35, .07);
+  background: var(--paper);
+  color: var(--fg);
+}
+.section--paper .btn--solid { --btn-bg: var(--navy-600); --btn-fg: #fff; }
+.section--paper .btn--solid::before { background: linear-gradient(120deg, var(--navy-800), var(--navy-600)); }
+.section--paper .btn--solid:hover { color: #fff; }
 .section--tight { padding-block: clamp(2.5rem, 6vw, 5rem); }
 .main { position: relative; z-index: 2; }
 

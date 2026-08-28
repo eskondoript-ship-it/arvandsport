@@ -6,115 +6,32 @@ export const formatDate = (iso) =>
 export const isoDate = (iso) => iso.split('T')[0];
 
 /** Two-line section title with an animated rule, used across every page. */
-export function sectionHead({ kicker = '', title, intro = '', align = 'left', id = '' }) {
-  return `<header class="section-head section-head--${align}"${id ? ` id="${attr(id)}"` : ''} data-reveal>
+export function sectionHead({ kicker = '', title, intro = '', align = 'left', id = '', n = '' }) {
+  return `<header class="section-head section-head--${align}"${id ? ` id="${attr(id)}"` : ''}${n ? ` data-n="${attr(n)}"` : ''} data-reveal>
   ${kicker ? `<p class="section-head__kicker"><span class="section-head__dot"></span>${esc(kicker)}</p>` : ''}
   <h2 class="section-head__title" data-split>${esc(title)}</h2>
   ${intro ? `<p class="section-head__intro">${intro}</p>` : ''}
 </header>`;
 }
 
-/** Three-letter codes for the nationalities that actually appear on the roster. */
-const COUNTRY_CODE = {
-  Iran: 'IRN', Iraq: 'IRQ', Denmark: 'DEN', Albania: 'ALB',
-  Italy: 'ITA', Kuwait: 'KUW', Afghanistan: 'AFG',
-};
-
-/** Short position codes, in the shorthand a squad list would use. */
-const POSITION_CODE = {
-  /* These mirror the codes already printed on the site's own card artwork,
-   * so the badge on the render and the badge we draw never disagree. */
-  'Centre-Forward': 'CF', 'Left Winger': 'LW', 'Right Winger': 'RW',
-  'Central Midfield': 'CM', 'Centre-Back': 'CB', 'Left-Back': 'LB',
-  'Right-Back': 'RB', Goalkeeper: 'GK',
-};
-
-export const positionCode = (player) =>
-  POSITION_CODE[player.position.detail] ||
-  POSITION_CODE[player.position.group] ||
-  player.position.group.slice(0, 2).toUpperCase();
-
-/** Age today, from the parsed birth date — never the stale figure in the copy. */
-export function ageOf(player, now = new Date()) {
-  if (!player.birthDate) return null;
-  const born = new Date(`${player.birthDate}T00:00:00Z`);
-  let age = now.getUTCFullYear() - born.getUTCFullYear();
-  const month = now.getUTCMonth() - born.getUTCMonth();
-  if (month < 0 || (month === 0 && now.getUTCDate() < born.getUTCDate())) age -= 1;
-  return age;
-}
-
-const year = (value) => /(\d{4})/.exec(value || '')?.[1] || '';
-const heightCm = (value) => {
-  const m = /(\d)[,.](\d{2})/.exec(value || '');
-  return m ? `${m[1]}${m[2]}` : '';
-};
-const footCode = (value) => {
-  const f = (value || '').toLowerCase();
-  if (f.startsWith('r')) return 'R';
-  if (f.startsWith('l')) return 'L';
-  if (f.startsWith('b')) return 'B';
-  return '';
-};
-
-/**
- * A squad card in the shape football fans read instinctively.
- *
- * The six cells hold real profile data, not ratings: the agency publishes no
- * player ratings and inventing them would put made-up numbers against real
- * people. The large figure is the player's age, labelled as such, so it is
- * never mistaken for an overall score.
- */
-export function playerCard(player, index = 0, { ratings = null } = {}) {
-  const age = ageOf(player);
-  const rating = ratings || null;
-  const code = positionCode(player);
-  const nation = player.citizenship[0] || '';
-  /* Players with a published in-game card show its six ratings. Everyone else
-   * shows profile data — the agency publishes no ratings, and putting invented
-   * numbers against a real player is not on the table. */
-  const stats = rating
-    ? [
-        ['PAC', rating.stats.PAC], ['SHO', rating.stats.SHO], ['PAS', rating.stats.PAS],
-        ['DRI', rating.stats.DRI], ['DEF', rating.stats.DEF], ['PHY', rating.stats.PHY],
-      ]
-    : [
-        ['AGE', age ?? '–'],
-        ['HGT', heightCm(player.height) || '–'],
-        ['FOOT', footCode(player.foot) || '–'],
-        ['NAT', COUNTRY_CODE[nation] || nation.slice(0, 3).toUpperCase() || '–'],
-        ['JND', year(player.joined) || '–'],
-        ['EXP', year(player.contractExpires) || '–'],
-      ];
-
-  const headline = rating ? rating.overall : age ?? '–';
-  const headlineLabel = rating ? 'ovr' : 'age';
-  const shownCode = rating?.position || code;
-
-  return `<article class="player-card${rating ? ' player-card--rated' : ''}" style="--i:${index}"
+export function playerCard(player, index = 0) {
+  const meta = [player.position.detail, player.club].filter(Boolean);
+  return `<article class="player-card" style="--i:${index}"
   data-player
   data-position="${attr(player.position.group)}"
   data-nationality="${attr(player.citizenship.join('|'))}"
   data-name="${attr(player.name.toLowerCase())}"
   data-club="${attr((player.club || '').toLowerCase())}">
   <a class="player-card__link" href="${attr(player.url)}">
-    <span class="player-card__shield">
-      <span class="player-card__ident">
-        <span class="player-card__age">${esc(headline)}<em>${headlineLabel}</em></span>
-        <span class="player-card__pos">${esc(shownCode)}</span>
-        <span class="player-card__nat">${esc(COUNTRY_CODE[nation] || nation)}</span>
-      </span>
-      <span class="player-card__media">
-        <img src="${attr(player.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
-      </span>
-      <span class="player-card__name">${esc(player.name)}</span>
-      <span class="player-card__stats">
-        ${stats
-          .map(([label, value]) => `<span class="player-card__stat"><b>${esc(value)}</b><i>${label}</i></span>`)
-          .join('')}
-      </span>
-      ${rating?.card ? `<span class="player-card__flair">${esc(rating.card)}</span>` : ''}
-      ${player.club ? `<span class="player-card__club">${esc(player.club)}</span>` : ''}
+    <span class="player-card__media">
+      <img src="${attr(player.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
+      <span class="player-card__glow" aria-hidden="true"></span>
+    </span>
+    <span class="player-card__badge">${esc(player.position.group)}</span>
+    <span class="player-card__body">
+      <span class="player-card__name"><em>${esc(player.firstName)}</em><strong>${esc(player.lastName)}</strong></span>
+      ${meta.length ? `<span class="player-card__meta">${meta.map((m) => `<span>${esc(m)}</span>`).join('')}</span>` : ''}
+      <span class="player-card__cta">Profile ${ICONS.arrow}</span>
     </span>
   </a>
 </article>`;
