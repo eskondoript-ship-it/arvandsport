@@ -5,6 +5,7 @@ import { initHeader, syncChrome } from './header.js';
 import { initRoster, initNewsSearch } from './roster.js';
 import { initForms } from './forms.js';
 import { initEmbeds } from './embed.js';
+import { initWire } from './wire.js';
 import { initCursor, destroyCursor } from './cursor.js';
 import { initTransitions } from './transitions.js';
 
@@ -13,6 +14,7 @@ function initPage(container = document) {
   initNewsSearch(container);
   initForms(container);
   initEmbeds(container);
+  initWire(container);
   initMotion(container);
 }
 

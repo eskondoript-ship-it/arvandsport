@@ -2,13 +2,17 @@
   "name": "arvandsport",
   "version": "1.0.0",
   "private": true,
-  "description": "arvandsport.com — animated static rebuild of the Arvand Sport football agency site",
+  "description": "arvandsport.com \u2014 animated static rebuild of the Arvand Sport football agency site",
   "type": "module",
   "scripts": {
     "build": "node tools/build.mjs",
     "extract": "node tools/extract.mjs",
     "serve": "node tools/serve.mjs",
-    "dev": "npm run build && npm run serve"
+    "dev": "npm run build && npm run serve",
+    "news": "node tools/fetch-news.mjs",
+    "test": "node tools/__tests__/feed-parse.test.mjs"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

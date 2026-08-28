@@ -1,0 +1,15 @@
+{
+  "_note": "Sources for the live wire. Only headline, link, timestamp and the feed's own short summary are shown, and every item links back to the publisher — this aggregates, it does not republish. Add or remove sources here; the fetcher skips any feed that fails so a dead source never breaks a build.",
+  "maxItems": 24,
+  "maxAgeHours": 72,
+  "sources": [
+    { "name": "Tasnim", "region": "iran", "url": "https://www.tasnimnews.com/en/rss/feed/0/8/0/sports" },
+    { "name": "Mehr News", "region": "iran", "url": "https://en.mehrnews.com/rss/tp/13" },
+    { "name": "Tehran Times", "region": "iran", "url": "https://www.tehrantimes.com/rss/tp/25" },
+    { "name": "IRNA", "region": "iran", "url": "https://en.irna.ir/rss/tp/14" },
+    { "name": "BBC Sport", "region": "world", "url": "https://feeds.bbci.co.uk/sport/football/rss.xml" },
+    { "name": "Sky Sports", "region": "world", "url": "https://www.skysports.com/rss/12040" },
+    { "name": "ESPN", "region": "world", "url": "https://www.espn.com/espn/rss/soccer/news" },
+    { "name": "Goal", "region": "world", "url": "https://www.goal.com/feeds/en/news" }
+  ]
+}

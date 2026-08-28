@@ -1,13 +1,19 @@
-# Publishes dist/ to GitHub Pages.
+# Builds the site and publishes dist/ to GitHub Pages.
 #
-# Set Settings → Pages → Source to "GitHub Actions" for this to take over.
-# While the source is a branch, Pages serves the repository root through Jekyll
-# and renders README.md instead of the site.
+# Runs on push, and on a schedule so the live news wire stays current.
+#
+# A note on the schedule: cron here is best-effort. GitHub does not guarantee
+# scheduled runs fire on time and commonly delays them under load, so treat
+# */10 as "roughly every ten minutes", not a hard interval. The page always
+# shows when it was last refreshed, so a late run is visible rather than
+# silently stale.
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main, claude/arvandsport-animated-rebuild-863sjk]
+  schedule:
+    - cron: '*/10 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +33,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      # The build has no dependencies; it only reads content/ and src/.
+      # Pull the latest headlines. The fetcher skips any source that fails and
+      # leaves the committed feed in place if every source is unreachable, so a
+      # bad feed can never fail the deploy.
+      - run: npm run news
+        continue-on-error: true
+      # The build itself has no dependencies; it only reads content/ and src/.
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

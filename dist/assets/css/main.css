@@ -1094,3 +1094,42 @@ a.office__row:hover { color: var(--white); }
   .strike__pin { --fig-size: 46vw; --fig-left: 0rem; }
   .strike__figure { opacity: .9; }
 }
+
+/* ------------------------------------------------------------- live wire */
+.wire__bar {
+  display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;
+  justify-content: space-between; margin-bottom: clamp(1.2rem, 3vw, 2rem);
+}
+.wire__updated { font-size: var(--step--1); color: var(--fg-faint); }
+.wire__updated time { color: var(--accent); }
+.wire__empty { color: var(--fg-muted); }
+
+.wire__list { list-style: none; padding: 0; display: grid; gap: .5rem; }
+.wire__item[hidden] { display: none; }
+.wire__item a {
+  position: relative; display: grid; gap: .35rem;
+  padding: clamp(.85rem, 2vw, 1.15rem) clamp(2.6rem, 5vw, 3.4rem) clamp(.85rem, 2vw, 1.15rem) clamp(.9rem, 2vw, 1.3rem);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color .35s var(--ease-out), background .35s var(--ease-out), transform .35s var(--ease-out);
+}
+.wire__item a:hover { border-color: var(--line-strong); background: var(--surface-2); transform: translateX(4px); }
+.wire__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .72rem; color: var(--fg-faint); }
+.wire__source {
+  padding: .1rem .45rem; border-radius: 3px;
+  background: rgba(5, 237, 255, .12); border: 1px solid var(--line);
+  color: var(--accent); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.wire__tag {
+  padding: .1rem .45rem; border-radius: 3px; background: rgba(255, 255, 255, .08);
+  font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.wire__title { font-size: var(--step-0); font-weight: 700; line-height: 1.35; }
+.wire__summary { font-size: var(--step--1); color: var(--fg-muted); }
+.wire__go {
+  position: absolute; top: 50%; right: clamp(.9rem, 2vw, 1.3rem); translate: 0 -50%;
+  color: var(--accent); font-size: 1.05rem; opacity: 0;
+  transition: opacity .3s var(--ease-out), translate .3s var(--ease-out);
+}
+.wire__item a:hover .wire__go { opacity: 1; translate: 4px -50%; }
+@media (hover: none) { .wire__go { opacity: .7; } }

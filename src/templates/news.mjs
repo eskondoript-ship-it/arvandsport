@@ -1,7 +1,8 @@
 import { layout, esc, attr, ICONS } from './layout.mjs';
 import { sectionHead, articleCard, formatDate, isoDate } from './partials.mjs';
+import { wire } from './wire.mjs';
 
-export function renderNewsIndex({ site, news }) {
+export function renderNewsIndex({ site, news, feed }) {
   const [lead, ...rest] = news;
   const content = `
 <section class="page-hero page-hero--news">
@@ -24,7 +25,8 @@ export function renderNewsIndex({ site, news }) {
     </div>
     <p class="roster__empty" data-news-empty hidden>No articles match that search.</p>
   </div>
-</section>`;
+</section>
+${wire(feed)}`;
 
   return layout({
     site,

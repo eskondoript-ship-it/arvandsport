@@ -15,6 +15,7 @@ const DIST = join(ROOT, 'dist');
 const site = JSON.parse(await readFile(join(ROOT, 'content/site.json'), 'utf8'));
 const players = JSON.parse(await readFile(join(ROOT, 'content/players.json'), 'utf8'));
 const news = JSON.parse(await readFile(join(ROOT, 'content/news.json'), 'utf8'));
+const feed = JSON.parse(await readFile(join(ROOT, 'content/feed.json'), 'utf8'));
 
 const { renderHome } = await import('../src/templates/home.mjs');
 const { renderPlayerIndex, renderPlayer } = await import('../src/templates/players.mjs');
@@ -24,7 +25,7 @@ const { renderArchive } = await import('../src/templates/archive.mjs');
 const { renderNotFound } = await import('../src/templates/notfound.mjs');
 const { renderRedirect } = await import('../src/templates/redirect.mjs');
 
-const ctx = { site, players, news };
+const ctx = { site, players, news, feed };
 
 /* --------------------------------------------------------------- helpers */
 

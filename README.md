@@ -69,6 +69,38 @@ Imagery — logo, favicon, hero, player cards, service icons, partner logos, tea
 and client portraits, article images — is downloaded from `wp-content/uploads`
 into `static/assets/img/`.
 
+## Live news wire
+
+`/news/` carries an aggregated wire of football headlines — Iranian and
+worldwide — below the agency's own articles.
+
+* `content/feeds.json` lists the sources and the caps (item count, max age).
+* `npm run news` (`tools/fetch-news.mjs`) fetches them, parses RSS and Atom,
+  de-duplicates by link, sorts newest first and writes `content/feed.json`.
+* The Pages workflow runs it on a `*/10` cron before each build.
+
+Two things it deliberately does not do. It **aggregates rather than
+republishes**: each item keeps only its headline, the feed's own one-line
+summary trimmed to 180 characters, its timestamp and a link out to the
+publisher — no article text is copied. And it **never fails a build**: each
+source is fetched independently with a timeout, failures are logged and
+skipped, and if every source is unreachable the committed feed is left in
+place rather than replaced with an empty one.
+
+Caveats worth knowing:
+
+* GitHub does not guarantee cron punctuality and routinely delays scheduled
+  runs under load, so `*/10` means "roughly every ten minutes". The wire shows
+  its own last-updated time, so a late run is visible rather than silently
+  stale.
+* The source URLs are the publishers' documented feeds but could not be
+  reached from the environment this was built in. The first scheduled run
+  prints a per-source line in the Actions log; anything that 404s or blocks
+  the bot is a one-line edit in `content/feeds.json`.
+
+`npm test` covers the parser against RSS and Atom fixtures — CDATA, entities,
+namespaced tags, Atom's link-as-attribute, missing dates and summary trimming.
+
 ## Forms
 
 Both forms post to the **existing WordPress handler**, unchanged:
