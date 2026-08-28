@@ -29,7 +29,26 @@ export const ICONS = {
   pin: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a7 7 0 0 1 7 7c0 5.06-6.3 12.4-6.57 12.71a.57.57 0 0 1-.86 0C11.3 21.4 5 14.06 5 9a7 7 0 0 1 7-7Zm0 9.5A2.5 2.5 0 1 0 12 6.5a2.5 2.5 0 0 0 0 5Z"/></svg>',
   arrow: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg>',
   search: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M10.5 3a7.5 7.5 0 0 1 5.92 12.13l4.72 4.73-1.28 1.28-4.73-4.72A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-1-13h2v3h-2V2Zm0 17h2v3h-2v-3ZM2 11h3v2H2v-2Zm17 0h3v2h-3v-2ZM4.22 5.64l1.42-1.42 2.12 2.12-1.41 1.42-2.13-2.12Zm12.02 12.02 1.42-1.41 2.12 2.12-1.41 1.41-2.13-2.12Zm2.12-13.44 1.42 1.42-2.12 2.12-1.42-1.41 2.12-2.13ZM5.64 19.78l-1.42-1.42 2.12-2.12 1.42 1.41-2.12 2.13Z"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12.7 2.05a1 1 0 0 1 .26 1.3 6.5 6.5 0 0 0 8.69 8.69 1 1 0 0 1 1.36 1.27A9.5 9.5 0 1 1 11.4 1.79a1 1 0 0 1 1.3.26Zm-2.3 2.2a7.5 7.5 0 1 0 9.35 9.35A8.5 8.5 0 0 1 10.4 4.25Z"/></svg>',
 };
+
+/* Applied before first paint so a stored choice never flashes the other
+ * theme. Kept inline and tiny for that reason — a deferred module would run
+ * after the first frame. With no stored choice nothing is set, and the
+ * prefers-color-scheme block in the stylesheet decides. */
+export const THEME_BOOT =
+  `try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}`;
+
+export function themeToggle() {
+  return `<button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+  <span class="theme-toggle__icons" aria-hidden="true">
+    <span class="theme-toggle__sun">${ICONS.sun}</span>
+    <span class="theme-toggle__moon">${ICONS.moon}</span>
+  </span>
+  <span class="u-sr-only" data-theme-label>Switch to light theme</span>
+</button>`;
+}
 
 function head({ site, title, description, canonicalPath, image, jsonLd, bodyClass }) {
   const origin = site.brand.url;
@@ -57,7 +76,7 @@ function head({ site, title, description, canonicalPath, image, jsonLd, bodyClas
 <link rel="preload" href="/assets/fonts/roboto-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/main.css">
 ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ''}
-<script>document.documentElement.classList.replace('no-js','js');</script>
+<script>document.documentElement.classList.replace('no-js','js');${THEME_BOOT}</script>
 </head>
 <body class="${attr(bodyClass || '')}" data-barba="wrapper">`;
 }
@@ -86,6 +105,7 @@ function header(site, current) {
     <nav class="nav" aria-label="Primary">
       <ul class="nav__list">${links}</ul>
     </nav>
+    ${themeToggle()}
     <a class="btn btn--solid btn--sm site-header__cta${isActive(CTA.href)}" href="${attr(CTA.href)}"><span>${esc(CTA.label)}</span>${ICONS.arrow}</a>
     <button class="burger" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">
       <span class="burger__box"><span class="burger__bar"></span><span class="burger__bar"></span><span class="burger__bar"></span></span>

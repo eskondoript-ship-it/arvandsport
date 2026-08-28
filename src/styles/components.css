@@ -118,11 +118,17 @@
 .player-card__link {
   position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
+  background: var(--card-bg);
   transition: border-color .45s var(--ease-out), transform .45s var(--ease-out), box-shadow .45s var(--ease-out);
 }
 .player-card__link:hover { border-color: var(--line-strong); transform: translateY(-6px); box-shadow: var(--shadow); }
-.player-card__media { position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden; }
+.player-card__media {
+  position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden;
+  /* The player renders are cutouts drawn for a dark card — their position
+     code and crest are white, and go invisible on a pale ground. The image
+     well stays dark in both themes; only the caption below follows it. */
+  background: var(--navy-900);
+}
 .player-card__media img {
   display: block;
   width: 100%; height: 100%; object-fit: cover; object-position: top center;
@@ -132,7 +138,7 @@
 .player-card__link:hover .player-card__media img { transform: scale(1.06); filter: none; }
 .player-card__glow {
   position: absolute; inset: auto 0 0; height: 65%;
-  background: linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+  background: var(--scrim);
 }
 /* The player art already carries a shield frame with the position
  * abbreviation top-left and the club crest top-right, so the group badge
@@ -140,7 +146,7 @@
 .player-card__badge {
   position: absolute; left: .8rem; bottom: .7rem; z-index: 2;
   padding: .3rem .7rem; border-radius: 999px;
-  background: rgba(11, 21, 35, .72); backdrop-filter: blur(6px);
+  background: var(--chip-bg); backdrop-filter: blur(6px);
   border: 1px solid var(--line-strong);
   font-size: .64rem; line-height: 1.25; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   color: var(--accent);
@@ -370,3 +376,30 @@ fieldset.field { border: 0; padding: 0; }
   color: var(--fg); font-size: var(--step--1); font-weight: 600; text-align: left;
 }
 .embed__frame { width: 100%; aspect-ratio: 16 / 9; margin-top: 1.1rem; border: 0; border-radius: var(--radius); }
+
+/* --------------------------------------------------------- theme toggle */
+.theme-toggle {
+  flex: none; position: relative; display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg-muted);
+  transition: color .35s var(--ease-out), border-color .35s var(--ease-out), background .35s var(--ease-out);
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--line-strong); background: var(--surface-2); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* Both icons are stacked in one cell and cross-faded, so the control keeps a
+   fixed size and the swap has somewhere to animate from. */
+.theme-toggle__icons { display: grid; place-items: center; width: 19px; height: 19px; }
+.theme-toggle__icons > span { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity .3s var(--ease-out), transform .4s var(--ease-out); }
+.theme-toggle svg { width: 19px; height: 19px; display: block; }
+/* Dark ground: offer the sun. Light ground: offer the moon. */
+.theme-toggle__sun { opacity: 1; transform: none; }
+.theme-toggle__moon { opacity: 0; transform: rotate(-70deg) scale(.5); }
+:root[data-theme="light"] .theme-toggle__sun { opacity: 0; transform: rotate(70deg) scale(.5); }
+:root[data-theme="light"] .theme-toggle__moon { opacity: 1; transform: none; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .theme-toggle__sun { opacity: 0; transform: rotate(70deg) scale(.5); }
+  :root:not([data-theme="dark"]) .theme-toggle__moon { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__icons > span { transition-duration: .01ms; }
+}

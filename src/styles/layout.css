@@ -29,7 +29,7 @@
   border-bottom: 1px solid transparent;
 }
 .site-header.is-stuck {
-  background: color-mix(in srgb, var(--navy-900) 82%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(16px) saturate(150%);
   border-bottom-color: var(--line);
 }
@@ -62,7 +62,7 @@
   background: var(--accent); transform: scaleX(0); transform-origin: right;
   transition: transform .4s var(--ease-out);
 }
-.nav__link:hover, .nav__link.is-current { color: var(--white); }
+.nav__link:hover, .nav__link.is-current { color: var(--fg); }
 .nav__link:hover::after, .nav__link.is-current::after { transform: scaleX(1); transform-origin: left; }
 
 .site-header__cta { flex: none; }
@@ -78,8 +78,16 @@
 .burger[aria-expanded="true"] .burger__bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 @media (max-width: 1024px) {
-  .nav, .site-header__cta { display: none; }
-  .burger { display: block; }
+  /* .site-header__cta alone never won this: the element also carries .btn,
+     which sets display:inline-flex from components.css — same specificity,
+     later in the sheet. The CTA was still laid out on mobile and only fit
+     by a few pixels; adding the theme toggle pushed the burger off-screen.
+     Scoping to the header outranks .btn and actually hides it. */
+  .nav, .site-header .site-header__cta { display: none; }
+  .burger { display: block; margin-inline-start: 0; }
+  /* The toggle stays out on small screens — it is the only chrome control
+     besides the menu, and burying it in the menu hides it behind a tap. */
+  .theme-toggle { margin-inline-start: auto; }
 }
 
 /* --------------------------------------------------------- mobile menu */
@@ -87,7 +95,7 @@
   position: fixed; inset: 0; z-index: 110;
   display: flex; flex-direction: column; justify-content: center; gap: 2rem;
   padding: calc(var(--header-h) + 2rem) var(--gutter) 2.5rem;
-  background: linear-gradient(170deg, var(--navy-800), var(--navy-900));
+  background: var(--menu-bg);
   clip-path: circle(0% at calc(100% - 46px) 38px);
   transition: clip-path .7s var(--ease-in-out);
 }
@@ -149,3 +157,61 @@
 }
 .site-footer__legal a { color: var(--fg-muted); }
 .site-footer__legal a:hover { color: var(--accent); }
+
+/* ------------------------------------------------- surfaces over dark art
+   Some sections sit on the agency's own dark photography, which does not
+   change with the theme. Left to inherit, light mode painted navy text onto
+   the stadium shot and the hero became unreadable. These keep the dark set
+   locally in both themes; everything below them still follows the theme.
+
+   The header only needs it while it is transparent over the hero — once it
+   is stuck it paints --header-bg and follows the theme like everything else. */
+.hero,
+.site-header:not(.is-stuck) {
+  --fg:          #eaf4fb;
+  --fg-muted:    rgba(234, 244, 251, .68);
+  --fg-faint:    rgba(234, 244, 251, .42);
+  --accent:      var(--cyan-400);
+  --line:        rgba(236, 252, 255, .14);
+  --line-strong: rgba(5, 237, 255, .45);
+  --surface:     rgba(255, 255, 255, .04);
+  --surface-2:   rgba(255, 255, 255, .07);
+  color: var(--fg);
+}
+
+/* The paper band exists to break a run of dark sections. In light mode it
+   would be paper on paper and the rhythm would vanish, so it inverts and
+   becomes the dark band instead — same job, opposite direction. */
+:root[data-theme="light"] .section--paper,
+:root[data-theme="light"] .section--paper .btn--solid {
+  --fg:          #eaf4fb;
+  --fg-muted:    rgba(234, 244, 251, .68);
+  --fg-faint:    rgba(234, 244, 251, .42);
+  --line:        rgba(236, 252, 255, .14);
+  --line-strong: rgba(5, 237, 255, .45);
+  --accent:      var(--cyan-400);
+  --surface:     rgba(255, 255, 255, .04);
+  --surface-2:   rgba(255, 255, 255, .07);
+}
+:root[data-theme="light"] .section--paper { background: var(--navy-900); color: var(--fg); }
+:root[data-theme="light"] .section--paper .btn--solid { --btn-bg: var(--accent); --btn-fg: var(--navy-900); }
+:root[data-theme="light"] .section--paper .btn--solid::before { background: linear-gradient(120deg, var(--white), var(--ice-100)); }
+:root[data-theme="light"] .section--paper .btn--solid:hover { color: var(--navy-900); }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .section--paper,
+  :root:not([data-theme="dark"]) .section--paper .btn--solid {
+    --fg:          #eaf4fb;
+    --fg-muted:    rgba(234, 244, 251, .68);
+    --fg-faint:    rgba(234, 244, 251, .42);
+    --line:        rgba(236, 252, 255, .14);
+    --line-strong: rgba(5, 237, 255, .45);
+    --accent:      var(--cyan-400);
+    --surface:     rgba(255, 255, 255, .04);
+    --surface-2:   rgba(255, 255, 255, .07);
+  }
+  :root:not([data-theme="dark"]) .section--paper { background: var(--navy-900); color: var(--fg); }
+  :root:not([data-theme="dark"]) .section--paper .btn--solid { --btn-bg: var(--accent); --btn-fg: var(--navy-900); }
+  :root:not([data-theme="dark"]) .section--paper .btn--solid::before { background: linear-gradient(120deg, var(--white), var(--ice-100)); }
+  :root:not([data-theme="dark"]) .section--paper .btn--solid:hover { color: var(--navy-900); }
+}

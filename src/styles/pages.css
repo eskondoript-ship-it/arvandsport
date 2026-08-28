@@ -206,7 +206,7 @@ a.office__row:hover { color: var(--white); }
  * no-JS / reduced-motion rendering is a composed still; motion.js sets the
  * start states and scrolls through them.
  */
-.strike { position: relative; background: linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900)); }
+.strike { position: relative; background: var(--scene-bg); }
 .strike__pin {
   /* The ball's rest position is derived from these, so it sits on the boot.
      The boot lands at 65% across and 12% down the figure's box (see
@@ -217,7 +217,10 @@ a.office__row:hover { color: var(--white); }
   --ball-size: clamp(36px, 4.4vw, 66px);
 
   position: relative; overflow: hidden;
-  min-height: min(100svh, 780px);
+  /* Fills the viewport while pinned. Capping this below 100svh left a strip
+     of the next section visible under a pinned scene, and made the scene
+     scroll away through its own leftover height once the pin released. */
+  min-height: 100svh;
   display: grid; align-items: end;
   padding: calc(var(--header-h) + 2rem) var(--gutter) clamp(2rem, 6vh, 4rem);
 }
@@ -283,7 +286,7 @@ a.office__row:hover { color: var(--white); }
   position: relative; z-index: 4; justify-self: end; max-width: 27rem;
   padding: clamp(1.2rem, 3vw, 2rem);
   border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(14px);
 }
 .strike__kicker { font-size: var(--step--1); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
@@ -388,7 +391,7 @@ a.office__row:hover { color: var(--white); }
   position: absolute; inset: auto 0 0 0; z-index: 3;
   overflow: hidden; padding-block: .55rem;
   border-block: 1px solid var(--line);
-  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
 }
 .ticker__track {
@@ -497,7 +500,7 @@ a.office__row:hover { color: var(--white); }
 .radar__ring, .radar__spoke { fill: none; stroke: var(--line); stroke-width: 1; }
 .radar__ring { fill: rgba(255, 255, 255, .012); }
 .radar__shape {
-  fill: rgba(5, 237, 255, .22);
+  fill: var(--accent-wash);
   stroke: var(--accent); stroke-width: 2; stroke-linejoin: round;
   filter: drop-shadow(0 0 10px rgba(5, 237, 255, .45));
   transform-origin: 50% 50%;
@@ -520,7 +523,7 @@ a.office__row:hover { color: var(--white); }
 .deal__row dt { font-size: var(--step--1); color: var(--fg-faint); }
 .deal__row dd { margin: 0; font-weight: 600; text-align: end; }
 .deal__bar { margin-top: 1.3rem; }
-.deal__track { position: relative; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.deal__track { position: relative; height: 6px; border-radius: 999px; background: var(--shade); overflow: hidden; }
 .deal__fill {
   display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit;
   background: linear-gradient(90deg, var(--accent-2), var(--accent));

@@ -54,6 +54,7 @@ function strikeScene(root) {
   const flash = $('[data-strike-flash]', section);
   const copy = $('[data-strike-copy]', section);
   const title = $('[data-strike-title]', section);
+  const hint = $('[data-strike-hint]', section);
   const speedLines = $$('[data-strike-speed] span', section);
   const pitchLines = $$('[data-strike-pitch] [data-draw]', section);
   const stats = $$('[data-strike-stats] [data-scrub-counter]', section);
@@ -93,9 +94,12 @@ function strikeScene(root) {
     scrollTrigger: {
       trigger: section,
       start: 'top top',
-      end: '+=320%',
+      end: '+=240%',
       pin: pin,
-      scrub: 0.6,
+      /* Smoothing, in seconds of catch-up. At 0.6 the sequence visibly
+       * trailed the wheel and took well over a second to settle once the
+       * visitor stopped — which read as the scene lagging behind them. */
+      scrub: 0.35,
       anticipatePin: 1,
       invalidateOnRefresh: true,
     },
@@ -127,6 +131,11 @@ function strikeScene(root) {
     .to(flash, { opacity: 1, duration: 0.02 }, 0.43)
     .to(flash, { opacity: 0, duration: 0.06 }, 0.45);
 
+  /* The prompt to scroll has done its job by the time the boot connects, and
+   * still reading "scroll to take the shot" over the finished goal was the
+   * scene looking stuck. */
+  if (hint) timeline.to(hint, { opacity: 0, duration: 0.06 }, 0.36);
+
   /* Stage 4 — the strike. x is linear, y is two eased halves, which gives a
    * real parabola and stays correct at any viewport size. */
   timeline
@@ -149,8 +158,14 @@ function strikeScene(root) {
     .to(shock, { scale: 1, opacity: 0.7, duration: 0.08, ease: 'power2.out' }, 0.72)
     .to(shock, { opacity: 0, duration: 0.1 }, 0.8);
 
-  /* Stage 6 — payoff: his real international record. */
-  timeline.to(copy, { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.84);
+  /* Stage 6 — payoff: his real international record.
+   *
+   * This lands at 0.90 rather than 1.0 on purpose. scrub trails the scroll by
+   * its smoothing time, so a timeline that finishes on the last pixel of the
+   * pin is still catching up as the pin releases — the counters finished
+   * while the scene was already sliding away. The tail leaves the payoff held
+   * on screen for a beat before the section hands over. */
+  timeline.to(copy, { opacity: 1, y: 0, duration: 0.1, ease: 'power2.out' }, 0.76);
 
   for (const el of stats) {
     const target = Number(el.dataset.scrubCounter) || 0;
@@ -160,12 +175,34 @@ function strikeScene(root) {
       value,
       {
         n: target,
-        duration: 0.14,
+        duration: 0.12,
         onUpdate: () => { el.textContent = Math.round(value.n); },
       },
-      0.86,
+      0.78,
     );
   }
+
+  /* Once the pin releases, the scene still has its own viewport-height to
+   * scroll away. Left alone that is a full screen of finished, static picture
+   * between the goal and the next section — the stretch that reads as the
+   * page having stalled. Fading it out across exactly that range turns the
+   * handover into a deliberate exit.
+   *
+   * Opacity only: the pin owns this element's transform, so animating y here
+   * would fight it. */
+  scene(
+    gsap.to(pin, {
+      opacity: 0.12,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'bottom bottom',
+        end: 'bottom top',
+        scrub: 0.3,
+        invalidateOnRefresh: true,
+      },
+    }).scrollTrigger,
+  );
 }
 
 /* ------------------------------------------------------------- hero exit */
@@ -207,7 +244,7 @@ function horizontalRail(root) {
           start: 'center center',
           end: () => `+=${distance() + wrap.offsetHeight}`,
           pin: true,
-          scrub: 0.8,
+          scrub: 0.45,
           invalidateOnRefresh: true,
         },
       }).scrollTrigger,

@@ -1,4 +1,15 @@
-/* Brand tokens taken from the live Elementor kit (elementor-kit-12). */
+/* Brand tokens taken from the live Elementor kit (elementor-kit-12).
+ *
+ * Theming works by redefining the semantic tokens only — the brand constants
+ * below never move. Components read --fg, --line, --surface and friends rather
+ * than literal colours, which is what lets a single block flip the whole site;
+ * .section--paper has always used the same trick for its light band.
+ *
+ * Three states, in the order they cascade:
+ *   :root                                  dark, the brand's default
+ *   prefers-color-scheme: light            light, unless dark was chosen
+ *   [data-theme="light" | "dark"]          an explicit choice, which wins
+ */
 :root {
   --navy-900: #0b1523;
   --navy-800: #0F1C2A;   /* e-global-color-secondary */
@@ -9,7 +20,11 @@
   --ice-100:  #ECFCFF;
   --white:    #FFFFFF;
   --ink:      #3D3D3D;
+}
 
+/* Dark — the brand's home ground. */
+:root, :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg:          var(--navy-900);
   --bg-alt:      var(--navy-800);
   --surface:     rgba(255, 255, 255, .04);
@@ -22,6 +37,87 @@
   --accent:      var(--cyan-400);
   --accent-2:    var(--blue-500);
 
+  /* Surfaces that carried literal colours before theming. */
+  --card-bg:     linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
+  --scene-bg:    linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900));
+  --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+  --chip-bg:     rgba(11, 21, 35, .72);
+  --header-bg:   color-mix(in srgb, var(--navy-900) 82%, transparent);
+  --shade:       rgba(255, 255, 255, .08);
+  --accent-wash: rgba(5, 237, 255, .22);
+  --accent-soft: rgba(5, 237, 255, .18);
+  --hero-tint:   rgba(11, 21, 35, .35);
+  --menu-bg:     linear-gradient(170deg, var(--navy-800), var(--navy-900));
+
+  --shadow: 0 24px 60px -28px rgba(0, 0, 0, .85);
+}
+
+/* Light — the paper band's palette taken site-wide. The brand cyan is
+ * illegible on a pale ground, so the accent steps down to the deep blue the
+ * paper band already uses; everything else is the dark set inverted. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg:          var(--paper);
+    --bg-alt:      #eae4d6;
+    --surface:     rgba(11, 21, 35, .04);
+    --surface-2:   rgba(11, 21, 35, .07);
+    --line:        rgba(11, 21, 35, .16);
+    --line-strong: rgba(0, 52, 88, .45);
+    --fg:          #0b1523;
+    --fg-muted:    rgba(11, 21, 35, .72);
+    --fg-faint:    rgba(11, 21, 35, .5);
+    --accent:      #00618f;
+    --accent-2:    var(--blue-500);
+
+    --card-bg:     linear-gradient(180deg, #ffffff, #efe9dc);
+    --scene-bg:    linear-gradient(180deg, var(--paper), #e7e0d0 55%, var(--paper));
+    /* Sits over the dark image well, so it does not follow the theme. */
+    --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+    --chip-bg:     rgba(255, 255, 255, .82);
+    --header-bg:   color-mix(in srgb, var(--paper) 86%, transparent);
+    --shade:       rgba(11, 21, 35, .1);
+    --accent-wash: rgba(0, 97, 143, .18);
+    --accent-soft: rgba(0, 97, 143, .16);
+    --hero-tint:   rgba(11, 21, 35, .55);
+    --menu-bg:     linear-gradient(170deg, #ffffff, var(--paper));
+
+    --shadow: 0 24px 60px -34px rgba(11, 21, 35, .45);
+  }
+}
+
+/* An explicit choice wins over the system preference, in both directions. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:          var(--paper);
+  --bg-alt:      #eae4d6;
+  --surface:     rgba(11, 21, 35, .04);
+  --surface-2:   rgba(11, 21, 35, .07);
+  --line:        rgba(11, 21, 35, .16);
+  --line-strong: rgba(0, 52, 88, .45);
+  --fg:          #0b1523;
+  --fg-muted:    rgba(11, 21, 35, .72);
+  --fg-faint:    rgba(11, 21, 35, .5);
+  --accent:      #00618f;
+  --accent-2:    var(--blue-500);
+
+  --card-bg:     linear-gradient(180deg, #ffffff, #efe9dc);
+  --scene-bg:    linear-gradient(180deg, var(--paper), #e7e0d0 55%, var(--paper));
+  /* Sits over the dark image well, so it does not follow the theme. */
+  --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+  --chip-bg:     rgba(255, 255, 255, .82);
+  --header-bg:   color-mix(in srgb, var(--paper) 86%, transparent);
+  --shade:       rgba(11, 21, 35, .1);
+  --accent-wash: rgba(0, 97, 143, .18);
+  --accent-soft: rgba(0, 97, 143, .16);
+  --hero-tint:   rgba(11, 21, 35, .55);
+  --menu-bg:     linear-gradient(170deg, #ffffff, var(--paper));
+
+  --shadow: 0 24px 60px -34px rgba(11, 21, 35, .45);
+}
+
+/* Shared across themes: type, rhythm, geometry, easing. */
+:root {
   --font: "Roboto", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 
   /* Paper band. Sections can flip to this ground by redefining the colour
@@ -51,7 +147,6 @@
   --ease-in-out: cubic-bezier(.65, 0, .35, 1);
   --dur: .5s;
 
-  --shadow: 0 24px 60px -28px rgba(0, 0, 0, .85);
   --header-h: 78px;
 }
 

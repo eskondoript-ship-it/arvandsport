@@ -1,6 +1,17 @@
 /* ===== tokens.css ===== */
 
-/* Brand tokens taken from the live Elementor kit (elementor-kit-12). */
+/* Brand tokens taken from the live Elementor kit (elementor-kit-12).
+ *
+ * Theming works by redefining the semantic tokens only — the brand constants
+ * below never move. Components read --fg, --line, --surface and friends rather
+ * than literal colours, which is what lets a single block flip the whole site;
+ * .section--paper has always used the same trick for its light band.
+ *
+ * Three states, in the order they cascade:
+ *   :root                                  dark, the brand's default
+ *   prefers-color-scheme: light            light, unless dark was chosen
+ *   [data-theme="light" | "dark"]          an explicit choice, which wins
+ */
 :root {
   --navy-900: #0b1523;
   --navy-800: #0F1C2A;   /* e-global-color-secondary */
@@ -11,7 +22,11 @@
   --ice-100:  #ECFCFF;
   --white:    #FFFFFF;
   --ink:      #3D3D3D;
+}
 
+/* Dark — the brand's home ground. */
+:root, :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg:          var(--navy-900);
   --bg-alt:      var(--navy-800);
   --surface:     rgba(255, 255, 255, .04);
@@ -24,6 +39,87 @@
   --accent:      var(--cyan-400);
   --accent-2:    var(--blue-500);
 
+  /* Surfaces that carried literal colours before theming. */
+  --card-bg:     linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
+  --scene-bg:    linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900));
+  --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+  --chip-bg:     rgba(11, 21, 35, .72);
+  --header-bg:   color-mix(in srgb, var(--navy-900) 82%, transparent);
+  --shade:       rgba(255, 255, 255, .08);
+  --accent-wash: rgba(5, 237, 255, .22);
+  --accent-soft: rgba(5, 237, 255, .18);
+  --hero-tint:   rgba(11, 21, 35, .35);
+  --menu-bg:     linear-gradient(170deg, var(--navy-800), var(--navy-900));
+
+  --shadow: 0 24px 60px -28px rgba(0, 0, 0, .85);
+}
+
+/* Light — the paper band's palette taken site-wide. The brand cyan is
+ * illegible on a pale ground, so the accent steps down to the deep blue the
+ * paper band already uses; everything else is the dark set inverted. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg:          var(--paper);
+    --bg-alt:      #eae4d6;
+    --surface:     rgba(11, 21, 35, .04);
+    --surface-2:   rgba(11, 21, 35, .07);
+    --line:        rgba(11, 21, 35, .16);
+    --line-strong: rgba(0, 52, 88, .45);
+    --fg:          #0b1523;
+    --fg-muted:    rgba(11, 21, 35, .72);
+    --fg-faint:    rgba(11, 21, 35, .5);
+    --accent:      #00618f;
+    --accent-2:    var(--blue-500);
+
+    --card-bg:     linear-gradient(180deg, #ffffff, #efe9dc);
+    --scene-bg:    linear-gradient(180deg, var(--paper), #e7e0d0 55%, var(--paper));
+    /* Sits over the dark image well, so it does not follow the theme. */
+    --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+    --chip-bg:     rgba(255, 255, 255, .82);
+    --header-bg:   color-mix(in srgb, var(--paper) 86%, transparent);
+    --shade:       rgba(11, 21, 35, .1);
+    --accent-wash: rgba(0, 97, 143, .18);
+    --accent-soft: rgba(0, 97, 143, .16);
+    --hero-tint:   rgba(11, 21, 35, .55);
+    --menu-bg:     linear-gradient(170deg, #ffffff, var(--paper));
+
+    --shadow: 0 24px 60px -34px rgba(11, 21, 35, .45);
+  }
+}
+
+/* An explicit choice wins over the system preference, in both directions. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:          var(--paper);
+  --bg-alt:      #eae4d6;
+  --surface:     rgba(11, 21, 35, .04);
+  --surface-2:   rgba(11, 21, 35, .07);
+  --line:        rgba(11, 21, 35, .16);
+  --line-strong: rgba(0, 52, 88, .45);
+  --fg:          #0b1523;
+  --fg-muted:    rgba(11, 21, 35, .72);
+  --fg-faint:    rgba(11, 21, 35, .5);
+  --accent:      #00618f;
+  --accent-2:    var(--blue-500);
+
+  --card-bg:     linear-gradient(180deg, #ffffff, #efe9dc);
+  --scene-bg:    linear-gradient(180deg, var(--paper), #e7e0d0 55%, var(--paper));
+  /* Sits over the dark image well, so it does not follow the theme. */
+  --scrim:       linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+  --chip-bg:     rgba(255, 255, 255, .82);
+  --header-bg:   color-mix(in srgb, var(--paper) 86%, transparent);
+  --shade:       rgba(11, 21, 35, .1);
+  --accent-wash: rgba(0, 97, 143, .18);
+  --accent-soft: rgba(0, 97, 143, .16);
+  --hero-tint:   rgba(11, 21, 35, .55);
+  --menu-bg:     linear-gradient(170deg, #ffffff, var(--paper));
+
+  --shadow: 0 24px 60px -34px rgba(11, 21, 35, .45);
+}
+
+/* Shared across themes: type, rhythm, geometry, easing. */
+:root {
   --font: "Roboto", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 
   /* Paper band. Sections can flip to this ground by redefining the colour
@@ -53,7 +149,6 @@
   --ease-in-out: cubic-bezier(.65, 0, .35, 1);
   --dur: .5s;
 
-  --shadow: 0 24px 60px -28px rgba(0, 0, 0, .85);
   --header-h: 78px;
 }
 
@@ -259,7 +354,7 @@ p { text-wrap: pretty; }
   border-bottom: 1px solid transparent;
 }
 .site-header.is-stuck {
-  background: color-mix(in srgb, var(--navy-900) 82%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(16px) saturate(150%);
   border-bottom-color: var(--line);
 }
@@ -292,7 +387,7 @@ p { text-wrap: pretty; }
   background: var(--accent); transform: scaleX(0); transform-origin: right;
   transition: transform .4s var(--ease-out);
 }
-.nav__link:hover, .nav__link.is-current { color: var(--white); }
+.nav__link:hover, .nav__link.is-current { color: var(--fg); }
 .nav__link:hover::after, .nav__link.is-current::after { transform: scaleX(1); transform-origin: left; }
 
 .site-header__cta { flex: none; }
@@ -308,8 +403,16 @@ p { text-wrap: pretty; }
 .burger[aria-expanded="true"] .burger__bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 @media (max-width: 1024px) {
-  .nav, .site-header__cta { display: none; }
-  .burger { display: block; }
+  /* .site-header__cta alone never won this: the element also carries .btn,
+     which sets display:inline-flex from components.css — same specificity,
+     later in the sheet. The CTA was still laid out on mobile and only fit
+     by a few pixels; adding the theme toggle pushed the burger off-screen.
+     Scoping to the header outranks .btn and actually hides it. */
+  .nav, .site-header .site-header__cta { display: none; }
+  .burger { display: block; margin-inline-start: 0; }
+  /* The toggle stays out on small screens — it is the only chrome control
+     besides the menu, and burying it in the menu hides it behind a tap. */
+  .theme-toggle { margin-inline-start: auto; }
 }
 
 /* --------------------------------------------------------- mobile menu */
@@ -317,7 +420,7 @@ p { text-wrap: pretty; }
   position: fixed; inset: 0; z-index: 110;
   display: flex; flex-direction: column; justify-content: center; gap: 2rem;
   padding: calc(var(--header-h) + 2rem) var(--gutter) 2.5rem;
-  background: linear-gradient(170deg, var(--navy-800), var(--navy-900));
+  background: var(--menu-bg);
   clip-path: circle(0% at calc(100% - 46px) 38px);
   transition: clip-path .7s var(--ease-in-out);
 }
@@ -379,6 +482,64 @@ p { text-wrap: pretty; }
 }
 .site-footer__legal a { color: var(--fg-muted); }
 .site-footer__legal a:hover { color: var(--accent); }
+
+/* ------------------------------------------------- surfaces over dark art
+   Some sections sit on the agency's own dark photography, which does not
+   change with the theme. Left to inherit, light mode painted navy text onto
+   the stadium shot and the hero became unreadable. These keep the dark set
+   locally in both themes; everything below them still follows the theme.
+
+   The header only needs it while it is transparent over the hero — once it
+   is stuck it paints --header-bg and follows the theme like everything else. */
+.hero,
+.site-header:not(.is-stuck) {
+  --fg:          #eaf4fb;
+  --fg-muted:    rgba(234, 244, 251, .68);
+  --fg-faint:    rgba(234, 244, 251, .42);
+  --accent:      var(--cyan-400);
+  --line:        rgba(236, 252, 255, .14);
+  --line-strong: rgba(5, 237, 255, .45);
+  --surface:     rgba(255, 255, 255, .04);
+  --surface-2:   rgba(255, 255, 255, .07);
+  color: var(--fg);
+}
+
+/* The paper band exists to break a run of dark sections. In light mode it
+   would be paper on paper and the rhythm would vanish, so it inverts and
+   becomes the dark band instead — same job, opposite direction. */
+:root[data-theme="light"] .section--paper,
+:root[data-theme="light"] .section--paper .btn--solid {
+  --fg:          #eaf4fb;
+  --fg-muted:    rgba(234, 244, 251, .68);
+  --fg-faint:    rgba(234, 244, 251, .42);
+  --line:        rgba(236, 252, 255, .14);
+  --line-strong: rgba(5, 237, 255, .45);
+  --accent:      var(--cyan-400);
+  --surface:     rgba(255, 255, 255, .04);
+  --surface-2:   rgba(255, 255, 255, .07);
+}
+:root[data-theme="light"] .section--paper { background: var(--navy-900); color: var(--fg); }
+:root[data-theme="light"] .section--paper .btn--solid { --btn-bg: var(--accent); --btn-fg: var(--navy-900); }
+:root[data-theme="light"] .section--paper .btn--solid::before { background: linear-gradient(120deg, var(--white), var(--ice-100)); }
+:root[data-theme="light"] .section--paper .btn--solid:hover { color: var(--navy-900); }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .section--paper,
+  :root:not([data-theme="dark"]) .section--paper .btn--solid {
+    --fg:          #eaf4fb;
+    --fg-muted:    rgba(234, 244, 251, .68);
+    --fg-faint:    rgba(234, 244, 251, .42);
+    --line:        rgba(236, 252, 255, .14);
+    --line-strong: rgba(5, 237, 255, .45);
+    --accent:      var(--cyan-400);
+    --surface:     rgba(255, 255, 255, .04);
+    --surface-2:   rgba(255, 255, 255, .07);
+  }
+  :root:not([data-theme="dark"]) .section--paper { background: var(--navy-900); color: var(--fg); }
+  :root:not([data-theme="dark"]) .section--paper .btn--solid { --btn-bg: var(--accent); --btn-fg: var(--navy-900); }
+  :root:not([data-theme="dark"]) .section--paper .btn--solid::before { background: linear-gradient(120deg, var(--white), var(--ice-100)); }
+  :root:not([data-theme="dark"]) .section--paper .btn--solid:hover { color: var(--navy-900); }
+}
 
 
 /* ===== components.css ===== */
@@ -503,11 +664,17 @@ p { text-wrap: pretty; }
 .player-card__link {
   position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
+  background: var(--card-bg);
   transition: border-color .45s var(--ease-out), transform .45s var(--ease-out), box-shadow .45s var(--ease-out);
 }
 .player-card__link:hover { border-color: var(--line-strong); transform: translateY(-6px); box-shadow: var(--shadow); }
-.player-card__media { position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden; }
+.player-card__media {
+  position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden;
+  /* The player renders are cutouts drawn for a dark card — their position
+     code and crest are white, and go invisible on a pale ground. The image
+     well stays dark in both themes; only the caption below follows it. */
+  background: var(--navy-900);
+}
 .player-card__media img {
   display: block;
   width: 100%; height: 100%; object-fit: cover; object-position: top center;
@@ -517,7 +684,7 @@ p { text-wrap: pretty; }
 .player-card__link:hover .player-card__media img { transform: scale(1.06); filter: none; }
 .player-card__glow {
   position: absolute; inset: auto 0 0; height: 65%;
-  background: linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+  background: var(--scrim);
 }
 /* The player art already carries a shield frame with the position
  * abbreviation top-left and the club crest top-right, so the group badge
@@ -525,7 +692,7 @@ p { text-wrap: pretty; }
 .player-card__badge {
   position: absolute; left: .8rem; bottom: .7rem; z-index: 2;
   padding: .3rem .7rem; border-radius: 999px;
-  background: rgba(11, 21, 35, .72); backdrop-filter: blur(6px);
+  background: var(--chip-bg); backdrop-filter: blur(6px);
   border: 1px solid var(--line-strong);
   font-size: .64rem; line-height: 1.25; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   color: var(--accent);
@@ -756,6 +923,33 @@ fieldset.field { border: 0; padding: 0; }
 }
 .embed__frame { width: 100%; aspect-ratio: 16 / 9; margin-top: 1.1rem; border: 0; border-radius: var(--radius); }
 
+/* --------------------------------------------------------- theme toggle */
+.theme-toggle {
+  flex: none; position: relative; display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg-muted);
+  transition: color .35s var(--ease-out), border-color .35s var(--ease-out), background .35s var(--ease-out);
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--line-strong); background: var(--surface-2); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* Both icons are stacked in one cell and cross-faded, so the control keeps a
+   fixed size and the swap has somewhere to animate from. */
+.theme-toggle__icons { display: grid; place-items: center; width: 19px; height: 19px; }
+.theme-toggle__icons > span { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity .3s var(--ease-out), transform .4s var(--ease-out); }
+.theme-toggle svg { width: 19px; height: 19px; display: block; }
+/* Dark ground: offer the sun. Light ground: offer the moon. */
+.theme-toggle__sun { opacity: 1; transform: none; }
+.theme-toggle__moon { opacity: 0; transform: rotate(-70deg) scale(.5); }
+:root[data-theme="light"] .theme-toggle__sun { opacity: 0; transform: rotate(70deg) scale(.5); }
+:root[data-theme="light"] .theme-toggle__moon { opacity: 1; transform: none; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .theme-toggle__sun { opacity: 0; transform: rotate(70deg) scale(.5); }
+  :root:not([data-theme="dark"]) .theme-toggle__moon { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__icons > span { transition-duration: .01ms; }
+}
+
 
 /* ===== pages.css ===== */
 
@@ -967,7 +1161,7 @@ a.office__row:hover { color: var(--white); }
  * no-JS / reduced-motion rendering is a composed still; motion.js sets the
  * start states and scrolls through them.
  */
-.strike { position: relative; background: linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900)); }
+.strike { position: relative; background: var(--scene-bg); }
 .strike__pin {
   /* The ball's rest position is derived from these, so it sits on the boot.
      The boot lands at 65% across and 12% down the figure's box (see
@@ -978,7 +1172,10 @@ a.office__row:hover { color: var(--white); }
   --ball-size: clamp(36px, 4.4vw, 66px);
 
   position: relative; overflow: hidden;
-  min-height: min(100svh, 780px);
+  /* Fills the viewport while pinned. Capping this below 100svh left a strip
+     of the next section visible under a pinned scene, and made the scene
+     scroll away through its own leftover height once the pin released. */
+  min-height: 100svh;
   display: grid; align-items: end;
   padding: calc(var(--header-h) + 2rem) var(--gutter) clamp(2rem, 6vh, 4rem);
 }
@@ -1044,7 +1241,7 @@ a.office__row:hover { color: var(--white); }
   position: relative; z-index: 4; justify-self: end; max-width: 27rem;
   padding: clamp(1.2rem, 3vw, 2rem);
   border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(14px);
 }
 .strike__kicker { font-size: var(--step--1); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
@@ -1149,7 +1346,7 @@ a.office__row:hover { color: var(--white); }
   position: absolute; inset: auto 0 0 0; z-index: 3;
   overflow: hidden; padding-block: .55rem;
   border-block: 1px solid var(--line);
-  background: color-mix(in srgb, var(--navy-900) 72%, transparent);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
 }
 .ticker__track {
@@ -1258,7 +1455,7 @@ a.office__row:hover { color: var(--white); }
 .radar__ring, .radar__spoke { fill: none; stroke: var(--line); stroke-width: 1; }
 .radar__ring { fill: rgba(255, 255, 255, .012); }
 .radar__shape {
-  fill: rgba(5, 237, 255, .22);
+  fill: var(--accent-wash);
   stroke: var(--accent); stroke-width: 2; stroke-linejoin: round;
   filter: drop-shadow(0 0 10px rgba(5, 237, 255, .45));
   transform-origin: 50% 50%;
@@ -1281,7 +1478,7 @@ a.office__row:hover { color: var(--white); }
 .deal__row dt { font-size: var(--step--1); color: var(--fg-faint); }
 .deal__row dd { margin: 0; font-weight: 600; text-align: end; }
 .deal__bar { margin-top: 1.3rem; }
-.deal__track { position: relative; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.deal__track { position: relative; height: 6px; border-radius: 999px; background: var(--shade); overflow: hidden; }
 .deal__fill {
   display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit;
   background: linear-gradient(90deg, var(--accent-2), var(--accent));

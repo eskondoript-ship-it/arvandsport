@@ -2,6 +2,7 @@
 import { ready } from './env.js';
 import { initMotion, teardownMotion, watchMotionPreference } from './motion.js';
 import { initHeader, syncChrome } from './header.js';
+import { initTheme } from './theme.js';
 import { initRoster, initNewsSearch } from './roster.js';
 import { initForms } from './forms.js';
 import { initEmbeds } from './embed.js';
@@ -22,6 +23,7 @@ function initPage(container = document) {
 
 ready(() => {
   initHeader();
+  initTheme();
   watchMotionPreference(destroyCursor);
   initCursor();
   initPage();

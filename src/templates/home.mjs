@@ -162,7 +162,7 @@ function strike(site, players) {
       }
     </div>
 
-    <p class="strike__hint" aria-hidden="true">${esc(config.caption)}</p>
+    <p class="strike__hint" data-strike-hint aria-hidden="true">${esc(config.caption)}</p>
   </div>
 </section>`;
 }
