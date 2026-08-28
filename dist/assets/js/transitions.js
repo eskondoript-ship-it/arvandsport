@@ -77,10 +77,22 @@ async function go(href, { push = true } = {}) {
     if (push) history.pushState({}, '', href);
 
     const url = new URL(href, location.href);
-    if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView();
-    else window.scrollTo(0, 0);
 
     onSwap(nextContainer, url.pathname, doc);
+
+    /* After onSwap, not before it. onSwap re-runs the motion system, which
+     * ends in ScrollTrigger.refresh() — and refresh restores the scroll
+     * position it recorded before the swap. Resetting first was undone by
+     * that, so following a player card from half-way down the roster landed
+     * you the same distance down the new page, below the profile entirely.
+     * A second pass on the next frame covers the pinned sections, whose
+     * spacers only settle once refresh has finished measuring. */
+    const land = () => {
+      if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView();
+      else window.scrollTo(0, 0);
+    };
+    land();
+    requestAnimationFrame(land);
 
     if (animate) await wipeOut(overlay).then();
   } catch {

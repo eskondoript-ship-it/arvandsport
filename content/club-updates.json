@@ -1,0 +1,76 @@
+{
+  "_note": "The club on each player's post is whatever was on arvandsport.com when tools/extract.mjs last ran, and several are years out of date. This file corrects the current club without touching content/players.json, so re-running the extractor cannot silently revert a correction, and every entry carries the source it was taken from. Remove an entry once the live site itself is updated. The agency's own records outrank anything here — overwrite freely.",
+  "_schema": {
+    "<player-slug>": {
+      "club": "current club name",
+      "since": "YYYY-MM the move completed, as published",
+      "source": "URL the club was read from",
+      "checked": "YYYY-MM-DD this entry was last verified",
+      "confidence": "high | medium — medium means one source, or sources that disagree"
+    }
+  },
+  "players": {
+    "mehdi-taremi": {
+      "club": "Olympiacos",
+      "since": "2025-08",
+      "source": "https://www.espn.com/soccer/player/_/id/219611/mehdi-taremi",
+      "checked": "2026-08-28",
+      "confidence": "high",
+      "note": "Porto to Inter on a free in 2024, Inter to Olympiacos in August 2025. The site was two moves behind."
+    },
+    "ali-alipour": {
+      "club": "Persepolis FC",
+      "since": "2024-07",
+      "source": "https://www.footballtransfers.com/en/players/ali-alipour",
+      "checked": "2026-08-28",
+      "confidence": "high",
+      "note": "Terminated at Gil Vicente and returned to Persepolis on a free."
+    },
+    "jafar-salmani": {
+      "club": "Malavan",
+      "since": "2025-02",
+      "source": "https://en.wikipedia.org/wiki/Jafar_Salmani",
+      "checked": "2026-08-28",
+      "confidence": "medium",
+      "note": "Left Esteghlal as a free agent in February 2025. Some profile pages still list Esteghlal."
+    },
+    "amir-roustaei": {
+      "club": "Lusail SC",
+      "since": "2025-07",
+      "source": "https://www.fotmob.com/players/848310/amir-roustaei",
+      "checked": "2026-08-28",
+      "confidence": "high",
+      "note": "Sitra in 2023/24, then Al-Waab, then Lusail SC in the Qatari Second Division."
+    },
+    "mario-fontanella": {
+      "club": "Żabbar St. Patrick FC",
+      "since": "2025-07",
+      "source": "https://en.wikipedia.org/wiki/Mario_Fontanella",
+      "checked": "2026-08-28",
+      "confidence": "high",
+      "note": "Left Al-Yarmouk after 2023-2025 and moved to the Malta Premier League."
+    },
+    "payam-parsa": {
+      "club": "Mes Rafsanjan",
+      "since": "2024",
+      "source": "https://en.wikipedia.org/wiki/Payam_Parsa",
+      "checked": "2026-08-28",
+      "confidence": "medium",
+      "note": "Date of birth matches the profile on the live site, so this is the same player."
+    },
+    "ali-al-mosawe": {
+      "club": "Hillerød Fodbold",
+      "since": "2024",
+      "source": "https://www.footballtransfers.com/en/players/ali-almosawe",
+      "checked": "2026-08-28",
+      "confidence": "medium",
+      "note": "Recorded as Estrela Amadora to Hillerod in 2024. The live site still says CD Gouveia, and the two histories do not line up cleanly — worth confirming with the player."
+    }
+  },
+  "_unchanged": {
+    "ali-pourdara": "Kuwait SC — confirmed still current.",
+    "ahoora-zand": "Shams Azar Qazvin — confirmed still current.",
+    "eslit-sala": "KF Vllaznia — no reliable source found; left as scraped.",
+    "farzad-tajik": "FC Sorkh Poshan Herat — no reliable source found; left as scraped."
+  }
+}

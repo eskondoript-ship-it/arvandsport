@@ -548,6 +548,15 @@ p { text-wrap: pretty; }
   :root:not([data-theme="dark"]) .section--paper .btn--solid:hover { color: var(--navy-900); }
 }
 
+/* Two consecutive sections each contribute a full --section-y, so the gap
+   between them is double the intended rhythm — at a wide viewport that is
+   nearly 350px of empty ground, which is what opened up between the services
+   grid and the roster. The second of a pair contributes half instead.
+   A section that paints its own background keeps its full padding, since
+   there the space is inside a visible band rather than between two. */
+.section + .section:not(.section--paper) { padding-top: calc(var(--section-y) * .5); }
+.section--paper + .section { padding-top: var(--section-y); }
+
 
 /* ===== components.css ===== */
 

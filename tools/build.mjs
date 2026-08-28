@@ -17,6 +17,23 @@ const players = JSON.parse(await readFile(join(ROOT, 'content/players.json'), 'u
 const news = JSON.parse(await readFile(join(ROOT, 'content/news.json'), 'utf8'));
 const feed = JSON.parse(await readFile(join(ROOT, 'content/feed.json'), 'utf8'));
 const careers = JSON.parse(await readFile(join(ROOT, 'content/careers.json'), 'utf8'));
+const clubUpdates = JSON.parse(await readFile(join(ROOT, 'content/club-updates.json'), 'utf8'));
+
+/* The scraped club is frozen at whatever the live site said when the extractor
+ * last ran, and several were years stale. Corrections live in their own file
+ * with a source against each, and are folded in here so every template — card,
+ * dossier, facts table, search index — sees one club and cannot disagree with
+ * itself. The bio row keeps the same treatment for the same reason. */
+for (const player of players) {
+  const update = clubUpdates.players?.[player.slug];
+  if (!update?.club || update.club === player.club) continue;
+  const previous = player.club;
+  player.club = update.club;
+  player.clubSource = update.source;
+  for (const row of player.bio || []) {
+    if (row.label === 'Current club' && row.value === previous) row.value = update.club;
+  }
+}
 
 const { renderHome } = await import('../src/templates/home.mjs');
 const { renderPlayerIndex, renderPlayer } = await import('../src/templates/players.mjs');
