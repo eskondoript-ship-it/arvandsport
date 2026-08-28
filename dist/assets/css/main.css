@@ -404,48 +404,88 @@ p { text-wrap: pretty; }
 .roster__more, .latest__more { margin-top: clamp(2rem, 4vw, 3rem); }
 .roster__empty { padding: 3rem 0; text-align: center; color: var(--fg-muted); }
 
-.player-card { position: relative; }
+.player-card { position: relative; perspective: 1000px; }
 .player-card[hidden] { display: none; }
-.player-card__link {
-  position: relative; display: block; overflow: hidden;
-  border: 1px solid var(--line); border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
-  transition: border-color .45s var(--ease-out), transform .45s var(--ease-out), box-shadow .45s var(--ease-out);
+
+/* line-height:0 kills the anchor's line box, which was leaving the gold
+ * edge poking out below the shield; the shield restores it for its content. */
+.player-card__link { position: relative; display: block; line-height: 0; }
+
+/* The shield silhouette squad cards are read in. Drawn with clip-path so the
+ * whole card — gradient, imagery, stats — is cut to shape in one pass. */
+.player-card__shield {
+  position: relative; display: block; isolation: isolate; line-height: 1.25;
+  padding: clamp(.9rem, 2vw, 1.2rem) clamp(.8rem, 1.8vw, 1.1rem) clamp(1rem, 2.4vw, 1.5rem);
+  aspect-ratio: 53 / 76;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(5, 237, 255, .22), transparent 60%),
+    linear-gradient(170deg, #0d3a5e 0%, #0a2540 38%, #071a2c 100%);
+  clip-path: polygon(50% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%, 0% 5%);
+  transition: transform .5s var(--ease-out), filter .5s var(--ease-out);
 }
-.player-card__link:hover { border-color: var(--line-strong); transform: translateY(-6px); box-shadow: var(--shadow); }
-.player-card__media { position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden; }
+/* A second shield behind the first reads as the card's gold edge. */
+.player-card__link::before {
+  content: ""; position: absolute; inset: -2px; z-index: 0;
+  background: linear-gradient(170deg, #f2d98a, #b8912f 45%, #6d5518 75%, #f2d98a);
+  clip-path: polygon(50% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%, 0% 5%);
+  opacity: .85; transition: opacity .45s var(--ease-out);
+}
+.player-card__link:hover .player-card__shield { transform: translateY(-8px) rotateX(4deg); }
+.player-card__link:hover::before { opacity: 1; }
+.player-card__link:focus-visible { outline: none; }
+.player-card__link:focus-visible::before { opacity: 1; box-shadow: 0 0 0 3px var(--accent); }
+
+.player-card__ident {
+  position: absolute; top: clamp(1.2rem, 3vw, 2rem); left: clamp(.9rem, 2.2vw, 1.4rem);
+  z-index: 3; display: grid; justify-items: center; gap: .18rem;
+  color: #f3e2ae; text-align: center;
+}
+.player-card__age {
+  display: grid; justify-items: center; font-size: clamp(1.5rem, 3.6vw, 2.3rem);
+  font-weight: 800; line-height: .9; letter-spacing: -.04em;
+}
+.player-card__age em {
+  font-style: normal; font-size: .3em; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; opacity: .75;
+}
+.player-card__pos { font-size: clamp(.72rem, 1.5vw, .95rem); font-weight: 700; letter-spacing: .06em; }
+.player-card__nat {
+  margin-top: .15rem; padding: .1rem .4rem; border-radius: 3px;
+  background: rgba(243, 226, 174, .16);
+  font-size: .58rem; font-weight: 700; letter-spacing: .1em;
+}
+
+.player-card__media { position: absolute; inset: 0 0 34% 0; z-index: 1; display: block; overflow: hidden; }
 .player-card__media img {
-  width: 100%; height: 100%; object-fit: cover; object-position: top center;
-  transition: transform .8s var(--ease-out), filter .6s var(--ease-out);
-  filter: saturate(.85) contrast(1.05);
+  width: 92%; height: 100%; margin-inline-start: 8%;
+  object-fit: contain; object-position: bottom center;
+  transition: transform .8s var(--ease-out);
 }
-.player-card__link:hover .player-card__media img { transform: scale(1.06); filter: none; }
-.player-card__glow {
-  position: absolute; inset: auto 0 0; height: 65%;
-  background: linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
+.player-card__link:hover .player-card__media img { transform: scale(1.05); }
+
+.player-card__name {
+  position: absolute; inset: auto 8% 30% 8%; z-index: 3; display: block;
+  padding-bottom: .35rem; border-bottom: 1px solid rgba(243, 226, 174, .35);
+  color: #f3e2ae; font-size: clamp(.8rem, 1.7vw, 1.02rem); font-weight: 800;
+  letter-spacing: .02em; text-align: center; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.player-card__badge {
-  position: absolute; top: .8rem; left: .8rem; z-index: 2;
-  padding: .28rem .7rem; border-radius: 999px;
-  background: rgba(11, 21, 35, .7); backdrop-filter: blur(6px);
-  border: 1px solid var(--line);
-  font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--accent);
+
+.player-card__stats {
+  position: absolute; inset: auto 9% 12% 9%; z-index: 3;
+  display: grid; grid-template-columns: 1fr 1fr; gap: .1rem clamp(.4rem, 1.4vw, 1rem);
+  color: #f3e2ae;
 }
-.player-card__body { position: relative; display: block; padding: 1rem 1.1rem 1.2rem; }
-.player-card__name { display: block; line-height: 1.06; }
-.player-card__name em { display: block; font-style: normal; font-size: var(--step--1); color: var(--fg-muted); }
-.player-card__name strong { display: block; font-size: var(--step-1); font-weight: 800; letter-spacing: -.02em; }
-.player-card__meta { display: flex; flex-wrap: wrap; gap: .3rem .7rem; margin-top: .5rem; font-size: var(--step--1); color: var(--fg-faint); }
-.player-card__meta span + span::before { content: "·"; margin-inline-end: .7rem; color: var(--accent); }
-.player-card__cta {
-  display: inline-flex; align-items: center; gap: .4rem; margin-top: .85rem;
-  font-size: var(--step--1); font-weight: 600; color: var(--accent);
-  opacity: 0; transform: translateY(6px);
-  transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);
+.player-card__stat { display: flex; align-items: baseline; gap: .3rem; font-size: clamp(.6rem, 1.25vw, .78rem); }
+.player-card__stat b { font-weight: 800; letter-spacing: -.02em; }
+.player-card__stat i { font-style: normal; font-weight: 600; opacity: .72; letter-spacing: .04em; }
+
+.player-card__club {
+  position: absolute; inset: auto 12% 5% 12%; z-index: 3;
+  color: rgba(243, 226, 174, .62); font-size: clamp(.52rem, 1.05vw, .64rem);
+  font-weight: 600; letter-spacing: .08em; text-align: center; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.player-card__link:hover .player-card__cta, .player-card__link:focus-visible .player-card__cta { opacity: 1; transform: none; }
-@media (hover: none) { .player-card__cta { opacity: 1; transform: none; } }
 
 /* ------------------------------------------------------------ news cards */
 .latest__grid {

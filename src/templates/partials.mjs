@@ -14,8 +14,70 @@ export function sectionHead({ kicker = '', title, intro = '', align = 'left', id
 </header>`;
 }
 
+/** Three-letter codes for the nationalities that actually appear on the roster. */
+const COUNTRY_CODE = {
+  Iran: 'IRN', Iraq: 'IRQ', Denmark: 'DEN', Albania: 'ALB',
+  Italy: 'ITA', Kuwait: 'KUW', Afghanistan: 'AFG',
+};
+
+/** Short position codes, in the shorthand a squad list would use. */
+const POSITION_CODE = {
+  /* These mirror the codes already printed on the site's own card artwork,
+   * so the badge on the render and the badge we draw never disagree. */
+  'Centre-Forward': 'CF', 'Left Winger': 'LW', 'Right Winger': 'RW',
+  'Central Midfield': 'CM', 'Centre-Back': 'CB', 'Left-Back': 'LB',
+  'Right-Back': 'RB', Goalkeeper: 'GK',
+};
+
+export const positionCode = (player) =>
+  POSITION_CODE[player.position.detail] ||
+  POSITION_CODE[player.position.group] ||
+  player.position.group.slice(0, 2).toUpperCase();
+
+/** Age today, from the parsed birth date — never the stale figure in the copy. */
+export function ageOf(player, now = new Date()) {
+  if (!player.birthDate) return null;
+  const born = new Date(`${player.birthDate}T00:00:00Z`);
+  let age = now.getUTCFullYear() - born.getUTCFullYear();
+  const month = now.getUTCMonth() - born.getUTCMonth();
+  if (month < 0 || (month === 0 && now.getUTCDate() < born.getUTCDate())) age -= 1;
+  return age;
+}
+
+const year = (value) => /(\d{4})/.exec(value || '')?.[1] || '';
+const heightCm = (value) => {
+  const m = /(\d)[,.](\d{2})/.exec(value || '');
+  return m ? `${m[1]}${m[2]}` : '';
+};
+const footCode = (value) => {
+  const f = (value || '').toLowerCase();
+  if (f.startsWith('r')) return 'R';
+  if (f.startsWith('l')) return 'L';
+  if (f.startsWith('b')) return 'B';
+  return '';
+};
+
+/**
+ * A squad card in the shape football fans read instinctively.
+ *
+ * The six cells hold real profile data, not ratings: the agency publishes no
+ * player ratings and inventing them would put made-up numbers against real
+ * people. The large figure is the player's age, labelled as such, so it is
+ * never mistaken for an overall score.
+ */
 export function playerCard(player, index = 0) {
-  const meta = [player.position.detail, player.club].filter(Boolean);
+  const age = ageOf(player);
+  const code = positionCode(player);
+  const nation = player.citizenship[0] || '';
+  const stats = [
+    ['AGE', age ?? '–'],
+    ['HGT', heightCm(player.height) || '–'],
+    ['FOOT', footCode(player.foot) || '–'],
+    ['NAT', COUNTRY_CODE[nation] || nation.slice(0, 3).toUpperCase() || '–'],
+    ['JND', year(player.joined) || '–'],
+    ['EXP', year(player.contractExpires) || '–'],
+  ];
+
   return `<article class="player-card" style="--i:${index}"
   data-player
   data-position="${attr(player.position.group)}"
@@ -23,15 +85,22 @@ export function playerCard(player, index = 0) {
   data-name="${attr(player.name.toLowerCase())}"
   data-club="${attr((player.club || '').toLowerCase())}">
   <a class="player-card__link" href="${attr(player.url)}">
-    <span class="player-card__media">
-      <img src="${attr(player.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
-      <span class="player-card__glow" aria-hidden="true"></span>
-    </span>
-    <span class="player-card__badge">${esc(player.position.group)}</span>
-    <span class="player-card__body">
-      <span class="player-card__name"><em>${esc(player.firstName)}</em><strong>${esc(player.lastName)}</strong></span>
-      ${meta.length ? `<span class="player-card__meta">${meta.map((m) => `<span>${esc(m)}</span>`).join('')}</span>` : ''}
-      <span class="player-card__cta">Profile ${ICONS.arrow}</span>
+    <span class="player-card__shield">
+      <span class="player-card__ident">
+        <span class="player-card__age">${age ?? '–'}<em>age</em></span>
+        <span class="player-card__pos">${esc(code)}</span>
+        <span class="player-card__nat">${esc(COUNTRY_CODE[nation] || nation)}</span>
+      </span>
+      <span class="player-card__media">
+        <img src="${attr(player.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
+      </span>
+      <span class="player-card__name">${esc(player.name)}</span>
+      <span class="player-card__stats">
+        ${stats
+          .map(([label, value]) => `<span class="player-card__stat"><b>${esc(value)}</b><i>${label}</i></span>`)
+          .join('')}
+      </span>
+      ${player.club ? `<span class="player-card__club">${esc(player.club)}</span>` : ''}
     </span>
   </a>
 </article>`;

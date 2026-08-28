@@ -66,6 +66,31 @@ function decode(s = '') {
 
 const stripTags = (s = '') => decode(s.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 
+const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+
+/**
+ * Pull an ISO date out of the two formats the profiles use:
+ * "Jul 18, 1992 (31)" and "14.02.2007". The parenthesised age on the live
+ * site was written in 2024 and is now wrong, so ages are recomputed at build
+ * time from this date instead of being read off the page.
+ */
+function parseBirthDate(raw) {
+  if (!raw) return '';
+  const dotted = /(\d{1,2})\.(\d{1,2})\.(\d{4})/.exec(raw);
+  if (dotted) {
+    const [, d, m, y] = dotted;
+    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  const worded = /([A-Za-z]{3})[a-z]*\s+(\d{1,2}),\s*(\d{4})/.exec(raw);
+  if (worded) {
+    const [, mon, d, y] = worded;
+    const index = MONTHS[mon.toLowerCase()];
+    if (index === undefined) return '';
+    return `${y}-${String(index + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  return '';
+}
+
 async function api(path) {
   const res = await fetch(`${API}${path}`);
   if (!res.ok) throw new Error(`${path} -> HTTP ${res.status}`);
@@ -163,6 +188,7 @@ function buildPlayer(post) {
     height: findRow(rows, /^height$/i),
     foot: findRow(rows, /^foot$/i),
     birth: findRow(rows, /date of birth/i),
+    birthDate: parseBirthDate(findRow(rows, /date of birth/i)),
     placeOfBirth: findRow(rows, /place of birth/i),
     joined: findRow(rows, /^joined$/i),
     contractExpires: findRow(rows, /contract\s*(?:–\s*)?expires/i),
