@@ -403,3 +403,11 @@ fieldset.field { border: 0; padding: 0; }
 @media (prefers-reduced-motion: reduce) {
   .theme-toggle__icons > span { transition-duration: .01ms; }
 }
+
+/* picture() introduces a <picture> between the media wrapper and its <img>.
+   It is inline by default, which would reintroduce the baseline gap and break
+   the aspect-ratio boxes, so it behaves as the block the img used to be. */
+.player-card__media picture,
+.news-card__media picture,
+.person__media picture,
+.player-hero__media picture { display: block; width: 100%; height: 100%; }

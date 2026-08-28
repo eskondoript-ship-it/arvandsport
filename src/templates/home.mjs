@@ -4,9 +4,12 @@ import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG, 
 function hero(site) {
   return `<section class="hero" id="home" data-hero>
   <div class="hero__bg" data-hero-bg>
-    <img src="${site.hero.background}" alt="" width="1920" height="1080" fetchpriority="high" decoding="async">
+    <picture>
+      <source type="image/webp" srcset="/assets/img/ui/hero-bg-640.webp 640w, /assets/img/ui/hero-bg-1024.webp 1024w, /assets/img/ui/hero-bg-1440.webp 1440w, /assets/img/ui/hero-bg-1920.webp 1920w" sizes="100vw">
+      <img src="${site.hero.background}" alt="" width="1920" height="1080" fetchpriority="high" decoding="async">
+    </picture>
   </div>
-  <div class="hero__smoke" data-hero-smoke style="background-image:url('${site.hero.smoke}')" aria-hidden="true"></div>
+  <div class="hero__smoke" data-hero-smoke aria-hidden="true"></div>
   <div class="hero__veil" aria-hidden="true"></div>
   <div class="shell hero__inner">
     <p class="hero__eyebrow" data-hero-eyebrow>FIFA-licensed football &amp; match agency</p>
