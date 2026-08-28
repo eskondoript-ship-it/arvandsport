@@ -27,10 +27,34 @@ export function sectionHead({ kicker = '', title, intro = '', align = 'left', id
  * that original. `sizes` is what actually saves the bytes: without it the
  * browser assumes full viewport width and picks the largest file.
  */
+let MANIFEST = null;
+
+/**
+ * Tell picture() which derivatives actually exist on disk. The build calls
+ * this before rendering; without it every requested width is trusted.
+ *
+ * This is not belt-and-braces. The archive pages render players through
+ * articleCard, which asks for 800px, while portraits are only generated at
+ * 265/400/529 — so a caller asking for a width that was never generated is a
+ * normal thing to happen, and silently shipping a 404 in a srcset is not.
+ */
+export function setImageManifest(manifest) {
+  MANIFEST = manifest;
+}
+
 export function picture(src, { widths, sizes, alt = '', width, height, className = '', loading = 'lazy', priority = false } = {}) {
   const dot = src.lastIndexOf('.');
   const stem = src.slice(0, dot);
-  const srcset = widths.map((w) => `${stem}-${w}.webp ${w}w`).join(', ');
+  const available = MANIFEST ? widths.filter((w) => MANIFEST.get(stem)?.has(w)) : widths;
+
+  /* No derivatives for this image: emit the plain <img> rather than a
+   * <picture> whose only source is broken. */
+  if (!available.length) {
+    const fetchPriorityOnly = priority ? ' fetchpriority="high"' : '';
+    return `<img src="${attr(src)}" alt="${attr(alt)}"${width ? ` width="${width}"` : ''}${height ? ` height="${height}"` : ''} loading="${priority ? 'eager' : loading}" decoding="async"${fetchPriorityOnly}>`;
+  }
+
+  const srcset = available.map((w) => `${stem}-${w}.webp ${w}w`).join(', ');
   const fetchPriority = priority ? ' fetchpriority="high"' : '';
   const load = priority ? 'eager' : loading;
   return `<picture${className ? ` class="${attr(className)}"` : ''}>

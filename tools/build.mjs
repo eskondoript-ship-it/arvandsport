@@ -6,7 +6,7 @@
  * URL structure, so no existing link or indexed URL changes.
  */
 import { readFile, writeFile, mkdir, rm, cp, readdir, stat } from 'node:fs/promises';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -34,6 +34,19 @@ for (const player of players) {
     if (row.label === 'Current club' && row.value === previous) row.value = update.club;
   }
 }
+
+/* Which WebP derivatives actually exist, so picture() cannot reference one
+ * that was never generated. Keyed by the image's site-absolute stem. */
+const { setImageManifest } = await import('../src/templates/partials.mjs');
+const derivatives = new Map();
+for (const rel of await walk(join(ROOT, 'static/assets/img'))) {
+  const m = /^(.*)-(\d+)\.webp$/.exec(rel.split(sep).join('/'));
+  if (!m) continue;
+  const stem = `/assets/img/${m[1]}`;
+  if (!derivatives.has(stem)) derivatives.set(stem, new Set());
+  derivatives.get(stem).add(Number(m[2]));
+}
+setImageManifest(derivatives);
 
 const { renderHome } = await import('../src/templates/home.mjs');
 const { renderPlayerIndex, renderPlayer } = await import('../src/templates/players.mjs');
@@ -94,7 +107,25 @@ function relativise(html, route) {
     return rest ? base + rest : base;
   };
 
+  /* srcset is a comma-separated list of "url descriptor" pairs, so it needs
+   * its own pass — the href/src rewrite below does not see inside it. Missing
+   * this shipped a <picture> whose <img> fallback was correctly relative but
+   * whose WebP sources were still site-absolute: fine at a domain root, and a
+   * 404 for every source under the Pages prefix, which is every browser that
+   * supports WebP. */
+  const relativiseSrcset = (value) =>
+    value
+      .split(',')
+      .map((part) => {
+        const bit = part.trim();
+        if (!bit.startsWith('/')) return bit;
+        const [url, ...rest] = bit.split(/\s+/);
+        return [toRelative(url), ...rest].join(' ');
+      })
+      .join(', ');
+
   return html
+    .replace(/\bsrcset="([^"]*)"/g, (_m, value) => `srcset="${relativiseSrcset(value)}"`)
     .replace(/\b(href|src)="\/([^"]*)"/g, (_m, attr, path) => `${attr}="${toRelative('/' + path)}"`)
     /* <meta http-equiv="refresh" content="0; url=/registration/"> */
     .replace(/(content="\d+;\s*url=)\/([^"]*)"/g, (_m, head, path) => `${head}${toRelative('/' + path)}"`)

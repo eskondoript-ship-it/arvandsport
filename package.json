@@ -11,7 +11,7 @@
     "dev": "npm run build && npm run serve",
     "news": "node tools/fetch-news.mjs",
     "transfermarkt": "node tools/fetch-transfermarkt.mjs",
-    "test": "node tools/__tests__/feed-parse.test.mjs"
+    "test": "node tools/__tests__/feed-parse.test.mjs && node tools/__tests__/assets.test.mjs"
   },
   "engines": {
     "node": ">=18"

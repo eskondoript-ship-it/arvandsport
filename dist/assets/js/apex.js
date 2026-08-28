@@ -19,46 +19,36 @@ export function initApex(root = document) {
 
   const pin = $('[data-apex-pin]', section);
   const ball = $('[data-apex-ball]', section);
-  const facetEls = $$('.apex__facet', section);
+  const object = $('[data-apex-object]', section);
   const words = $$('[data-apex-word]', section);
   const fades = $$('[data-apex-fade]', section);
 
-  if (!canAnimate() || !ScrollTrigger || !facetEls.length) return;
+  if (!canAnimate() || !ScrollTrigger) return;
 
-  /* Intro: the ball pulls itself together once, on load. Each facet carries
-   * its own outward offset from the template, so the scatter follows the
-   * geometry rather than being random per visit. */
-  gsap.set(facetEls, {
-    x: (i, el) => Number(el.dataset.dx) || 0,
-    y: (i, el) => Number(el.dataset.dy) || 0,
-    rotate: (i, el) => Number(el.dataset.spin) || 0,
-    scale: 0.35,
-    opacity: 0,
-  });
+  /* The sprite is 30 frames of a full rotation laid out 6 across, 5 down.
+   * Setting a frame is one background-position write, which the compositor
+   * handles without a layout or a paint of anything else. */
+  const COLS = 6;
+  const ROWS = 5;
+  const FRAMES = COLS * ROWS;
+  const spriteActive = () => window.matchMedia('(min-width: 761px)').matches;
+
+  const showFrame = (n) => {
+    if (!ball || !spriteActive()) return;
+    const f = ((Math.round(n) % FRAMES) + FRAMES) % FRAMES;
+    ball.style.backgroundPositionX = `${((f % COLS) / (COLS - 1)) * 100}%`;
+    ball.style.backgroundPositionY = `${(Math.floor(f / COLS) / (ROWS - 1)) * 100}%`;
+  };
+
   gsap.set(fades, { opacity: 0, y: 14 });
 
   const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  /* Spins up and settles, rather than appearing already turning. */
+  const spin = { f: -14 };
   intro
-    .to(facetEls, {
-      x: 0,
-      y: 0,
-      rotate: 0,
-      scale: 1,
-      opacity: 1,
-      duration: 1.15,
-      stagger: { each: 0.006, from: 'center' },
-    })
-    .to(fades, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.35);
-
-  if (words.length === 2) {
-    gsap.from(words, {
-      opacity: 0,
-      y: 40,
-      duration: 1,
-      ease: 'power3.out',
-      stagger: 0.08,
-    });
-  }
+    .from(object, { opacity: 0, scale: 0.82, duration: 1.1, ease: 'power2.out' }, 0)
+    .to(spin, { f: 0, duration: 1.5, ease: 'power3.out', onUpdate: () => showFrame(spin.f) }, 0)
+    .to(fades, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.3);
 
   /* Scroll: the ball turns and recedes while the two halves of the line part
    * further, so the gap the ball sits in opens as the section leaves. */
@@ -71,9 +61,57 @@ export function initApex(root = document) {
       invalidateOnRefresh: true,
     },
   });
+  /* Scroll turns the ball: a little over half a revolution across the
+   * section, which reads as deliberate rather than as a spinning loop. */
+  const scrubbed = { f: 0 };
   exit
-    .to(ball, { rotate: 26, scale: 1.18, ease: 'none' }, 0)
+    .to(scrubbed, { f: 17, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0)
+    .to(object, { scale: 1.14, ease: 'none' }, 0)
     .to(pin, { opacity: 0.25, ease: 'none' }, 0.55);
+
+
+  /* Kick it. Clicking the ball drives it away along a shallow arc, spinning
+   * hard, then lets it come back and settle — a toy, but the kind visitors
+   * actually poke at. Guarded so a second click cannot stack timelines, and
+   * the frame scrub is handed back to scroll when it lands. */
+  let kicking = false;
+  const kick = () => {
+    if (kicking || !object) return;
+    kicking = true;
+    const spinFrames = { f: 0 };
+    const dir = Math.random() < 0.5 ? -1 : 1;
+
+    gsap
+      .timeline({
+        defaults: { ease: 'power2.out' },
+        onComplete: () => {
+          kicking = false;
+          exit.scrollTrigger?.refresh();
+        },
+      })
+      /* Squash on contact, then away. */
+      .to(object, { scaleX: 1.14, scaleY: 0.86, duration: 0.07, ease: 'power2.in' })
+      .to(object, { scaleX: 1, scaleY: 1, duration: 0.16 })
+      .to(object, { x: dir * 190, y: -150, duration: 0.42, ease: 'power2.out' }, 0.06)
+      .to(object, { y: 0, duration: 0.5, ease: 'power2.in' }, 0.48)
+      .to(object, { x: 0, duration: 0.62, ease: 'power2.inOut' }, 0.48)
+      /* Two full turns while it is in the air. */
+      .to(spinFrames, {
+        f: dir * FRAMES * 2,
+        duration: 1.05,
+        ease: 'power2.out',
+        onUpdate: () => showFrame(spinFrames.f),
+      }, 0.06)
+      /* A short bounce on the way down rather than a dead stop. */
+      .to(object, { y: -34, duration: 0.16, ease: 'power2.out' }, 0.98)
+      .to(object, { y: 0, duration: 0.22, ease: 'power2.in' });
+  };
+
+  if (object) {
+    object.style.pointerEvents = 'auto';
+    object.style.cursor = 'pointer';
+    object.addEventListener('click', kick);
+  }
 
   if (words.length === 2) {
     exit
