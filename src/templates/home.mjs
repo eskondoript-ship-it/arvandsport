@@ -69,7 +69,7 @@ function roster(site, players) {
   return `<section class="roster section" id="players">
   <div class="shell">
     ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro) })}
-    <div class="roster__grid">${players.map((p, i) => playerCard(p, i)).join('')}</div>
+    <div class="roster__grid">${players.map((p, i) => playerCard(p, i, { ratings: site.ratings?.[p.slug] })).join('')}</div>
     <div class="roster__more" data-reveal>
       <a class="btn btn--line" href="/player/" data-magnetic><span>All players</span>${ICONS.arrow}</a>
     </div>
@@ -142,6 +142,19 @@ function strike(site, players) {
         <div><dt>Goals</dt><dd><span data-scrub-counter="${attr(player.goals)}">${esc(player.goals)}</span></dd></div>
       </dl>
       <a class="btn btn--solid" href="${attr(player.url)}" data-magnetic><span>Full profile</span>${ICONS.arrow}</a>
+      ${
+        config.video
+          ? `<button class="embed" type="button"
+              data-embed
+              data-embed-provider="${attr(config.video.provider)}"
+              data-embed-id="${attr(config.video.id)}"
+              data-embed-title="${attr(`${player.name} — ${config.video.label}`)}">
+        <img src="${attr(config.image)}" alt="" width="529" height="760" loading="lazy" decoding="async">
+        <span class="embed__play" aria-hidden="true"></span>
+        <span class="embed__label">${esc(config.video.label)}</span>
+      </button>`
+          : ''
+      }
     </div>
 
     <p class="strike__hint" aria-hidden="true">${esc(config.caption)}</p>

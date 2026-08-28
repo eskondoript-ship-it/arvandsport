@@ -47,87 +47,149 @@
 .roster__more, .latest__more { margin-top: clamp(2rem, 4vw, 3rem); }
 .roster__empty { padding: 3rem 0; text-align: center; color: var(--fg-muted); }
 
-.player-card { position: relative; perspective: 1000px; }
+.player-card { position: relative; perspective: 1100px; }
 .player-card[hidden] { display: none; }
 
 /* line-height:0 kills the anchor's line box, which was leaving the gold
  * edge poking out below the shield; the shield restores it for its content. */
 .player-card__link { position: relative; display: block; line-height: 0; }
 
-/* The shield silhouette squad cards are read in. Drawn with clip-path so the
- * whole card — gradient, imagery, stats — is cut to shape in one pass. */
+/* Rated cards get an electric palette; the rest keep the gold squad look. */
+.player-card--rated {
+  --edge: linear-gradient(158deg, #d8fbff 0%, #35d8ef 20%, #0b6fa8 42%, #b9f4ff 58%, #0a5f96 80%, #7fe7ff 100%);
+  --face-a: #123f78; --face-b: #0b2d5e; --face-c: #071c3d; --face-d: #04101f;
+  --bloom: rgba(90, 226, 255, .38);
+  --ink: #e8fbff;
+}
+.player-card {
+  --edge: linear-gradient(158deg, #fcefc0 0%, #d8b45c 18%, #8d6d22 38%, #f6e3a4 55%, #7d5f1c 78%, #e8cf85 100%);
+  --face-a: #10456e; --face-b: #0a2a48; --face-c: #071c31; --face-d: #04101c;
+  --bloom: rgba(5, 237, 255, .3);
+  --ink: #f7e9bd;
+}
+
+/* Shield silhouette. Shared by the card face and the metal edge behind it. */
+.player-card__link,
+.player-card__shield { --shield: polygon(50% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%, 0% 5%); }
+
+/* The metal edge: a slightly larger shield sitting behind the face, with a
+ * multi-stop gradient so it catches light along the bevel. */
+.player-card__link::before {
+  content: ""; position: absolute; inset: -2px; z-index: 0;
+  clip-path: var(--shield);
+  background: var(--edge);
+  transition: opacity .45s var(--ease-out), filter .45s var(--ease-out);
+}
+.player-card__link:hover::before { filter: brightness(1.12); }
+.player-card__link:focus-visible { outline: none; }
+.player-card__link:focus-visible::before { box-shadow: 0 0 0 3px var(--accent); }
+
 .player-card__shield {
   position: relative; display: block; isolation: isolate; line-height: 1.25;
   padding: clamp(.9rem, 2vw, 1.2rem) clamp(.8rem, 1.8vw, 1.1rem) clamp(1rem, 2.4vw, 1.5rem);
   aspect-ratio: 53 / 76;
+  clip-path: var(--shield);
+  /* Faceted ground: crossed linear gradients read as cut planes, over a deep
+     navy body with a cyan bloom behind the player. Original artwork. */
   background:
-    radial-gradient(120% 70% at 50% 0%, rgba(5, 237, 255, .22), transparent 60%),
-    linear-gradient(170deg, #0d3a5e 0%, #0a2540 38%, #071a2c 100%);
-  clip-path: polygon(50% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%, 0% 5%);
-  transition: transform .5s var(--ease-out), filter .5s var(--ease-out);
+    linear-gradient(118deg, rgba(255, 255, 255, .07) 0 14%, transparent 14.2% 30%,
+                    rgba(255, 255, 255, .05) 30.2% 42%, transparent 42.2% 66%,
+                    rgba(255, 255, 255, .06) 66.2% 76%, transparent 76.2%),
+    linear-gradient(212deg, rgba(5, 237, 255, .12) 0 18%, transparent 18.2% 46%,
+                    rgba(5, 237, 255, .09) 46.2% 58%, transparent 58.2%),
+    radial-gradient(90% 55% at 50% 26%, var(--bloom), transparent 62%),
+    linear-gradient(172deg, var(--face-a) 0%, var(--face-b) 34%, var(--face-c) 72%, var(--face-d) 100%);
+  transition: transform .55s var(--ease-out);
 }
-/* A second shield behind the first reads as the card's gold edge. */
-.player-card__link::before {
-  content: ""; position: absolute; inset: -2px; z-index: 0;
-  background: linear-gradient(170deg, #f2d98a, #b8912f 45%, #6d5518 75%, #f2d98a);
-  clip-path: polygon(50% 0%, 100% 5%, 100% 84%, 50% 100%, 0% 84%, 0% 5%);
-  opacity: .85; transition: opacity .45s var(--ease-out);
+.player-card__link:hover .player-card__shield { transform: translateY(-8px) rotateX(5deg); }
+
+/* Light sweeping across the face on hover. */
+.player-card__shield::after {
+  content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  background: linear-gradient(104deg, transparent 38%, rgba(255, 255, 255, .16) 48%, transparent 58%);
+  transform: translateX(-120%);
+  transition: transform .85s var(--ease-out);
 }
-.player-card__link:hover .player-card__shield { transform: translateY(-8px) rotateX(4deg); }
-.player-card__link:hover::before { opacity: 1; }
-.player-card__link:focus-visible { outline: none; }
-.player-card__link:focus-visible::before { opacity: 1; box-shadow: 0 0 0 3px var(--accent); }
+.player-card__link:hover .player-card__shield::after { transform: translateX(120%); }
 
 .player-card__ident {
-  position: absolute; top: clamp(1.2rem, 3vw, 2rem); left: clamp(.9rem, 2.2vw, 1.4rem);
-  z-index: 3; display: grid; justify-items: center; gap: .18rem;
-  color: #f3e2ae; text-align: center;
+  position: absolute; top: clamp(1.1rem, 2.8vw, 1.9rem); left: clamp(.85rem, 2.1vw, 1.35rem);
+  z-index: 3; display: grid; justify-items: center; gap: .1rem;
+  color: var(--ink); text-align: center; text-shadow: 0 2px 6px rgba(0, 0, 0, .5);
 }
 .player-card__age {
-  display: grid; justify-items: center; font-size: clamp(1.5rem, 3.6vw, 2.3rem);
-  font-weight: 800; line-height: .9; letter-spacing: -.04em;
+  display: grid; justify-items: center; font-size: clamp(1.55rem, 3.7vw, 2.4rem);
+  font-weight: 800; line-height: .88; letter-spacing: -.045em;
 }
 .player-card__age em {
-  font-style: normal; font-size: .3em; font-weight: 600;
-  letter-spacing: .22em; text-transform: uppercase; opacity: .75;
+  font-style: normal; font-size: .28em; font-weight: 700;
+  letter-spacing: .24em; text-transform: uppercase; opacity: .7;
 }
-.player-card__pos { font-size: clamp(.72rem, 1.5vw, .95rem); font-weight: 700; letter-spacing: .06em; }
+.player-card__pos {
+  font-size: clamp(.74rem, 1.55vw, .98rem); font-weight: 800; letter-spacing: .05em;
+}
 .player-card__nat {
-  margin-top: .15rem; padding: .1rem .4rem; border-radius: 3px;
-  background: rgba(243, 226, 174, .16);
-  font-size: .58rem; font-weight: 700; letter-spacing: .1em;
+  margin-top: .25rem; padding: .12rem .42rem; border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  font-size: .56rem; font-weight: 800; letter-spacing: .12em;
+}
+/* Hairline separating the ident column from the render, as on a printed card. */
+.player-card__ident::after {
+  content: ""; position: absolute; top: -.2rem; right: -.55rem; bottom: -.2rem; width: 1px;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 55%, transparent), transparent);
 }
 
-.player-card__media { position: absolute; inset: 0 0 34% 0; z-index: 1; display: block; overflow: hidden; }
+.player-card__media { position: absolute; inset: 2% 0 33% 0; z-index: 1; display: block; overflow: hidden; }
 .player-card__media img {
-  width: 92%; height: 100%; margin-inline-start: 8%;
+  width: 90%; height: 100%; margin-inline-start: 10%;
   object-fit: contain; object-position: bottom center;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, .55));
   transition: transform .8s var(--ease-out);
 }
-.player-card__link:hover .player-card__media img { transform: scale(1.05); }
+.player-card__link:hover .player-card__media img { transform: scale(1.06); }
 
 .player-card__name {
-  position: absolute; inset: auto 8% 30% 8%; z-index: 3; display: block;
-  padding-bottom: .35rem; border-bottom: 1px solid rgba(243, 226, 174, .35);
-  color: #f3e2ae; font-size: clamp(.8rem, 1.7vw, 1.02rem); font-weight: 800;
-  letter-spacing: .02em; text-align: center; text-transform: uppercase;
+  position: absolute; inset: auto 7% 29.5% 7%; z-index: 3; display: block;
+  padding-bottom: .38rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--ink); font-size: clamp(.82rem, 1.75vw, 1.06rem); font-weight: 800;
+  letter-spacing: .01em; text-align: center; text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .55);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .player-card__stats {
-  position: absolute; inset: auto 9% 12% 9%; z-index: 3;
-  display: grid; grid-template-columns: 1fr 1fr; gap: .1rem clamp(.4rem, 1.4vw, 1rem);
-  color: #f3e2ae;
+  position: absolute; inset: auto 8% 11.5% 8%; z-index: 3;
+  display: grid; grid-template-columns: 1fr 1px 1fr; gap: .12rem clamp(.45rem, 1.3vw, .9rem);
+  color: var(--ink);
 }
-.player-card__stat { display: flex; align-items: baseline; gap: .3rem; font-size: clamp(.6rem, 1.25vw, .78rem); }
+/* Centre rule between the two stat columns. */
+.player-card__stats::before {
+  content: ""; grid-area: 1 / 2 / 4 / 3;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 45%, transparent), transparent);
+}
+.player-card__stat { display: flex; align-items: baseline; gap: .32rem; font-size: clamp(.62rem, 1.28vw, .8rem); }
+.player-card__stat:nth-child(1) { grid-area: 1 / 1; }
+.player-card__stat:nth-child(2) { grid-area: 2 / 1; }
+.player-card__stat:nth-child(3) { grid-area: 3 / 1; }
+.player-card__stat:nth-child(4) { grid-area: 1 / 3; }
+.player-card__stat:nth-child(5) { grid-area: 2 / 3; }
+.player-card__stat:nth-child(6) { grid-area: 3 / 3; }
 .player-card__stat b { font-weight: 800; letter-spacing: -.02em; }
-.player-card__stat i { font-style: normal; font-weight: 600; opacity: .72; letter-spacing: .04em; }
+.player-card__stat i { font-style: normal; font-weight: 700; opacity: .68; letter-spacing: .05em; }
 
 .player-card__club {
-  position: absolute; inset: auto 12% 5% 12%; z-index: 3;
-  color: rgba(243, 226, 174, .62); font-size: clamp(.52rem, 1.05vw, .64rem);
-  font-weight: 600; letter-spacing: .08em; text-align: center; text-transform: uppercase;
+  position: absolute; inset: auto 14% 8.5% 14%; z-index: 3;
+  color: color-mix(in srgb, var(--ink) 62%, transparent); font-size: clamp(.5rem, 1vw, .62rem);
+  font-weight: 700; letter-spacing: .06em; text-align: center; text-transform: uppercase;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Card-type flash (TOTS, etc.) down the left edge of a rated card. */
+.player-card__flair {
+  position: absolute; top: 46%; left: clamp(.35rem, 1vw, .6rem); z-index: 3;
+  color: var(--ink); font-size: .52rem; font-weight: 800; letter-spacing: .3em;
+  writing-mode: vertical-rl; transform: rotate(180deg); opacity: .8;
 }
 
 /* ------------------------------------------------------------ news cards */
@@ -297,3 +359,35 @@ fieldset.field { border: 0; padding: 0; }
 /* ----------------------------------------------------------- line masks */
 [data-split-lines] .line { display: block; overflow: hidden; padding-block: .08em; margin-block: -.08em; }
 [data-split-lines] .line__inner { display: block; }
+
+/* ---------------------------------------------------------- video embed
+ * A poster and a button. The iframe is only created on click, so the
+ * rights holder's player — and its cookies — load when asked for, not before.
+ */
+.embed {
+  position: relative; display: block; width: 100%; margin-top: 1.1rem;
+  aspect-ratio: 16 / 9; overflow: hidden; padding: 0;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: rgba(0, 52, 88, .4); cursor: pointer;
+  transition: border-color .35s var(--ease-out), transform .35s var(--ease-out);
+}
+.embed:hover { border-color: var(--accent); transform: translateY(-3px); }
+.embed img { width: 100%; height: 100%; object-fit: cover; object-position: top center; opacity: .55; }
+.embed__play {
+  position: absolute; inset: 50% auto auto 50%; translate: -50% -50%;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  transition: scale .35s var(--ease-out);
+}
+.embed__play::after {
+  content: ""; position: absolute; inset: 50% auto auto 54%; translate: -50% -50%;
+  border-style: solid; border-width: 9px 0 9px 15px;
+  border-color: transparent transparent transparent var(--navy-900);
+}
+.embed:hover .embed__play { scale: 1.1; }
+.embed__label {
+  position: absolute; inset: auto 0 0 0; padding: .6rem .8rem;
+  background: linear-gradient(transparent, rgba(11, 21, 35, .9));
+  color: var(--fg); font-size: var(--step--1); font-weight: 600; text-align: left;
+}
+.embed__frame { width: 100%; aspect-ratio: 16 / 9; margin-top: 1.1rem; border: 0; border-radius: var(--radius); }

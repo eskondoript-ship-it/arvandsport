@@ -65,20 +65,33 @@ const footCode = (value) => {
  * people. The large figure is the player's age, labelled as such, so it is
  * never mistaken for an overall score.
  */
-export function playerCard(player, index = 0) {
+export function playerCard(player, index = 0, { ratings = null } = {}) {
   const age = ageOf(player);
+  const rating = ratings || null;
   const code = positionCode(player);
   const nation = player.citizenship[0] || '';
-  const stats = [
-    ['AGE', age ?? '–'],
-    ['HGT', heightCm(player.height) || '–'],
-    ['FOOT', footCode(player.foot) || '–'],
-    ['NAT', COUNTRY_CODE[nation] || nation.slice(0, 3).toUpperCase() || '–'],
-    ['JND', year(player.joined) || '–'],
-    ['EXP', year(player.contractExpires) || '–'],
-  ];
+  /* Players with a published in-game card show its six ratings. Everyone else
+   * shows profile data — the agency publishes no ratings, and putting invented
+   * numbers against a real player is not on the table. */
+  const stats = rating
+    ? [
+        ['PAC', rating.stats.PAC], ['SHO', rating.stats.SHO], ['PAS', rating.stats.PAS],
+        ['DRI', rating.stats.DRI], ['DEF', rating.stats.DEF], ['PHY', rating.stats.PHY],
+      ]
+    : [
+        ['AGE', age ?? '–'],
+        ['HGT', heightCm(player.height) || '–'],
+        ['FOOT', footCode(player.foot) || '–'],
+        ['NAT', COUNTRY_CODE[nation] || nation.slice(0, 3).toUpperCase() || '–'],
+        ['JND', year(player.joined) || '–'],
+        ['EXP', year(player.contractExpires) || '–'],
+      ];
 
-  return `<article class="player-card" style="--i:${index}"
+  const headline = rating ? rating.overall : age ?? '–';
+  const headlineLabel = rating ? 'ovr' : 'age';
+  const shownCode = rating?.position || code;
+
+  return `<article class="player-card${rating ? ' player-card--rated' : ''}" style="--i:${index}"
   data-player
   data-position="${attr(player.position.group)}"
   data-nationality="${attr(player.citizenship.join('|'))}"
@@ -87,8 +100,8 @@ export function playerCard(player, index = 0) {
   <a class="player-card__link" href="${attr(player.url)}">
     <span class="player-card__shield">
       <span class="player-card__ident">
-        <span class="player-card__age">${age ?? '–'}<em>age</em></span>
-        <span class="player-card__pos">${esc(code)}</span>
+        <span class="player-card__age">${esc(headline)}<em>${headlineLabel}</em></span>
+        <span class="player-card__pos">${esc(shownCode)}</span>
         <span class="player-card__nat">${esc(COUNTRY_CODE[nation] || nation)}</span>
       </span>
       <span class="player-card__media">
@@ -100,6 +113,7 @@ export function playerCard(player, index = 0) {
           .map(([label, value]) => `<span class="player-card__stat"><b>${esc(value)}</b><i>${label}</i></span>`)
           .join('')}
       </span>
+      ${rating?.card ? `<span class="player-card__flair">${esc(rating.card)}</span>` : ''}
       ${player.club ? `<span class="player-card__club">${esc(player.club)}</span>` : ''}
     </span>
   </a>

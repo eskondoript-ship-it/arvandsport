@@ -415,6 +415,28 @@
     "image": "/assets/img/players/mehdi-taremi.png",
     "kicker": "Client spotlight",
     "lead": "Represented since 2020",
-    "caption": "Scroll to take the shot"
+    "caption": "Scroll to take the shot",
+    "video": {
+      "_note": "Official-player embed for the goal. The iframe is only created after a click, so YouTube sets nothing until the visitor asks for it. Swap `id` to change the clip; remove this block to drop the embed entirely.",
+      "provider": "youtube",
+      "id": "7gGsmRkmshs",
+      "label": "Watch the goal"
+    }
+  },
+  "ratings": {
+    "_note": "Published EA FC / FIFA card ratings, keyed by player slug. Only players who actually have an in-game card appear here — the rest of the roster shows profile data instead, because inventing ratings for real players is not acceptable. Add a block here as cards are released; the card picks it up automatically.",
+    "mehdi-taremi": {
+      "overall": 93,
+      "position": "ST",
+      "card": "TOTS",
+      "stats": {
+        "PAC": 93,
+        "SHO": 94,
+        "PAS": 87,
+        "DRI": 94,
+        "DEF": 52,
+        "PHY": 88
+      }
+    }
   }
 }

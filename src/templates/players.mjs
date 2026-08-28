@@ -51,7 +51,7 @@ export function renderPlayerIndex({ site, players }) {
 <section class="section section--tight">
   <div class="shell">
     ${filterBar(site, players)}
-    <div class="roster__grid" data-roster>${players.map((p, i) => playerCard(p, i)).join('')}</div>
+    <div class="roster__grid" data-roster>${players.map((p, i) => playerCard(p, i, { ratings: site.ratings?.[p.slug] })).join('')}</div>
     <p class="roster__empty" data-roster-empty hidden>No players match those filters.</p>
   </div>
 </section>`;
@@ -167,7 +167,7 @@ export function renderPlayer({ site, players, player }) {
 <section class="section">
   <div class="shell">
     ${sectionHead({ kicker: 'More from the roster', title: 'Other players' })}
-    <div class="roster__grid roster__grid--compact">${related.map((p, i) => playerCard(p, i)).join('')}</div>
+    <div class="roster__grid roster__grid--compact">${related.map((p, i) => playerCard(p, i, { ratings: site.ratings?.[p.slug] })).join('')}</div>
   </div>
 </section>`;
 
