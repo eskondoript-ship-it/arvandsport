@@ -16,6 +16,7 @@ const site = JSON.parse(await readFile(join(ROOT, 'content/site.json'), 'utf8'))
 const players = JSON.parse(await readFile(join(ROOT, 'content/players.json'), 'utf8'));
 const news = JSON.parse(await readFile(join(ROOT, 'content/news.json'), 'utf8'));
 const feed = JSON.parse(await readFile(join(ROOT, 'content/feed.json'), 'utf8'));
+const careers = JSON.parse(await readFile(join(ROOT, 'content/careers.json'), 'utf8'));
 
 const { renderHome } = await import('../src/templates/home.mjs');
 const { renderPlayerIndex, renderPlayer } = await import('../src/templates/players.mjs');
@@ -42,11 +43,29 @@ const ctx = { site, players, news, feed };
  * Absolute `https://arvandsport.com/...` URLs are deliberately untouched:
  * canonical tags, Open Graph and JSON-LD must keep naming the real origin.
  */
+/* Deploy prefix for the 404 page only, e.g. "/arvandsport/". Normalised so
+ * the workflow can pass it with or without surrounding slashes. */
+const BASE_PATH = (() => {
+  const raw = (process.env.BASE_PATH || '').trim();
+  if (!raw || raw === '/') return '/';
+  return `/${raw.replace(/^\/+|\/+$/g, '')}/`;
+})();
+
 function relativise(html, route) {
   /* The 404 page is served by the host for *any* missing path, at any depth,
-   * so there is no correct relative prefix for it. Leave it site-absolute:
-   * right on the real domain, mildly unstyled on a subpath preview. */
-  if (route === '/404.html') return html;
+   * so no relative prefix is correct for it and it stays site-absolute. That
+   * is right at a domain root but breaks under a subpath, where `/assets/...`
+   * resolves above the site and the page loads with no CSS at all — which is
+   * exactly how it is served on a Pages project site. BASE_PATH names that
+   * prefix (the workflow passes the repo name); unset, this is a no-op and
+   * the output is byte-identical to the domain-root form. */
+  if (route === '/404.html') {
+    if (BASE_PATH === '/') return html;
+    return html.replace(
+      /\b(href|src)="\/([^"/][^"]*)?"/g,
+      (_m, attr, path = '') => `${attr}="${BASE_PATH}${path}"`,
+    );
+  }
 
   /* '/' -> './', '/news' -> '../', '/player/mehdi-taremi' -> '../../' */
   const depth = route.split('/').filter(Boolean).length;
@@ -112,7 +131,7 @@ const routes = [];
 routes.push(await emit('/', renderHome(ctx)));
 routes.push(await emit('/player', renderPlayerIndex(ctx)));
 for (const player of players) {
-  routes.push(await emit(`/player/${player.slug}`, renderPlayer({ ...ctx, player })));
+  routes.push(await emit(`/player/${player.slug}`, renderPlayer({ ...ctx, player, careers })));
 }
 routes.push(await emit('/news', renderNewsIndex(ctx)));
 for (const article of news) {

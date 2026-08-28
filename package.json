@@ -10,6 +10,7 @@
     "serve": "node tools/serve.mjs",
     "dev": "npm run build && npm run serve",
     "news": "node tools/fetch-news.mjs",
+    "transfermarkt": "node tools/fetch-transfermarkt.mjs",
     "test": "node tools/__tests__/feed-parse.test.mjs"
   },
   "engines": {

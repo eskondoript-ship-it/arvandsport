@@ -216,6 +216,105 @@ function contract(player) {
   </div>`;
 }
 
+/* ------------------------------------------------------------- career
+ * Transfer timeline and season-by-season record. Both come from
+ * content/careers.json and both are omitted when that file has no rows for
+ * the player, so a thin profile shows nothing rather than an empty frame. */
+
+const nf = new Intl.NumberFormat('en-GB');
+
+function transferTimeline(transfers) {
+  if (!transfers?.length) return '';
+  /* Newest first: the current club is what a scout looks for. */
+  const rows = [...transfers].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  return `<ol class="career-line" data-reveal>
+    ${rows
+      .map(
+        (t) => `<li class="career-line__item">
+      <span class="career-line__when">${esc(t.season || (t.date || '').slice(0, 4))}</span>
+      <span class="career-line__move">
+        <span class="career-line__to">${esc(t.to || '')}</span>
+        ${t.from ? `<span class="career-line__from">from ${esc(t.from)}</span>` : ''}
+      </span>
+      ${t.fee ? `<span class="career-line__fee">${esc(t.fee)}</span>` : ''}
+    </li>`,
+      )
+      .join('')}
+  </ol>`;
+}
+
+function seasonTable(seasons) {
+  if (!seasons?.length) return '';
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : null);
+  const peak = Math.max(1, ...seasons.map((s) => num(s.goals) || 0));
+  const totals = seasons.reduce(
+    (acc, s) => ({
+      appearances: acc.appearances + (num(s.appearances) || 0),
+      goals: acc.goals + (num(s.goals) || 0),
+      assists: acc.assists + (num(s.assists) || 0),
+    }),
+    { appearances: 0, goals: 0, assists: 0 },
+  );
+
+  return `<div class="seasons" data-reveal>
+  <div class="seasons__scroll">
+    <table class="seasons__table">
+      <caption class="u-sr-only">Season by season record</caption>
+      <thead>
+        <tr>
+          <th scope="col">Season</th><th scope="col">Club</th><th scope="col">Competition</th>
+          <th scope="col" class="is-num">Apps</th><th scope="col" class="is-num">Goals</th><th scope="col" class="is-num">Assists</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${seasons
+          .map((s) => {
+            const g = num(s.goals);
+            return `<tr>
+          <th scope="row">${esc(s.season || '')}</th>
+          <td>${esc(s.club || '')}</td>
+          <td class="is-muted">${esc(s.competition || '')}</td>
+          <td class="is-num">${s.appearances === undefined ? '—' : esc(String(s.appearances))}</td>
+          <td class="is-num">${
+            g === null
+              ? '—'
+              : `<span class="seasons__goals"><span class="seasons__bar" style="--w:${((g / peak) * 100).toFixed(0)}%"></span><span>${esc(String(g))}</span></span>`
+            }</td>
+          <td class="is-num">${s.assists === undefined ? '—' : esc(String(s.assists))}</td>
+        </tr>`;
+          })
+          .join('')}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" colspan="3">Total</th>
+          <td class="is-num">${esc(nf.format(totals.appearances))}</td>
+          <td class="is-num">${esc(nf.format(totals.goals))}</td>
+          <td class="is-num">${esc(nf.format(totals.assists))}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>`;
+}
+
+function career(player, careers) {
+  const record = careers?.players?.[player.slug];
+  const line = transferTimeline(record?.transfers);
+  const table = seasonTable(record?.seasons);
+  if (!line && !table) return '';
+  return `
+<section class="section section--tight career">
+  <div class="shell">
+    ${sectionHead({ kicker: 'Career', title: 'Club history' })}
+    <div class="career__grid">
+      ${line ? `<div class="career__col career__col--line"><h3 class="career__sub">Transfers</h3>${line}</div>` : ''}
+      ${table ? `<div class="career__col career__col--table"><h3 class="career__sub">Season by season</h3>${table}</div>` : ''}
+    </div>
+  </div>
+</section>`;
+}
+
 function dossier(player, ratings) {
   const rating = ratings?.[player.slug];
   const blocks = [vitals(player), radar(rating), contract(player)].filter(Boolean);
@@ -229,7 +328,7 @@ function dossier(player, ratings) {
 </section>`;
 }
 
-export function renderPlayer({ site, players, player }) {
+export function renderPlayer({ site, players, player, careers }) {
   const idx = players.findIndex((p) => p.slug === player.slug);
   const next = players[(idx + 1) % players.length];
   const prev = players[(idx - 1 + players.length) % players.length];
@@ -265,6 +364,7 @@ export function renderPlayer({ site, players, player }) {
   <span class="player-hero__watermark" aria-hidden="true">${esc(player.lastName || player.name)}</span>
 </section>
 ${dossier(player, site.ratings)}
+${career(player, careers)}
 
 <section class="section section--tight">
   <div class="shell player-detail">

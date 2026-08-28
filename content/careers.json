@@ -1,0 +1,42 @@
+{
+  "_note": "Career history and season stats, keyed by player slug. Nothing here is generated or estimated — a player appears on the site's career section only once real rows are filled in, and any player left empty simply renders no career block rather than a padded or invented one. Source it from the agency's own records (authoritative for its clients) or from a Transfermarkt profile; tools/fetch-transfermarkt.mjs fills this file automatically for any player given a transfermarktId, where Transfermarkt is reachable.",
+  "_schema": {
+    "<player-slug>": {
+      "transfermarktId": "numeric id from the player's Transfermarkt URL, e.g. 307058 for /mehdi-taremi/profil/spieler/307058 — required only for the fetcher",
+      "updated": "ISO date this player's rows were last refreshed",
+      "transfers": [
+        {
+          "date": "ISO date, e.g. 2020-08-31",
+          "season": "e.g. 20/21",
+          "from": "club left",
+          "to": "club joined",
+          "fee": "as published, e.g. '€ 4.00m', 'Free transfer', 'Loan' — omit if unknown"
+        }
+      ],
+      "seasons": [
+        {
+          "season": "e.g. 23/24",
+          "club": "club name",
+          "competition": "e.g. Liga Portugal",
+          "appearances": 0,
+          "goals": 0,
+          "assists": 0,
+          "minutes": 0
+        }
+      ]
+    }
+  },
+  "players": {
+    "ahoora-zand": {},
+    "ali-al-mosawe": {},
+    "ali-alipour": {},
+    "ali-pourdara": {},
+    "amir-roustaei": {},
+    "eslit-sala": {},
+    "farzad-tajik": {},
+    "jafar-salmani": {},
+    "mario-fontanella": {},
+    "mehdi-taremi": { "transfermarktId": 307058 },
+    "payam-parsa": {}
+  }
+}

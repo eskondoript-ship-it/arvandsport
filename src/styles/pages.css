@@ -530,3 +530,78 @@ a.office__row:hover { color: var(--white); }
 .deal__bar.is-expired .deal__fill { background: linear-gradient(90deg, #4a5a6b, #7d8b99); box-shadow: none; }
 .deal__scale { display: flex; justify-content: space-between; gap: 1rem; margin-top: .5rem; font-size: .7rem; color: var(--fg-faint); }
 .deal__state { margin-top: .5rem; font-size: var(--step--1); color: var(--fg-muted); }
+
+/* -------------------------------------------------------------- career
+   Transfer list and season table. Both are driven by content/careers.json
+   and are absent from the markup entirely when a player has no rows. */
+.career__grid {
+  display: grid; gap: clamp(1.4rem, 3vw, 2.4rem);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 980px) {
+  .career__grid:has(.career__col--line):has(.career__col--table) {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  }
+}
+.career__sub {
+  font-size: var(--step--1); font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: .9rem;
+}
+
+/* Transfer timeline ---------------------------------------------------- */
+.career-line { list-style: none; margin: 0; padding: 0; position: relative; }
+.career-line::before {
+  content: ""; position: absolute; inset: .5rem auto .5rem 0; width: 1px;
+  background: linear-gradient(180deg, transparent, var(--line-strong), transparent);
+}
+.career-line__item {
+  position: relative; display: grid; gap: .1rem .9rem; padding: .75rem 0 .75rem 1.4rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.career-line__item::before {
+  content: ""; position: absolute; left: -3px; top: 1.25rem;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 3px rgba(5, 237, 255, .18);
+}
+/* The most recent move is the one that matters; the rest recede. */
+.career-line__item:not(:first-child)::before { background: var(--fg-faint); box-shadow: none; }
+.career-line__when {
+  grid-column: 1 / -1; font-size: .68rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--fg-faint);
+}
+.career-line__move { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.career-line__to { font-weight: 700; }
+.career-line__from { font-size: var(--step--1); color: var(--fg-faint); }
+.career-line__fee {
+  align-self: center; padding: .2rem .6rem; border: 1px solid var(--line);
+  font-size: .7rem; font-weight: 700; color: var(--accent); white-space: nowrap;
+}
+
+/* Season table --------------------------------------------------------- */
+.seasons__scroll { overflow-x: auto; }
+.seasons__table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+.seasons__table th, .seasons__table td { padding: .65rem .7rem; text-align: start; }
+.seasons__table thead th {
+  font-size: .66rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fg-faint); border-bottom: 1px solid var(--line-strong); white-space: nowrap;
+}
+.seasons__table tbody tr { border-bottom: 1px solid var(--line); }
+.seasons__table tbody tr:hover { background: var(--surface); }
+.seasons__table tbody th { font-weight: 700; white-space: nowrap; }
+.seasons__table .is-num { text-align: end; font-variant-numeric: tabular-nums; }
+.seasons__table .is-muted { color: var(--fg-faint); }
+.seasons__table tfoot th, .seasons__table tfoot td {
+  border-top: 1px solid var(--line-strong); font-weight: 800;
+}
+/* Goals read as a bar behind the figure, so a scan down the column shows
+   the shape of a career without needing a separate chart. */
+.seasons__goals { position: relative; display: inline-flex; justify-content: flex-end; min-width: 4.6rem; padding: .1rem .4rem; }
+/* Anchored left so the bar grows out from under the figure rather than
+   butting up against it from the right. */
+.seasons__bar {
+  position: absolute; inset: 0 auto 0 0; width: calc(var(--w, 0%) * .62);
+  background: linear-gradient(90deg, rgba(5, 237, 255, .06), rgba(5, 237, 255, .3));
+  border-inline-end: 2px solid var(--accent);
+}
+.seasons__goals > span { position: relative; }

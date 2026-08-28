@@ -39,7 +39,12 @@ jobs:
       - run: npm run news
         continue-on-error: true
       # The build itself has no dependencies; it only reads content/ and src/.
+      # BASE_PATH is the Pages project-site prefix and is used only to keep
+      # 404.html styled: the host serves it at an unknown depth, so unlike
+      # every other page it cannot use relative asset paths.
       - run: npm run build
+        env:
+          BASE_PATH: ${{ github.event.repository.name }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

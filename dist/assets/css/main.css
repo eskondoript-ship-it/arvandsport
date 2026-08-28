@@ -384,20 +384,21 @@ p { text-wrap: pretty; }
 /* ===== components.css ===== */
 
 /* ---------------------------------------------------------------- buttons */
-/* One cut corner is the house shape. Buttons take it on the bottom-right
- * only — cutting two corners read as a stray notch rather than a decision.
+/* Buttons are fully round. The cut corner stays the house shape elsewhere
+ * (cards, tiles, panels), but the pill is what the controls wanted.
  * Depth comes from a top inner highlight plus a coloured cast shadow, and
- * hover sweeps a sheen across instead of repainting the whole face. */
+ * hover sweeps a sheen across instead of repainting the whole face.
+ * The radius sits on border-radius rather than a clip-path so the border,
+ * the outline and both pseudo-element layers all follow the same curve. */
 .btn {
-  --btn-cut: 12px;
   --btn-bg: transparent;
   --btn-fg: var(--fg);
   --btn-bd: var(--line);
   --btn-glow: transparent;
   position: relative; display: inline-flex; align-items: center; gap: .65rem;
-  padding: .85rem 1.7rem;
+  padding: .85rem 1.8rem;
   border: 1px solid var(--btn-bd);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--btn-cut)), calc(100% - var(--btn-cut)) 100%, 0 100%);
+  border-radius: 999px;
   background: var(--btn-bg); color: var(--btn-fg);
   font-size: var(--step--1); font-weight: 700; letter-spacing: .04em; line-height: 1.2;
   text-align: center; overflow: hidden; isolation: isolate;
@@ -454,8 +455,8 @@ p { text-wrap: pretty; }
 .btn--ghost:hover::before, .btn--ghost:focus-visible::before,
 .btn--line:hover::before, .btn--line:focus-visible::before { transform: scaleX(1); }
 
-.btn--sm { --btn-cut: 9px; padding: .6rem 1.15rem; font-size: var(--step--1); }
-.btn--lg { --btn-cut: 16px; padding: 1.05rem 2.1rem; font-size: var(--step-0); letter-spacing: .06em; }
+.btn--sm { padding: .58rem 1.25rem; font-size: var(--step--1); }
+.btn--lg { padding: 1.05rem 2.3rem; font-size: var(--step-0); letter-spacing: .06em; }
 
 @media (prefers-reduced-motion: reduce) {
   .btn, .btn::before, .btn::after, .btn > svg { transition-duration: .01ms; }
@@ -1290,3 +1291,78 @@ a.office__row:hover { color: var(--white); }
 .deal__bar.is-expired .deal__fill { background: linear-gradient(90deg, #4a5a6b, #7d8b99); box-shadow: none; }
 .deal__scale { display: flex; justify-content: space-between; gap: 1rem; margin-top: .5rem; font-size: .7rem; color: var(--fg-faint); }
 .deal__state { margin-top: .5rem; font-size: var(--step--1); color: var(--fg-muted); }
+
+/* -------------------------------------------------------------- career
+   Transfer list and season table. Both are driven by content/careers.json
+   and are absent from the markup entirely when a player has no rows. */
+.career__grid {
+  display: grid; gap: clamp(1.4rem, 3vw, 2.4rem);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 980px) {
+  .career__grid:has(.career__col--line):has(.career__col--table) {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  }
+}
+.career__sub {
+  font-size: var(--step--1); font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: .9rem;
+}
+
+/* Transfer timeline ---------------------------------------------------- */
+.career-line { list-style: none; margin: 0; padding: 0; position: relative; }
+.career-line::before {
+  content: ""; position: absolute; inset: .5rem auto .5rem 0; width: 1px;
+  background: linear-gradient(180deg, transparent, var(--line-strong), transparent);
+}
+.career-line__item {
+  position: relative; display: grid; gap: .1rem .9rem; padding: .75rem 0 .75rem 1.4rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.career-line__item::before {
+  content: ""; position: absolute; left: -3px; top: 1.25rem;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 3px rgba(5, 237, 255, .18);
+}
+/* The most recent move is the one that matters; the rest recede. */
+.career-line__item:not(:first-child)::before { background: var(--fg-faint); box-shadow: none; }
+.career-line__when {
+  grid-column: 1 / -1; font-size: .68rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--fg-faint);
+}
+.career-line__move { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.career-line__to { font-weight: 700; }
+.career-line__from { font-size: var(--step--1); color: var(--fg-faint); }
+.career-line__fee {
+  align-self: center; padding: .2rem .6rem; border: 1px solid var(--line);
+  font-size: .7rem; font-weight: 700; color: var(--accent); white-space: nowrap;
+}
+
+/* Season table --------------------------------------------------------- */
+.seasons__scroll { overflow-x: auto; }
+.seasons__table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+.seasons__table th, .seasons__table td { padding: .65rem .7rem; text-align: start; }
+.seasons__table thead th {
+  font-size: .66rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fg-faint); border-bottom: 1px solid var(--line-strong); white-space: nowrap;
+}
+.seasons__table tbody tr { border-bottom: 1px solid var(--line); }
+.seasons__table tbody tr:hover { background: var(--surface); }
+.seasons__table tbody th { font-weight: 700; white-space: nowrap; }
+.seasons__table .is-num { text-align: end; font-variant-numeric: tabular-nums; }
+.seasons__table .is-muted { color: var(--fg-faint); }
+.seasons__table tfoot th, .seasons__table tfoot td {
+  border-top: 1px solid var(--line-strong); font-weight: 800;
+}
+/* Goals read as a bar behind the figure, so a scan down the column shows
+   the shape of a career without needing a separate chart. */
+.seasons__goals { position: relative; display: inline-flex; justify-content: flex-end; min-width: 4.6rem; padding: .1rem .4rem; }
+/* Anchored left so the bar grows out from under the figure rather than
+   butting up against it from the right. */
+.seasons__bar {
+  position: absolute; inset: 0 auto 0 0; width: calc(var(--w, 0%) * .62);
+  background: linear-gradient(90deg, rgba(5, 237, 255, .06), rgba(5, 237, 255, .3));
+  border-inline-end: 2px solid var(--accent);
+}
+.seasons__goals > span { position: relative; }
