@@ -28,13 +28,13 @@ function hero(site) {
 </section>`;
 }
 
-function about(site) {
+export function about(site) {
   return `<section class="about section section--paper" id="about">
   <div class="shell about__grid">
     <div class="about__copy">
       ${sectionHead({ kicker: site.about.eyebrow, title: 'Twenty-five years at the top level of football', n: '01' })}
       ${site.about.paragraphs.map((p) => `<p class="about__para" data-split-lines>${p}</p>`).join('')}
-      <a class="btn btn--line" href="/#services" data-reveal data-magnetic><span>What we do</span>${ICONS.arrow}</a>
+      <a class="btn btn--line" href="/services/" data-reveal data-magnetic><span>What we do</span>${ICONS.arrow}</a>
     </div>
     <div class="about__stats" data-stats>
       ${site.stats.map((s, i) => statBlock(s, i)).join('')}
@@ -44,9 +44,9 @@ function about(site) {
 </section>`;
 }
 
-function serviceGroup(group, groupIndex) {
+export function serviceGroup(group, groupIndex, firstIndex = '02') {
   return `<div class="services__group" id="${attr(group.id)}">
-  ${sectionHead({ kicker: groupIndex === 0 ? 'What we do' : '', title: group.title, intro: esc(group.intro), n: groupIndex === 0 ? '02' : '03' })}
+  ${sectionHead({ kicker: groupIndex === 0 ? 'What we do' : '', title: group.title, intro: esc(group.intro), n: groupIndex === 0 ? firstIndex : '' })}
   <div class="services__grid">
     ${group.items
       .map(
@@ -62,7 +62,33 @@ function serviceGroup(group, groupIndex) {
 </div>`;
 }
 
-function services(site) {
+/* The homepage carries a short teaser rather than all twelve services; the
+ * full set lives at /services/. Four is one clean row at every breakpoint. */
+function servicesTeaser(site) {
+  const items = site.serviceGroups.flatMap((g) => g.items).slice(0, 4);
+  return `<section class="services section" id="services">
+  <div class="shell">
+    ${sectionHead({ kicker: 'What we do', title: 'Services', intro: esc(site.serviceGroups[0].intro), n: '02' })}
+    <div class="services__grid">
+      ${items
+        .map(
+          (item, i) => `<article class="service" style="--i:${i}" data-reveal data-tilt>
+        <span class="service__icon"><img src="${attr(item.icon)}" alt="" width="96" height="96" loading="lazy" decoding="async"></span>
+        <h3 class="service__title">${esc(item.title)}</h3>
+        <p class="service__body">${esc(item.body)}</p>
+        <span class="service__index">${String(i + 1).padStart(2, '0')}</span>
+      </article>`,
+        )
+        .join('')}
+    </div>
+    <div class="roster__more" data-reveal>
+      <a class="btn btn--line" href="/services/" data-magnetic><span>All services</span>${ICONS.arrow}</a>
+    </div>
+  </div>
+</section>`;
+}
+
+export function services(site) {
   return `<section class="services section" id="services">
   <div class="shell">
     ${site.serviceGroups.map(serviceGroup).join('')}
@@ -167,7 +193,7 @@ function strike(site, players) {
 </section>`;
 }
 
-function clients(site) {
+export function clients(site) {
   return `<section class="clients section" id="clients">
   <div class="shell">
     ${sectionHead({ kicker: 'Track record', title: site.formerClients.title, n: '05' })}
@@ -184,7 +210,7 @@ function clients(site) {
 </section>`;
 }
 
-function team(site) {
+export function team(site) {
   const t = site.team;
   return `<section class="team section" id="team">
   <div class="shell">
@@ -239,7 +265,7 @@ function partners(site) {
 </section>`;
 }
 
-function contact(site) {
+export function contact(site) {
   return `<section class="contact section" id="contacts">
   <div class="shell">
     ${sectionHead({ kicker: 'Say hello', title: site.contact.title, n: '09' })}
@@ -263,6 +289,21 @@ function contact(site) {
     <div class="contact__cta" data-reveal>
       ${site.contact.emails.map((e) => `<a class="btn btn--ghost" href="mailto:${attr(e)}" data-magnetic><span>${esc(e)}</span></a>`).join('')}
       <a class="btn btn--solid" href="/registration/" data-magnetic><span>Player / Coach Registration</span>${ICONS.arrow}</a>
+    </div>
+  </div>
+</section>`;
+}
+
+/* Contact moved to its own page, so the homepage ends on an invitation
+ * rather than a form. */
+function closing(site) {
+  return `<section class="section closing">
+  <div class="shell closing__inner">
+    <p class="closing__kicker">${esc(site.brand.tagline)}</p>
+    <h2 class="closing__title">Work with Arvand Sport</h2>
+    <div class="closing__actions">
+      <a class="btn btn--solid btn--lg" href="/registration/" data-magnetic><span>Player &amp; coach registration</span>${ICONS.arrow}</a>
+      <a class="btn btn--ghost btn--lg" href="/contact/" data-magnetic><span>Contact us</span></a>
     </div>
   </div>
 </section>`;
@@ -295,14 +336,12 @@ export function renderHome({ site, players, news }) {
     content: [
       hero(site),
       about(site),
-      services(site),
+      servicesTeaser(site),
       roster(site, players),
       strike(site, players),
-      clients(site),
-      team(site),
       latestNews(site, news),
       partners(site),
-      contact(site),
+      closing(site),
     ].join('\n'),
   });
 }

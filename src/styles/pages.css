@@ -608,3 +608,15 @@ a.office__row:hover { color: var(--white); }
   border-inline-end: 2px solid var(--accent);
 }
 .seasons__goals > span { position: relative; }
+
+/* ------------------------------------------------------------- closing band
+   Ends a page on an invitation instead of a dead stop. Used by the homepage,
+   which no longer carries the contact form, and by each carved-out page. */
+.closing { text-align: center; }
+.closing__inner { display: grid; justify-items: center; gap: 1rem; }
+.closing__kicker {
+  font-size: var(--step--1); font-weight: 600; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--accent);
+}
+.closing__title { font-size: var(--step-3); text-transform: uppercase; letter-spacing: -.03em; }
+.closing__actions { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; margin-top: .6rem; }

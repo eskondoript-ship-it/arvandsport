@@ -557,6 +557,18 @@ p { text-wrap: pretty; }
 .section + .section:not(.section--paper) { padding-top: calc(var(--section-y) * .5); }
 .section--paper + .section { padding-top: var(--section-y); }
 
+/* Pages carved out of the old single-page homepage lead straight into a
+   section that carries its own heading, so they get no page hero — but the
+   header is fixed, and the section's own padding alone is not enough to clear
+   it. The ghost section index goes too: 01–09 numbered one long page, and a
+   lone "09" at the top of the contact page is a leftover of that scheme. */
+.page-about .main > .section:first-child,
+.page-contact .main > .section:first-child {
+  padding-top: calc(var(--header-h) + clamp(2.5rem, 6vw, 5rem));
+}
+.page-about .section-head[data-n]::before,
+.page-contact .section-head[data-n]::before { content: none; }
+
 
 /* ===== components.css ===== */
 
@@ -1579,3 +1591,15 @@ a.office__row:hover { color: var(--white); }
   border-inline-end: 2px solid var(--accent);
 }
 .seasons__goals > span { position: relative; }
+
+/* ------------------------------------------------------------- closing band
+   Ends a page on an invitation instead of a dead stop. Used by the homepage,
+   which no longer carries the contact form, and by each carved-out page. */
+.closing { text-align: center; }
+.closing__inner { display: grid; justify-items: center; gap: 1rem; }
+.closing__kicker {
+  font-size: var(--step--1); font-weight: 600; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--accent);
+}
+.closing__title { font-size: var(--step-3); text-transform: uppercase; letter-spacing: -.03em; }
+.closing__actions { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; margin-top: .6rem; }

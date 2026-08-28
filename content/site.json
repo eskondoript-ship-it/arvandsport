@@ -22,19 +22,19 @@
   "nav": [
     {
       "label": "Home",
-      "href": "/#home"
+      "href": "/"
     },
     {
       "label": "Services",
-      "href": "/#services"
+      "href": "/services/"
     },
     {
       "label": "Players",
-      "href": "/#players"
+      "href": "/player/"
     },
     {
       "label": "Our Team",
-      "href": "/#team"
+      "href": "/about/"
     },
     {
       "label": "News",
@@ -46,7 +46,7 @@
     },
     {
       "label": "Contact us",
-      "href": "/#contacts"
+      "href": "/contact/"
     }
   ],
   "hero": {
@@ -372,6 +372,9 @@
     "homeNews": {
       "title": "Latest News",
       "moreLabel": "See more"
+    },
+    "services": {
+      "title": "Services"
     }
   },
   "wordpress": {

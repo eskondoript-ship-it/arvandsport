@@ -42,6 +42,7 @@ const { renderRegistration } = await import('../src/templates/registration.mjs')
 const { renderArchive } = await import('../src/templates/archive.mjs');
 const { renderNotFound } = await import('../src/templates/notfound.mjs');
 const { renderRedirect } = await import('../src/templates/redirect.mjs');
+const { renderServices, renderAbout, renderContact } = await import('../src/templates/pages.mjs');
 
 const ctx = { site, players, news, feed };
 
@@ -154,6 +155,9 @@ routes.push(await emit('/news', renderNewsIndex(ctx)));
 for (const article of news) {
   routes.push(await emit(`/news/${article.slug}`, renderArticle({ ...ctx, article })));
 }
+routes.push(await emit('/services', renderServices(ctx)));
+routes.push(await emit('/about', renderAbout(ctx)));
+routes.push(await emit('/contact', renderContact(ctx)));
 routes.push(await emit('/registration', renderRegistration(ctx)));
 
 /* Author archive — the live site exposes /author/arvand-admin/. */

@@ -225,3 +225,15 @@
    there the space is inside a visible band rather than between two. */
 .section + .section:not(.section--paper) { padding-top: calc(var(--section-y) * .5); }
 .section--paper + .section { padding-top: var(--section-y); }
+
+/* Pages carved out of the old single-page homepage lead straight into a
+   section that carries its own heading, so they get no page hero — but the
+   header is fixed, and the section's own padding alone is not enough to clear
+   it. The ghost section index goes too: 01–09 numbered one long page, and a
+   lone "09" at the top of the contact page is a leftover of that scheme. */
+.page-about .main > .section:first-child,
+.page-contact .main > .section:first-child {
+  padding-top: calc(var(--header-h) + clamp(2.5rem, 6vw, 5rem));
+}
+.page-about .section-head[data-n]::before,
+.page-contact .section-head[data-n]::before { content: none; }
