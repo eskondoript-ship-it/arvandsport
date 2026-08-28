@@ -80,7 +80,7 @@ async function go(href, { push = true } = {}) {
     if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView();
     else window.scrollTo(0, 0);
 
-    onSwap(nextContainer, url.pathname);
+    onSwap(nextContainer, url.pathname, doc);
 
     if (animate) await wipeOut(overlay).then();
   } catch {
@@ -93,7 +93,7 @@ async function go(href, { push = true } = {}) {
 }
 
 /**
- * @param {(container: Element, pathname: string) => void} handler
+ * @param {(container: Element, pathname: string, doc: Document) => void} handler
  *   Called after each swap so page modules can re-initialise.
  */
 export function initTransitions(handler) {

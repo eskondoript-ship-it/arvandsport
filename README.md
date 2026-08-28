@@ -152,6 +152,35 @@ npm run extract   # re-pull content from the live WordPress API
 URLs (`/player/mehdi-taremi/`) resolve via `index.html`, so no server rules are
 needed; point 404s at `dist/404.html`.
 
+### Paths are relative
+
+Templates are authored with site-absolute URLs (`/assets/…`, `/player/…`)
+because that is what they mean, but the generator rewrites them to paths
+relative to each page as it writes. The output therefore works unchanged at a
+domain root (`arvandsport.com/player/`), under any prefix (a GitHub Pages
+project site at `/arvandsport/player/`), and straight off disk over `file://` —
+with no base-path flag to set at build time.
+
+Two deliberate exceptions:
+
+* Canonical, Open Graph and JSON-LD URLs stay absolute and keep naming
+  `arvandsport.com`, so a preview deploy never competes with the real site.
+* `404.html` stays site-absolute. The host serves it for a missing path at any
+  depth, so no single relative prefix can be right; absolute is correct on the
+  real domain and merely unstyled on a subpath preview.
+
+Because the header sits outside the container that page transitions swap, its
+relative links would otherwise still describe the previous page's depth after a
+client-side navigation. `syncChrome()` copies the freshly fetched document's
+header hrefs across on every swap.
+
+### GitHub Pages
+
+`.github/workflows/pages.yml` builds and publishes `dist/`. It only takes
+effect once **Settings → Pages → Source** is set to **GitHub Actions**. While
+the source is a branch, Pages serves the repository root through Jekyll and
+renders this README instead of the site.
+
 ## Known constraints
 
 * The hero background (`static/assets/img/ui/hero-bg.jpeg`, 1.9 MB) is the only

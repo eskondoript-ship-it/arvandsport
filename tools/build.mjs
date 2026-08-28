@@ -28,10 +28,46 @@ const ctx = { site, players, news };
 
 /* --------------------------------------------------------------- helpers */
 
+/**
+ * Rewrite the site-absolute URLs the templates emit into paths relative to the
+ * page being written.
+ *
+ * Templates are authored with `/assets/...` and `/player/...` because that is
+ * what they mean, but the output has to survive being served from a subpath —
+ * a GitHub Pages project site lives at `/<repo>/`, and the same tree may be
+ * opened straight off disk. Relative paths work at the domain root, under any
+ * prefix, and from file:// with no build flag to remember.
+ *
+ * Absolute `https://arvandsport.com/...` URLs are deliberately untouched:
+ * canonical tags, Open Graph and JSON-LD must keep naming the real origin.
+ */
+function relativise(html, route) {
+  /* The 404 page is served by the host for *any* missing path, at any depth,
+   * so there is no correct relative prefix for it. Leave it site-absolute:
+   * right on the real domain, mildly unstyled on a subpath preview. */
+  if (route === '/404.html') return html;
+
+  /* '/' -> './', '/news' -> '../', '/player/mehdi-taremi' -> '../../' */
+  const depth = route.split('/').filter(Boolean).length;
+  const base = depth === 0 ? './' : '../'.repeat(depth);
+
+  const toRelative = (path) => {
+    const rest = path.replace(/^\//, '');
+    return rest ? base + rest : base;
+  };
+
+  return html
+    .replace(/\b(href|src)="\/([^"]*)"/g, (_m, attr, path) => `${attr}="${toRelative('/' + path)}"`)
+    /* <meta http-equiv="refresh" content="0; url=/registration/"> */
+    .replace(/(content="\d+;\s*url=)\/([^"]*)"/g, (_m, head, path) => `${head}${toRelative('/' + path)}"`)
+    /* location.replace("/registration/") in the redirect stubs */
+    .replace(/(location\.replace\(")\/([^"]*)"/g, (_m, head, path) => `${head}${toRelative('/' + path)}"`);
+}
+
 async function emit(route, html) {
   const file = route === '/404.html' ? join(DIST, '404.html') : join(DIST, route, 'index.html');
   await mkdir(dirname(file), { recursive: true });
-  await writeFile(file, html);
+  await writeFile(file, relativise(html, route));
   return route;
 }
 

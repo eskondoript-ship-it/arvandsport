@@ -79,11 +79,31 @@ export function initHeader() {
   });
 }
 
+const CHROME_LINKS = '.site-header a[href], .mobile-menu a[href]';
+
+/**
+ * Re-point the chrome after a client-side swap.
+ *
+ * Links are emitted relative to the page they live on, but the header and
+ * mobile menu sit outside the swapped container, so their hrefs still describe
+ * the *previous* page's depth. The freshly fetched document already has them
+ * at the right depth — copy them across. The markup is identical on every
+ * page, so a positional copy is safe, and the length check makes it a no-op if
+ * that ever stops being true.
+ */
+export function syncChrome(doc, pathname) {
+  const live = $$(CHROME_LINKS);
+  const next = [...doc.querySelectorAll(CHROME_LINKS)];
+  if (live.length === next.length) {
+    live.forEach((link, i) => link.setAttribute('href', next[i].getAttribute('href')));
+  }
+  syncNav(pathname);
+}
+
 /** Keep the nav's current-page marker in sync after a client-side swap. */
 export function syncNav(pathname) {
   for (const link of $$('.nav__link')) {
-    const href = link.getAttribute('href') || '';
-    const path = href.startsWith('/') ? href.split('#')[0] || '/' : '';
-    link.classList.toggle('is-current', Boolean(path) && (path === pathname || (path !== '/' && pathname.startsWith(path))));
+    const path = new URL(link.href, location.href).pathname;
+    link.classList.toggle('is-current', path === pathname || (path !== '/' && pathname.startsWith(path)));
   }
 }
