@@ -14,8 +14,10 @@ export function sectionHead({ kicker = '', title, intro = '', align = 'left', id
 </header>`;
 }
 
+/* Role and club each get their own line. Running them inline with a "·"
+ * separator put the dot at the head of the wrapped line on longer club
+ * names, and left cards in a row at different heights. */
 export function playerCard(player, index = 0) {
-  const meta = [player.position.detail, player.club].filter(Boolean);
   return `<article class="player-card" style="--i:${index}"
   data-player
   data-position="${attr(player.position.group)}"
@@ -26,11 +28,14 @@ export function playerCard(player, index = 0) {
     <span class="player-card__media">
       <img src="${attr(player.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
       <span class="player-card__glow" aria-hidden="true"></span>
+      <span class="player-card__badge">${esc(player.position.group)}</span>
     </span>
-    <span class="player-card__badge">${esc(player.position.group)}</span>
     <span class="player-card__body">
       <span class="player-card__name"><em>${esc(player.firstName)}</em><strong>${esc(player.lastName)}</strong></span>
-      ${meta.length ? `<span class="player-card__meta">${meta.map((m) => `<span>${esc(m)}</span>`).join('')}</span>` : ''}
+      <span class="player-card__meta">
+        ${player.position.detail ? `<span class="player-card__role">${esc(player.position.detail)}</span>` : ''}
+        ${player.club ? `<span class="player-card__club">${esc(player.club)}</span>` : ''}
+      </span>
       <span class="player-card__cta">Profile ${ICONS.arrow}</span>
     </span>
   </a>

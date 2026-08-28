@@ -85,6 +85,150 @@ function factRow(label, value) {
   return `<div class="facts__row"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
 }
 
+/* Transfermarkt hands us dates in two shapes: "29.07.2025" and "Jul 1, 2023".
+ * Anything else is left alone rather than guessed at. */
+function parseLooseDate(value) {
+  if (!value) return null;
+  const dotted = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(value.trim());
+  if (dotted) return new Date(Date.UTC(+dotted[3], +dotted[2] - 1, +dotted[1]));
+  const parsed = new Date(value.replace(/\(\d+\)/, '').trim());
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+const YEAR_MS = 365.25 * 24 * 3600 * 1000;
+
+function ageFrom(player) {
+  const dob = parseLooseDate(player.birthDate || player.birth);
+  if (!dob) return null;
+  const age = Math.floor((Date.now() - dob.getTime()) / YEAR_MS);
+  return age > 0 && age < 60 ? age : null;
+}
+
+/** A stat tile only appears when the underlying value is real. */
+function vital({ label, value, suffix = '', count = null }) {
+  if (value === null || value === undefined || value === '') return '';
+  const countAttr = count === null ? '' : ` data-count="${attr(String(count))}"`;
+  return `<li class="vital">
+    <span class="vital__value"${countAttr}>${esc(String(value))}${suffix ? `<i>${esc(suffix)}</i>` : ''}</span>
+    <span class="vital__label">${esc(label)}</span>
+  </li>`;
+}
+
+function vitals(player) {
+  const age = ageFrom(player);
+  const heightM = /([\d,.]+)\s*m/.exec(player.height || '');
+  const items = [
+    vital({ label: 'Age', value: age, count: age }),
+    vital({
+      label: 'Height',
+      value: heightM ? heightM[1].replace(',', '.') : '',
+      suffix: heightM ? 'm' : '',
+    }),
+    vital({ label: 'Caps', value: player.caps, count: Number(player.caps) || null }),
+    vital({ label: 'Int. goals', value: player.goals, count: Number(player.goals) || null }),
+  ].filter(Boolean);
+  if (!items.length) return '';
+  return `<ul class="vitals" data-reveal>${items.join('')}</ul>`;
+}
+
+/* Hexagonal attribute radar. Drawn only for players with a published EA FC
+ * card in content/site.json — the six axes are that card's real values, so
+ * the rest of the roster simply gets the profile blocks instead. */
+const RADAR_AXES = ['PAC', 'SHO', 'PAS', 'DRI', 'DEF', 'PHY'];
+
+function radar(rating) {
+  if (!rating?.stats) return '';
+  /* The viewBox carries its own margin so the vertex labels sit inside it —
+   * letting them overflow made the figure's height unpredictable. */
+  const size = 320;
+  const c = size / 2;
+  const rMax = 92;
+  const point = (i, r) => {
+    const angle = (Math.PI / 3) * i - Math.PI / 2;
+    return [c + Math.cos(angle) * r, c + Math.sin(angle) * r];
+  };
+  const ring = (r) => RADAR_AXES.map((_, i) => point(i, r).map((n) => n.toFixed(1)).join(',')).join(' ');
+  const values = RADAR_AXES.map((k) => Math.max(0, Math.min(99, Number(rating.stats[k]) || 0)));
+  const shape = values.map((v, i) => point(i, (v / 99) * rMax).map((n) => n.toFixed(1)).join(',')).join(' ');
+
+  const grid = [0.25, 0.5, 0.75, 1]
+    .map((f) => `<polygon class="radar__ring" points="${ring(rMax * f)}"></polygon>`)
+    .join('');
+  const spokes = RADAR_AXES.map((_, i) => {
+    const [x, y] = point(i, rMax);
+    return `<line class="radar__spoke" x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"></line>`;
+  }).join('');
+  const labels = RADAR_AXES.map((k, i) => {
+    const [x, y] = point(i, rMax + 26);
+    return `<text class="radar__label" x="${x.toFixed(1)}" y="${y.toFixed(1)}">
+      <tspan class="radar__key" x="${x.toFixed(1)}" dy="-.1em">${esc(k)}</tspan>
+      <tspan class="radar__num" x="${x.toFixed(1)}" dy="1.15em">${esc(String(values[i]))}</tspan>
+    </text>`;
+  }).join('');
+
+  return `<figure class="radar" data-radar data-reveal>
+  <figcaption class="radar__head">
+    <span class="radar__overall"><strong data-count="${attr(String(rating.overall))}">${esc(String(rating.overall))}</strong><span>Overall</span></span>
+    <span class="radar__tags">
+      ${rating.position ? `<span class="radar__tag">${esc(rating.position)}</span>` : ''}
+      ${rating.card ? `<span class="radar__tag radar__tag--card">${esc(rating.card)}</span>` : ''}
+    </span>
+  </figcaption>
+  <svg viewBox="0 0 ${size} ${size}" role="img" aria-label="EA FC attribute ratings: ${attr(RADAR_AXES.map((k, i) => `${k} ${values[i]}`).join(', '))}">
+    <g class="radar__grid">${grid}${spokes}</g>
+    <polygon class="radar__shape" data-radar-shape points="${shape}"></polygon>
+    <g class="radar__labels">${labels}</g>
+  </svg>
+  <p class="radar__note">Published EA FC card rating</p>
+</figure>`;
+}
+
+/* Contract bar: how much of joined → expires has already run. Both dates come
+ * straight from the profile, so the bar is omitted unless both parse. */
+function contract(player) {
+  const from = parseLooseDate(player.joined);
+  const to = parseLooseDate(player.contractExpires);
+  const rows = [
+    player.club ? `<div class="deal__row"><dt>Club</dt><dd>${esc(player.club)}</dd></div>` : '',
+    player.joined ? `<div class="deal__row"><dt>Joined</dt><dd>${esc(player.joined)}</dd></div>` : '',
+    player.contractExpires ? `<div class="deal__row"><dt>Contract until</dt><dd>${esc(player.contractExpires)}</dd></div>` : '',
+    player.outfitter ? `<div class="deal__row"><dt>Outfitter</dt><dd>${esc(player.outfitter)}</dd></div>` : '',
+  ]
+    .filter(Boolean)
+    .join('');
+  if (!rows) return '';
+
+  let bar = '';
+  if (from && to && to > from) {
+    const pct = Math.max(0, Math.min(100, ((Date.now() - from) / (to - from)) * 100));
+    const expired = Date.now() > to.getTime();
+    bar = `<div class="deal__bar${expired ? ' is-expired' : ''}">
+      <div class="deal__track"><span class="deal__fill" data-bar style="--pct:${pct.toFixed(1)}%"></span></div>
+      <div class="deal__scale"><span>${esc(player.joined)}</span><span>${esc(player.contractExpires)}</span></div>
+      <p class="deal__state">${expired ? 'Term complete — contact the agency for current status' : `${Math.round(100 - pct)}% of the term still to run`}</p>
+    </div>`;
+  }
+
+  return `<div class="deal" data-reveal>
+    <h3 class="deal__title">Club &amp; contract</h3>
+    <dl class="deal__rows">${rows}</dl>
+    ${bar}
+  </div>`;
+}
+
+function dossier(player, ratings) {
+  const rating = ratings?.[player.slug];
+  const blocks = [vitals(player), radar(rating), contract(player)].filter(Boolean);
+  if (!blocks.length) return '';
+  return `
+<section class="section section--tight dossier">
+  <div class="shell">
+    ${sectionHead({ kicker: 'Dossier', title: 'Performance profile' })}
+    <div class="dossier__grid${rating ? ' dossier__grid--radar' : ''}">${blocks.join('')}</div>
+  </div>
+</section>`;
+}
+
 export function renderPlayer({ site, players, player }) {
   const idx = players.findIndex((p) => p.slug === player.slug);
   const next = players[(idx + 1) % players.length];
@@ -120,13 +264,17 @@ export function renderPlayer({ site, players, player }) {
   </div>
   <span class="player-hero__watermark" aria-hidden="true">${esc(player.lastName || player.name)}</span>
 </section>
+${dossier(player, site.ratings)}
 
 <section class="section section--tight">
   <div class="shell player-detail">
     <div class="player-detail__facts">
       ${sectionHead({ kicker: 'Profile', title: 'Player data' })}
       <dl class="facts" data-reveal>
-        ${factRow('Date of birth / Age', player.birth)}
+        ${/* The scraped string carries the age as at capture ("(31)"); the
+            dossier tile computes it live, so the stale figure is dropped
+            rather than contradicting it. */ ''}
+        ${factRow('Date of birth', (player.birth || '').replace(/\s*\(\d+\)\s*$/, ''))}
         ${factRow('Place of birth', player.placeOfBirth)}
         ${factRow('Citizenship', player.citizenship.join(' · '))}
         ${factRow('Height', player.height)}

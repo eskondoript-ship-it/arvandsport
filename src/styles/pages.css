@@ -410,3 +410,123 @@ a.office__row:hover { color: var(--white); }
 .hero__tagline { max-width: 20ch; }
 .hero__eyebrow { max-width: max-content; }
 .hero { padding-bottom: clamp(5rem, 11vh, 9rem); }
+
+/* ------------------------------------------------------------- dossier
+   The player dossier: vital counters, the EA FC attribute radar and the
+   club/contract term. Every block is emitted only when the underlying
+   profile data exists, so the grid has to cope with one, two or three
+   children rather than assuming a fixed layout. */
+.dossier__grid {
+  display: grid; gap: clamp(1rem, 2.4vw, 1.8rem);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .dossier__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .dossier__grid .vitals { grid-column: 1 / -1; }
+  /* With a radar present the term sits beside it; without one it runs full width. */
+  .dossier__grid:not(.dossier__grid--radar) .deal { grid-column: 1 / -1; }
+}
+
+/* Vitals ------------------------------------------------------------- */
+.vitals {
+  display: grid; gap: clamp(.6rem, 1.5vw, 1rem); list-style: none; padding: 0; margin: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+}
+/* Sparser profiles yield one or two tiles; left to stretch they read as an
+   empty banner, so they hold a natural width instead. */
+.vitals:not(:has(> :nth-child(3))) {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 230px));
+  justify-content: start;
+}
+.vital {
+  position: relative; padding: clamp(1rem, 2.2vw, 1.4rem) clamp(.9rem, 2vw, 1.3rem);
+  border: 1px solid var(--line);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  background:
+    linear-gradient(150deg, rgba(5, 237, 255, .09), transparent 55%),
+    var(--surface);
+  overflow: hidden;
+}
+/* Hairline scan across the top edge, the one flourish these tiles get. */
+.vital::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: .7;
+}
+.vital__value {
+  display: flex; align-items: baseline; gap: .15rem;
+  font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 800; line-height: 1;
+  letter-spacing: -.04em; color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.vital__value i { font-style: normal; font-size: .4em; font-weight: 600; color: var(--fg-faint); }
+.vital__label {
+  display: block; margin-top: .55rem;
+  font-size: .68rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+/* Attribute radar ----------------------------------------------------- */
+.radar {
+  margin: 0; padding: clamp(1.1rem, 2.4vw, 1.6rem);
+  border: 1px solid var(--line);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(5, 237, 255, .12), transparent 60%),
+    var(--surface);
+}
+.radar__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.radar__overall { display: flex; align-items: baseline; gap: .5rem; }
+.radar__overall strong {
+  font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; line-height: 1;
+  letter-spacing: -.04em; color: var(--accent); font-variant-numeric: tabular-nums;
+}
+.radar__overall span {
+  font-size: .68rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--fg-faint);
+}
+.radar__tags { display: flex; gap: .4rem; }
+.radar__tag {
+  padding: .25rem .6rem; border: 1px solid var(--line-strong); border-radius: 999px;
+  font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
+}
+.radar__tag--card { border-color: transparent; background: linear-gradient(120deg, var(--accent), var(--accent-2)); color: var(--navy-900); }
+/* Capped, or the square figure grows to the full column width and the card
+   towers over the term panel beside it. */
+.radar svg { display: block; width: 100%; max-width: 360px; height: auto; margin: .6rem auto 0; }
+.radar__ring, .radar__spoke { fill: none; stroke: var(--line); stroke-width: 1; }
+.radar__ring { fill: rgba(255, 255, 255, .012); }
+.radar__shape {
+  fill: rgba(5, 237, 255, .22);
+  stroke: var(--accent); stroke-width: 2; stroke-linejoin: round;
+  filter: drop-shadow(0 0 10px rgba(5, 237, 255, .45));
+  transform-origin: 50% 50%;
+}
+.radar__label { text-anchor: middle; }
+.radar__key { font-size: 11px; font-weight: 700; letter-spacing: .1em; fill: var(--fg-faint); }
+.radar__num { font-size: 15px; font-weight: 800; fill: var(--fg); }
+.radar__note { margin-top: .5rem; font-size: .7rem; color: var(--fg-faint); text-align: center; }
+
+/* Club and contract term ---------------------------------------------- */
+.deal {
+  padding: clamp(1.1rem, 2.4vw, 1.6rem);
+  border: 1px solid var(--line);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  background: var(--surface);
+}
+.deal__title { font-size: var(--step-1); letter-spacing: -.02em; }
+.deal__rows { display: grid; gap: 0; margin: 1rem 0 0; }
+.deal__row { display: flex; justify-content: space-between; gap: 1rem; padding-block: .65rem; border-top: 1px solid var(--line); }
+.deal__row dt { font-size: var(--step--1); color: var(--fg-faint); }
+.deal__row dd { margin: 0; font-weight: 600; text-align: end; }
+.deal__bar { margin-top: 1.3rem; }
+.deal__track { position: relative; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.deal__fill {
+  display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  box-shadow: 0 0 12px rgba(5, 237, 255, .6);
+  transform-origin: left center;
+}
+.deal__bar.is-expired .deal__fill { background: linear-gradient(90deg, #4a5a6b, #7d8b99); box-shadow: none; }
+.deal__scale { display: flex; justify-content: space-between; gap: 1rem; margin-top: .5rem; font-size: .7rem; color: var(--fg-faint); }
+.deal__state { margin-top: .5rem; font-size: var(--step--1); color: var(--fg-muted); }

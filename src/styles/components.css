@@ -1,32 +1,82 @@
 /* ---------------------------------------------------------------- buttons */
+/* One cut corner is the house shape. Buttons take it on the bottom-right
+ * only — cutting two corners read as a stray notch rather than a decision.
+ * Depth comes from a top inner highlight plus a coloured cast shadow, and
+ * hover sweeps a sheen across instead of repainting the whole face. */
 .btn {
+  --btn-cut: 12px;
   --btn-bg: transparent;
   --btn-fg: var(--fg);
   --btn-bd: var(--line);
-  position: relative; display: inline-flex; align-items: center; gap: .6rem;
-  padding: .8rem 1.6rem; border: 1px solid var(--btn-bd);
-  border-radius: 0;
-  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  --btn-glow: transparent;
+  position: relative; display: inline-flex; align-items: center; gap: .65rem;
+  padding: .85rem 1.7rem;
+  border: 1px solid var(--btn-bd);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--btn-cut)), calc(100% - var(--btn-cut)) 100%, 0 100%);
   background: var(--btn-bg); color: var(--btn-fg);
-  font-size: var(--step--1); font-weight: 600; letter-spacing: .02em;
-  overflow: hidden; isolation: isolate;
-  transition: color .35s var(--ease-out), border-color .35s var(--ease-out), transform .35s var(--ease-out);
+  font-size: var(--step--1); font-weight: 700; letter-spacing: .04em; line-height: 1.2;
+  text-align: center; overflow: hidden; isolation: isolate;
+  box-shadow: 0 10px 30px -14px var(--btn-glow);
+  transition: color .4s var(--ease-out), border-color .4s var(--ease-out),
+    transform .4s var(--ease-out), box-shadow .4s var(--ease-out);
 }
-.btn > span { position: relative; z-index: 1; }
-.btn > svg { position: relative; z-index: 1; font-size: 1.05em; transition: transform .35s var(--ease-out); }
+.btn > span { position: relative; z-index: 2; }
+.btn > svg { position: relative; z-index: 2; font-size: 1.05em; transition: transform .4s var(--ease-out); }
+
+/* Fill that wipes in from the left for the outlined variants. */
 .btn::before {
-  content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit;
-  background: linear-gradient(120deg, var(--accent), var(--accent-2));
-  transform: translateY(101%); transition: transform .45s var(--ease-out);
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(115deg, var(--accent), var(--accent-2));
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform .5s var(--ease-out);
 }
-.btn:hover::before, .btn:focus-visible::before { transform: none; }
-.btn:hover, .btn:focus-visible { color: var(--navy-900); border-color: transparent; }
-.btn:hover > svg { transform: translateX(4px); }
-.btn--solid { --btn-bg: var(--accent); --btn-fg: var(--navy-900); --btn-bd: transparent; }
-.btn--solid::before { background: linear-gradient(120deg, var(--white), var(--ice-100)); }
-.btn--ghost { --btn-bd: var(--line); }
+/* Travelling sheen, used by the solid variant. */
+.btn::after {
+  content: ""; position: absolute; z-index: 1; inset: 0 auto 0 0; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: translateX(-160%); opacity: 0;
+  transition: transform .75s var(--ease-out), opacity .3s linear;
+  pointer-events: none;
+}
+.btn:hover, .btn:focus-visible { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); transition-duration: .08s; }
+.btn:hover > svg, .btn:focus-visible > svg { transform: translateX(5px); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Solid — the primary action. Already filled, so hover sweeps the sheen. */
+.btn--solid {
+  --btn-fg: var(--navy-900);
+  --btn-bd: transparent;
+  --btn-glow: rgba(5, 237, 255, .5);
+  background: linear-gradient(150deg, var(--white) -30%, var(--accent) 45%, #00c8e0 100%);
+  box-shadow: 0 10px 30px -14px var(--btn-glow), inset 0 1px 0 rgba(255, 255, 255, .75);
+}
+.btn--solid::before { content: none; }
+.btn--solid:hover, .btn--solid:focus-visible {
+  color: var(--navy-900);
+  box-shadow: 0 18px 40px -16px rgba(5, 237, 255, .75), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+.btn--solid:hover::after, .btn--solid:focus-visible::after { transform: translateX(320%); opacity: 1; }
+
+/* Outlined variants fill on hover and flip their text to the dark ground. */
+.btn--ghost { --btn-bd: var(--line); background: rgba(236, 252, 255, .03); }
 .btn--line { --btn-bd: var(--line-strong); }
-.btn--lg { padding: .95rem 1.9rem; font-size: var(--step-0); }
+.btn--ghost:hover, .btn--ghost:focus-visible,
+.btn--line:hover, .btn--line:focus-visible {
+  color: var(--navy-900); border-color: transparent;
+  box-shadow: 0 18px 40px -18px rgba(5, 237, 255, .6);
+}
+.btn--ghost:hover::before, .btn--ghost:focus-visible::before,
+.btn--line:hover::before, .btn--line:focus-visible::before { transform: scaleX(1); }
+
+.btn--sm { --btn-cut: 9px; padding: .6rem 1.15rem; font-size: var(--step--1); }
+.btn--lg { --btn-cut: 16px; padding: 1.05rem 2.1rem; font-size: var(--step-0); letter-spacing: .06em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn::before, .btn::after, .btn > svg { transition-duration: .01ms; }
+  .btn:hover, .btn:focus-visible { transform: none; }
+  .btn::after { display: none; }
+}
 
 /* ---------------------------------------------------------- section head */
 .section-head {
@@ -62,17 +112,10 @@
 .roster__more, .latest__more { margin-top: clamp(2rem, 4vw, 3rem); }
 .roster__empty { padding: 3rem 0; text-align: center; color: var(--fg-muted); }
 
-.player-card { position: relative; perspective: 1100px; }
-.player-card[hidden] { display: none; }
-
-/* line-height:0 kills the anchor's line box, which was leaving the gold
- * edge poking out below the shield; the shield restores it for its content. */
-.player-card__link { position: relative; display: block; line-height: 0; }
-
 .player-card { position: relative; }
 .player-card[hidden] { display: none; }
 .player-card__link {
-  position: relative; display: block; overflow: hidden;
+  position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(0, 52, 88, .55), rgba(15, 28, 42, .9));
   transition: border-color .45s var(--ease-out), transform .45s var(--ease-out), box-shadow .45s var(--ease-out);
@@ -80,6 +123,7 @@
 .player-card__link:hover { border-color: var(--line-strong); transform: translateY(-6px); box-shadow: var(--shadow); }
 .player-card__media { position: relative; display: block; aspect-ratio: 53 / 62; overflow: hidden; }
 .player-card__media img {
+  display: block;
   width: 100%; height: 100%; object-fit: cover; object-position: top center;
   transition: transform .8s var(--ease-out), filter .6s var(--ease-out);
   filter: saturate(.85) contrast(1.05);
@@ -89,22 +133,36 @@
   position: absolute; inset: auto 0 0; height: 65%;
   background: linear-gradient(180deg, transparent, rgba(11, 21, 35, .92));
 }
+/* The player art already carries a shield frame with the position
+ * abbreviation top-left and the club crest top-right, so the group badge
+ * sits at the foot of the image where the glow gives it a clean ground. */
 .player-card__badge {
-  position: absolute; top: .8rem; left: .8rem; z-index: 2;
-  padding: .28rem .7rem; border-radius: 999px;
-  background: rgba(11, 21, 35, .7); backdrop-filter: blur(6px);
-  border: 1px solid var(--line);
-  font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  position: absolute; left: .8rem; bottom: .7rem; z-index: 2;
+  padding: .3rem .7rem; border-radius: 999px;
+  background: rgba(11, 21, 35, .72); backdrop-filter: blur(6px);
+  border: 1px solid var(--line-strong);
+  font-size: .64rem; line-height: 1.25; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   color: var(--accent);
 }
-.player-card__body { position: relative; display: block; padding: 1rem 1.1rem 1.2rem; }
+.player-card__body {
+  position: relative; display: flex; flex-direction: column; flex: 1;
+  padding: 1rem 1.1rem 1.2rem; line-height: 1.5;
+}
 .player-card__name { display: block; line-height: 1.06; }
 .player-card__name em { display: block; font-style: normal; font-size: var(--step--1); color: var(--fg-muted); }
 .player-card__name strong { display: block; font-size: var(--step-1); font-weight: 800; letter-spacing: -.02em; }
-.player-card__meta { display: flex; flex-wrap: wrap; gap: .3rem .7rem; margin-top: .5rem; font-size: var(--step--1); color: var(--fg-faint); }
-.player-card__meta span + span::before { content: "·"; margin-inline-end: .7rem; color: var(--accent); }
+.player-card__meta {
+  display: flex; flex-direction: column; gap: .18rem; margin-top: .5rem;
+  font-size: var(--step--1); line-height: 1.45; color: var(--fg-faint);
+}
+.player-card__role { color: var(--fg-muted); }
+.player-card__club { position: relative; padding-inline-start: .85rem; }
+.player-card__club::before {
+  content: ""; position: absolute; left: 0; top: .55em;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+}
 .player-card__cta {
-  display: inline-flex; align-items: center; gap: .4rem; margin-top: .85rem;
+  display: inline-flex; align-items: center; gap: .4rem; margin-top: auto; padding-top: .85rem;
   font-size: var(--step--1); font-weight: 600; color: var(--accent);
   opacity: 0; transform: translateY(6px);
   transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);

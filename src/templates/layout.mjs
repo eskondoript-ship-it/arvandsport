@@ -62,9 +62,15 @@ ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script
 <body class="${attr(bodyClass || '')}" data-barba="wrapper">`;
 }
 
+const CTA = { href: '/registration/', label: 'Registration' };
+
 function header(site, current) {
   const isActive = (href) => (href === current || (href !== '/' && current.startsWith(href)) ? ' is-current' : '');
+  /* Registration owns the header CTA, so it is dropped from the link row to
+   * stop the label appearing twice side by side. The mobile menu has no CTA,
+   * so it still lists every nav entry. */
   const links = site.nav
+    .filter((item) => item.href !== CTA.href)
     .map(
       (item) =>
         `<li class="nav__item"><a class="nav__link${isActive(item.href)}" href="${attr(item.href)}"><span data-scramble>${esc(item.label)}</span></a></li>`,
@@ -80,7 +86,7 @@ function header(site, current) {
     <nav class="nav" aria-label="Primary">
       <ul class="nav__list">${links}</ul>
     </nav>
-    <a class="btn btn--ghost site-header__cta" href="/registration/"><span>Registration</span></a>
+    <a class="btn btn--solid btn--sm site-header__cta${isActive(CTA.href)}" href="${attr(CTA.href)}"><span>${esc(CTA.label)}</span>${ICONS.arrow}</a>
     <button class="burger" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">
       <span class="burger__box"><span class="burger__bar"></span><span class="burger__bar"></span><span class="burger__bar"></span></span>
       <span class="u-sr-only">Menu</span>

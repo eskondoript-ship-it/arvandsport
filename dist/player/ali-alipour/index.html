@@ -36,9 +36,9 @@
       <img class="brand__logo" src="../../assets/img/brand/logo-wordmark.png" alt="ARVAND SPORT" width="1024" height="187">
     </a>
     <nav class="nav" aria-label="Primary">
-      <ul class="nav__list"><li class="nav__item"><a class="nav__link" href="../../#home"><span data-scramble>Home</span></a></li><li class="nav__item"><a class="nav__link" href="../../#services"><span data-scramble>Services</span></a></li><li class="nav__item"><a class="nav__link" href="../../#players"><span data-scramble>Players</span></a></li><li class="nav__item"><a class="nav__link" href="../../#team"><span data-scramble>Our Team</span></a></li><li class="nav__item"><a class="nav__link" href="../../news/"><span data-scramble>News</span></a></li><li class="nav__item"><a class="nav__link" href="../../registration/"><span data-scramble>Registration</span></a></li><li class="nav__item"><a class="nav__link" href="../../#contacts"><span data-scramble>Contact us</span></a></li></ul>
+      <ul class="nav__list"><li class="nav__item"><a class="nav__link" href="../../#home"><span data-scramble>Home</span></a></li><li class="nav__item"><a class="nav__link" href="../../#services"><span data-scramble>Services</span></a></li><li class="nav__item"><a class="nav__link" href="../../#players"><span data-scramble>Players</span></a></li><li class="nav__item"><a class="nav__link" href="../../#team"><span data-scramble>Our Team</span></a></li><li class="nav__item"><a class="nav__link" href="../../news/"><span data-scramble>News</span></a></li><li class="nav__item"><a class="nav__link" href="../../#contacts"><span data-scramble>Contact us</span></a></li></ul>
     </nav>
-    <a class="btn btn--ghost site-header__cta" href="../../registration/"><span>Registration</span></a>
+    <a class="btn btn--solid btn--sm site-header__cta" href="../../registration/"><span>Registration</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></a>
     <button class="burger" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">
       <span class="burger__box"><span class="burger__bar"></span><span class="burger__bar"></span><span class="burger__bar"></span></span>
       <span class="u-sr-only">Menu</span>
@@ -84,6 +84,31 @@
   <span class="player-hero__watermark" aria-hidden="true">Alipour</span>
 </section>
 
+<section class="section section--tight dossier">
+  <div class="shell">
+    <header class="section-head section-head--left" data-reveal>
+  <p class="section-head__kicker"><span class="section-head__dot"></span>Dossier</p>
+  <h2 class="section-head__title" data-split>Performance profile</h2>
+  
+</header>
+    <div class="dossier__grid"><ul class="vitals" data-reveal><li class="vital">
+    <span class="vital__value" data-count="30">30</span>
+    <span class="vital__label">Age</span>
+  </li><li class="vital">
+    <span class="vital__value">1.81<i>m</i></span>
+    <span class="vital__label">Height</span>
+  </li></ul><div class="deal" data-reveal>
+    <h3 class="deal__title">Club &amp; contract</h3>
+    <dl class="deal__rows"><div class="deal__row"><dt>Club</dt><dd>Gil Vicente FC</dd></div><div class="deal__row"><dt>Joined</dt><dd>Jul 1, 2022</dd></div><div class="deal__row"><dt>Contract until</dt><dd>Jun 30, 2024</dd></div></dl>
+    <div class="deal__bar is-expired">
+      <div class="deal__track"><span class="deal__fill" data-bar style="--pct:100.0%"></span></div>
+      <div class="deal__scale"><span>Jul 1, 2022</span><span>Jun 30, 2024</span></div>
+      <p class="deal__state">Term complete — contact the agency for current status</p>
+    </div>
+  </div></div>
+  </div>
+</section>
+
 <section class="section section--tight">
   <div class="shell player-detail">
     <div class="player-detail__facts">
@@ -93,7 +118,8 @@
   
 </header>
       <dl class="facts" data-reveal>
-        <div class="facts__row"><dt>Date of birth / Age</dt><dd>Nov 11, 1995 (28)</dd></div>
+        
+        <div class="facts__row"><dt>Date of birth</dt><dd>Nov 11, 1995</dd></div>
         <div class="facts__row"><dt>Place of birth</dt><dd>Qaemshahr, Mazandaran</dd></div>
         <div class="facts__row"><dt>Citizenship</dt><dd>Iran</dd></div>
         <div class="facts__row"><dt>Height</dt><dd>1,81 m</dd></div>
@@ -144,11 +170,14 @@
     <span class="player-card__media">
       <img src="../../assets/img/players/ahoora-zand.png" alt="Ahoora Zand" width="529" height="760" loading="lazy" decoding="async">
       <span class="player-card__glow" aria-hidden="true"></span>
+      <span class="player-card__badge">Attack</span>
     </span>
-    <span class="player-card__badge">Attack</span>
     <span class="player-card__body">
       <span class="player-card__name"><em>Ahoora</em><strong>Zand</strong></span>
-      <span class="player-card__meta"><span>Centre-Forward</span><span>Shams Azar Qazvin</span></span>
+      <span class="player-card__meta">
+        <span class="player-card__role">Centre-Forward</span>
+        <span class="player-card__club">Shams Azar Qazvin</span>
+      </span>
       <span class="player-card__cta">Profile <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></span>
     </span>
   </a>
@@ -162,11 +191,14 @@
     <span class="player-card__media">
       <img src="../../assets/img/players/ali-al-mosawe.png" alt="Ali Al-Mosawe" width="529" height="760" loading="lazy" decoding="async">
       <span class="player-card__glow" aria-hidden="true"></span>
+      <span class="player-card__badge">Attack</span>
     </span>
-    <span class="player-card__badge">Attack</span>
     <span class="player-card__body">
       <span class="player-card__name"><em>Ali</em><strong>Al-Mosawe</strong></span>
-      <span class="player-card__meta"><span>Left Winger</span><span>CD Gouveia</span></span>
+      <span class="player-card__meta">
+        <span class="player-card__role">Left Winger</span>
+        <span class="player-card__club">CD Gouveia</span>
+      </span>
       <span class="player-card__cta">Profile <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></span>
     </span>
   </a>
@@ -180,11 +212,14 @@
     <span class="player-card__media">
       <img src="../../assets/img/players/amir-roustaei.png" alt="Amir Roustaei" width="529" height="760" loading="lazy" decoding="async">
       <span class="player-card__glow" aria-hidden="true"></span>
+      <span class="player-card__badge">Attack</span>
     </span>
-    <span class="player-card__badge">Attack</span>
     <span class="player-card__body">
       <span class="player-card__name"><em>Amir</em><strong>Roustaei</strong></span>
-      <span class="player-card__meta"><span>Centre-Forward</span><span>Sitra Club</span></span>
+      <span class="player-card__meta">
+        <span class="player-card__role">Centre-Forward</span>
+        <span class="player-card__club">Sitra Club</span>
+      </span>
       <span class="player-card__cta">Profile <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></span>
     </span>
   </a>
@@ -198,11 +233,14 @@
     <span class="player-card__media">
       <img src="../../assets/img/players/mario-fontanella.png" alt="Mario Fontanella" width="529" height="760" loading="lazy" decoding="async">
       <span class="player-card__glow" aria-hidden="true"></span>
+      <span class="player-card__badge">Attack</span>
     </span>
-    <span class="player-card__badge">Attack</span>
     <span class="player-card__body">
       <span class="player-card__name"><em>Mario</em><strong>Fontanella</strong></span>
-      <span class="player-card__meta"><span>Centre-Forward</span><span>Al-Yarmouk SC (Kuwait)</span></span>
+      <span class="player-card__meta">
+        <span class="player-card__role">Centre-Forward</span>
+        <span class="player-card__club">Al-Yarmouk SC (Kuwait)</span>
+      </span>
       <span class="player-card__cta">Profile <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></span>
     </span>
   </a>
