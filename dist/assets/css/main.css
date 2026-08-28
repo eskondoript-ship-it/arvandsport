@@ -828,6 +828,14 @@ a.office__row:hover { color: var(--white); }
  */
 .strike { position: relative; background: linear-gradient(180deg, var(--navy-900), #061020 55%, var(--navy-900)); }
 .strike__pin {
+  /* The ball's rest position is derived from these, so it sits on the boot.
+     The boot lands at 65% across and 12% down the figure's box (see
+     POSES.strike in src/scripts/kicker.js). */
+  --fig-left: clamp(0rem, 4vw, 6rem);
+  --fig-size: clamp(210px, 27vw, 380px);
+  --fig-bottom: clamp(1rem, 5vh, 3rem);
+  --ball-size: clamp(36px, 4.4vw, 66px);
+
   position: relative; overflow: hidden;
   min-height: min(100svh, 780px);
   display: grid; align-items: end;
@@ -838,16 +846,7 @@ a.office__row:hover { color: var(--white); }
   fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke;
 }
 
-.strike__player {
-  position: absolute; left: clamp(-1rem, 1vw, 3rem); bottom: -4%; z-index: 2; margin: 0;
-  width: clamp(230px, 33vw, 440px);
-  filter: drop-shadow(0 30px 50px rgba(0, 0, 0, .6));
-  /* The source asset is a FIFA-style card, frame included. Fading the lower
-   * edge grounds the figure on the pitch instead of leaving a card hovering. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 97%);
-  mask-image: linear-gradient(to bottom, #000 72%, transparent 97%);
-}
-.strike__player img { width: 100%; height: auto; }
+
 
 .strike__speed { position: absolute; left: 0; bottom: 22%; z-index: 1; display: grid; gap: 10px; width: clamp(120px, 22vw, 280px); }
 .strike__speed span {
@@ -858,8 +857,9 @@ a.office__row:hover { color: var(--white); }
 
 .strike__ball {
   position: absolute; z-index: 3;
-  left: clamp(10rem, 27vw, 24rem); bottom: clamp(4rem, 14vh, 8rem);
-  width: clamp(36px, 4.4vw, 66px); aspect-ratio: 1;
+  width: var(--ball-size); aspect-ratio: 1;
+  left: calc(var(--fig-left) + .65 * var(--fig-size) - .5 * var(--ball-size));
+  bottom: calc(var(--fig-bottom) + .88 * var(--fig-size) - .5 * var(--ball-size));
 }
 .strike__ball-core { display: block; width: 100%; height: 100%; }
 .strike__ball svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .55)); }
@@ -874,8 +874,10 @@ a.office__row:hover { color: var(--white); }
 }
 
 .strike__flash {
-  position: absolute; z-index: 3; left: clamp(8rem, 25vw, 21rem); bottom: clamp(2.5rem, 11vh, 6.5rem);
-  width: clamp(80px, 12vw, 170px); aspect-ratio: 1; border-radius: 50%;
+  position: absolute; z-index: 3;
+  left: calc(var(--fig-left) + .65 * var(--fig-size) - 50px);
+  bottom: calc(var(--fig-bottom) + .88 * var(--fig-size) - 50px);
+  width: 100px; aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, .95), rgba(5, 237, 255, .35) 45%, transparent 70%);
   opacity: 0; pointer-events: none;
 }
@@ -884,15 +886,15 @@ a.office__row:hover { color: var(--white); }
  * the layout position so JS can measure it; the svg inside carries the
  * animation. */
 .strike__net-box {
-  position: absolute; z-index: 1; right: clamp(1.5rem, 7vw, 9rem); top: clamp(4.5rem, 17vh, 11rem);
-  width: clamp(170px, 25vw, 340px);
+  position: absolute; z-index: 1; right: clamp(2rem, 11vw, 14rem); top: clamp(2.5rem, 9vh, 5.5rem);
+  width: clamp(170px, 24vw, 320px);
 }
 .strike__net { width: 100%; height: auto; transform-origin: center bottom; }
 .strike__mesh line { stroke: rgba(236, 252, 255, .32); stroke-width: 1; }
 .strike__frame { fill: none; stroke: var(--white); stroke-width: 3; }
 
 .strike__shock {
-  position: absolute; z-index: 2; right: clamp(6rem, 16vw, 20rem); top: clamp(9rem, 26vh, 18rem);
+  position: absolute; z-index: 2; right: clamp(6rem, 19vw, 24rem); top: clamp(6rem, 18vh, 12rem);
   width: clamp(70px, 10vw, 150px); aspect-ratio: 1; border-radius: 50%;
   border: 2px solid var(--accent); opacity: 0;
 }
@@ -920,7 +922,6 @@ a.office__row:hover { color: var(--white); }
   .strike__player { width: 44vw; opacity: .55; }
   .strike__copy { justify-self: stretch; max-width: none; }
   .strike__net-box { width: 42vw; top: clamp(4rem, 13vh, 8rem); right: 1rem; }
-  .strike__ball { left: 30vw; bottom: 34vh; }
   .strike__hint { display: none; }
 }
 
@@ -929,3 +930,33 @@ a.office__row:hover { color: var(--white); }
 .rail__track { display: flex; gap: clamp(.9rem, 2vw, 1.5rem); width: max-content; }
 .rail__track > * { width: clamp(160px, 20vw, 230px); flex: none; }
 @media (max-width: 720px) { .rail { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+
+/* ------------------------------------------------------- the kick figure
+ * Original stroke figure, posed by src/scripts/kicker.js. It replaces the
+ * static cutout as the moving element; the photograph stays in the copy
+ * panel, where it does the job of saying who this is.
+ */
+.strike__figure {
+  position: absolute; left: var(--fig-left); bottom: var(--fig-bottom);
+  z-index: 2; width: var(--fig-size); aspect-ratio: 1;
+}
+.kicker { width: 100%; height: 100%; overflow: visible; }
+.kicker line {
+  stroke: var(--white); stroke-width: 9; stroke-linecap: round;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .5));
+}
+.kicker__torso { stroke-width: 13 !important; }
+.kicker__limbs--near line { stroke: var(--accent); }
+.kicker__head { fill: var(--white); }
+
+.strike__portrait {
+  width: 54px; height: 54px; margin: 0 0 .9rem; overflow: hidden;
+  border-radius: 50%; border: 1px solid var(--line-strong);
+  background: rgba(0, 52, 88, .5);
+}
+.strike__portrait img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+@media (max-width: 860px) {
+  .strike__pin { --fig-size: 46vw; --fig-left: 0rem; }
+  .strike__figure { opacity: .9; }
+}

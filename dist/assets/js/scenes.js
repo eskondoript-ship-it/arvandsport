@@ -13,6 +13,7 @@
  */
 import { $, $$, gsap, ScrollTrigger } from './env.js';
 import { splitChars } from './text.js';
+import { POSES, setPose, poseTo } from './kicker.js';
 
 const registry = new Set();
 
@@ -41,6 +42,7 @@ function strikeScene(root) {
 
   const pin = $('[data-strike-pin]', section);
   const player = $('[data-strike-player]', section);
+  const figure = $('[data-kicker]', section);
   const ball = $('[data-strike-ball]', section);
   const spin = $('[data-strike-spin]', section);
   const tail = $('[data-strike-tail]', section);
@@ -64,7 +66,8 @@ function strikeScene(root) {
     gsap.set(line, { strokeDasharray: length, strokeDashoffset: length });
   }
 
-  gsap.set(player, { xPercent: -46, yPercent: 6, rotate: -7, scale: 0.9, opacity: 0 });
+  gsap.set(player, { xPercent: -46, yPercent: 6, rotate: 0, scale: 0.9, opacity: 0 });
+  if (figure) setPose(figure, POSES.approach);
   gsap.set(ball, { x: 0, y: 0, scale: 0, opacity: 0 });
   gsap.set(spin, { rotate: 0 });
   gsap.set(tail, { scaleX: 0, opacity: 0 });
@@ -110,12 +113,19 @@ function strikeScene(root) {
     .to(speedLines, { scaleX: 1, opacity: 1, duration: 0.08, stagger: 0.012 }, 0.2)
     .to(speedLines, { scaleX: 0, opacity: 0, duration: 0.08, stagger: 0.012 }, 0.34);
 
-  /* Stage 3 — plant and contact. */
+  /* Stage 3 — plant, leap, invert, contact. The figure is posed joint by
+   * joint rather than rotated as a sprite, so the kick actually articulates. */
+  if (figure) {
+    poseTo(timeline, gsap, figure, POSES.load, 0.32, 0.06, 'power2.in');
+    poseTo(timeline, gsap, figure, POSES.launch, 0.38, 0.05, 'power2.out');
+    poseTo(timeline, gsap, figure, POSES.strike, 0.43, 0.03, 'power4.out');
+    poseTo(timeline, gsap, figure, POSES.follow, 0.5, 0.08, 'power1.out');
+  }
   timeline
-    .to(player, { rotate: 3, scaleY: 0.97, scaleX: 1.03, duration: 0.04, ease: 'power3.in' }, 0.38)
-    .to(player, { rotate: -1, scaleY: 1, scaleX: 1, duration: 0.06, ease: 'back.out(2)' }, 0.42)
-    .to(flash, { opacity: 1, duration: 0.02 }, 0.42)
-    .to(flash, { opacity: 0, duration: 0.06 }, 0.44);
+    .to(player, { y: -18, duration: 0.06, ease: 'power2.out' }, 0.38)
+    .to(player, { y: 0, duration: 0.1, ease: 'power2.in' }, 0.48)
+    .to(flash, { opacity: 1, duration: 0.02 }, 0.43)
+    .to(flash, { opacity: 0, duration: 0.06 }, 0.45);
 
   /* Stage 4 — the strike. x is linear, y is two eased halves, which gives a
    * real parabola and stays correct at any viewport size. */

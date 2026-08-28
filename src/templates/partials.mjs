@@ -83,3 +83,26 @@ export const BALL_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true" focusable
   <path fill="#0b1523" d="M38 66l12 8 12-8-4.5-9h-15z"/>
   <path fill="#0b1523" d="M28 72l7-1 3 8-6 3zM72 72l-7-1-3 8 6 3z"/>
 </svg>`;
+
+/**
+ * An articulated figure, drawn as weighted strokes — head, torso, two arms,
+ * two legs. Original artwork; `src/scripts/kicker.js` poses it.
+ *
+ * Authored in a 200×200 box so pose coordinates stay readable.
+ */
+export const KICKER_SVG = `<svg class="kicker" data-kicker viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+  <g class="kicker__limbs">
+    <line data-joint="armFar"  x1="100" y1="62"  x2="86"  y2="82" />
+    <line data-joint="foreFar" x1="86"  y1="82"  x2="80"  y2="100" />
+    <line data-joint="legFar"  x1="100" y1="105" x2="92"  y2="140" />
+    <line data-joint="shinFar" x1="92"  y1="140" x2="92"  y2="174" />
+  </g>
+  <line class="kicker__torso" data-joint="torso" x1="100" y1="58" x2="100" y2="105" />
+  <g class="kicker__limbs kicker__limbs--near">
+    <line data-joint="armNear"  x1="100" y1="62"  x2="114" y2="82" />
+    <line data-joint="foreNear" x1="114" y1="82"  x2="120" y2="100" />
+    <line data-joint="legNear"  x1="100" y1="105" x2="108" y2="140" />
+    <line data-joint="shinNear" x1="108" y1="140" x2="108" y2="174" />
+  </g>
+  <circle class="kicker__head" data-joint="head" cx="100" cy="42" r="13" />
+</svg>`;

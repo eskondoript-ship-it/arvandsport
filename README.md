@@ -106,24 +106,31 @@ height drives one timeline:
 | --- | --- |
 | 0.00–0.18 | pitch markings draw themselves in (`stroke-dashoffset`), his name rises letter by letter |
 | 0.18–0.38 | run-up — the figure drives in from the left, speed lines streak behind |
-| 0.38–0.45 | plant — squash and stretch, contact flash |
+| 0.32–0.45 | plant, leap, invert — the figure articulates through its poses |
+| 0.43–0.46 | contact — striking boot at the apex, flash on the ball |
 | 0.45–0.72 | the strike — ball fires along a parabola, spinning 1080°, comet tail behind it |
 | 0.66–0.85 | the net takes it — mesh ripples and settles on an elastic ease, shockwave ring expands |
 | 0.84–1.00 | payoff — his real record counts up: 79 caps, 43 goals |
 
 Two things worth knowing about how it is built:
 
-* **The kick is choreography, not a photograph.** The live site's only image of
-  Taremi is a static studio portrait, and no photo of him striking a ball was
-  invented or sourced from elsewhere. The shot reads through the run-up, the
-  plant and the ball leaving frame. `content/site.json` → `strike.image` is the
-  single swap point if a licensed action cutout is ever supplied.
+* **The figure is original artwork, not footage.** The moving player is a
+  stroke figure posed joint by joint through five hand-authored keyframes
+  (`src/scripts/kicker.js`): approach, load, launch, strike, follow-through.
+  The overhead kick was choreographed against a reference clip supplied by the
+  client, but no frame, crop or trace of that footage is reproduced or shipped
+  — the repository contains no broadcast imagery. The site's own studio
+  portrait of Taremi stays in the copy panel, where it establishes who this is.
+  `content/site.json` → `strike.image` is the single swap point for it.
 * **The flight is measured, not guessed.** `flightX`/`flightY` read
   `offsetLeft`/`offsetTop` off the ball and the net's wrapper — layout values
   that transforms do not disturb — so the ball lands in the goal at any
   viewport size. (The net is wrapped in a `div` for exactly this reason: SVG
   elements have no `offset*` properties.) The values are functions, so
-  `invalidateOnRefresh` re-measures them after a resize.
+  `invalidateOnRefresh` re-measures them after a resize. The ball's rest
+  position is derived in CSS from the figure's own geometry (`--fig-*` custom
+  properties), so it sits on the striking boot at every viewport size rather
+  than at a hand-tuned offset.
 
 ### Everything else
 

@@ -411,9 +411,22 @@
 
     <div class="strike__speed" data-strike-speed aria-hidden="true"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span></div>
 
-    <figure class="strike__player" data-strike-player>
-      <img src="./assets/img/players/mehdi-taremi.png" alt="Mehdi Taremi" width="529" height="760" loading="lazy" decoding="async">
-    </figure>
+    <div class="strike__figure" data-strike-player><svg class="kicker" data-kicker viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+  <g class="kicker__limbs">
+    <line data-joint="armFar"  x1="100" y1="62"  x2="86"  y2="82" />
+    <line data-joint="foreFar" x1="86"  y1="82"  x2="80"  y2="100" />
+    <line data-joint="legFar"  x1="100" y1="105" x2="92"  y2="140" />
+    <line data-joint="shinFar" x1="92"  y1="140" x2="92"  y2="174" />
+  </g>
+  <line class="kicker__torso" data-joint="torso" x1="100" y1="58" x2="100" y2="105" />
+  <g class="kicker__limbs kicker__limbs--near">
+    <line data-joint="armNear"  x1="100" y1="62"  x2="114" y2="82" />
+    <line data-joint="foreNear" x1="114" y1="82"  x2="120" y2="100" />
+    <line data-joint="legNear"  x1="100" y1="105" x2="108" y2="140" />
+    <line data-joint="shinNear" x1="108" y1="140" x2="108" y2="174" />
+  </g>
+  <circle class="kicker__head" data-joint="head" cx="100" cy="42" r="13" />
+</svg></div>
 
     <span class="strike__flash" data-strike-flash aria-hidden="true"></span>
     <div class="strike__ball" data-strike-ball aria-hidden="true">
@@ -437,6 +450,9 @@
     <span class="strike__shock" data-strike-shock aria-hidden="true"></span>
 
     <div class="strike__copy" data-strike-copy>
+      <figure class="strike__portrait">
+        <img src="./assets/img/players/mehdi-taremi.png" alt="Mehdi Taremi" width="529" height="760" loading="lazy" decoding="async">
+      </figure>
       <p class="strike__kicker">Client spotlight</p>
       <h2 class="strike__title" id="strike-title" data-strike-title>Mehdi Taremi</h2>
       <p class="strike__sub">Centre-Forward · FC Porto</p>

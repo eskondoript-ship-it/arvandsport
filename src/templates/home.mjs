@@ -1,5 +1,5 @@
 import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
-import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG } from './partials.mjs';
+import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG, KICKER_SVG } from './partials.mjs';
 
 function hero(site) {
   return `<section class="hero" id="home" data-hero>
@@ -114,9 +114,7 @@ function strike(site, players) {
 
     <div class="strike__speed" data-strike-speed aria-hidden="true">${speedLines}</div>
 
-    <figure class="strike__player" data-strike-player>
-      <img src="${attr(config.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
-    </figure>
+    <div class="strike__figure" data-strike-player>${KICKER_SVG}</div>
 
     <span class="strike__flash" data-strike-flash aria-hidden="true"></span>
     <div class="strike__ball" data-strike-ball aria-hidden="true">
@@ -133,6 +131,9 @@ function strike(site, players) {
     <span class="strike__shock" data-strike-shock aria-hidden="true"></span>
 
     <div class="strike__copy" data-strike-copy>
+      <figure class="strike__portrait">
+        <img src="${attr(config.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
+      </figure>
       <p class="strike__kicker">${esc(config.kicker)}</p>
       <h2 class="strike__title" id="strike-title" data-strike-title>${esc(player.name)}</h2>
       <p class="strike__sub">${esc([player.position.detail, player.club].filter(Boolean).join(' · '))}</p>
