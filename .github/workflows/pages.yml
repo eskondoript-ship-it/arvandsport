@@ -76,7 +76,13 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: ${{ github.event.repository.name }}
+      # BASE_PATH here too, and not by habit: the asset check resolves the
+      # experience's absolute paths against it, so without it the check is
+      # asking whether an export built for /arvandsport/ works at the domain
+      # root, and correctly answers no.
       - run: npm test
+        env:
+          BASE_PATH: ${{ github.event.repository.name }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -82,11 +82,19 @@ for (const file of files) {
      * rather than waved through, and a stale export built at the wrong prefix
      * fails here instead of on the live site. */
     if (page.startsWith('/experience/') && ref.startsWith('/')) {
-      if (!ref.startsWith(PREFIX)) {
-        failures.push(`${page} -> ${ref} (built for a different BASE_PATH; expected ${PREFIX})`);
-      } else if (!(await resolves(DIST, ref.slice(PREFIX.length)))) {
-        failures.push(`${page} -> ${ref} (missing)`);
-      }
+      if (ref.startsWith(PREFIX) && (await resolves(DIST, ref.slice(PREFIX.length)))) continue;
+      /* Name the mismatch rather than reporting a bare "missing". Every ref in
+       * the export is wrong together when the prefixes disagree, and the first
+       * time that happened the twenty-four identical "missing" lines sent the
+       * search towards a copy that had in fact worked. The prefix the export
+       * was built with is right there in the path, so say both. */
+      const built = ref.startsWith('/experience/') ? '' : `/${ref.split('/')[1]}`;
+      failures.push(
+        built === PREFIX
+          ? `${page} -> ${ref} (missing)`
+          : `${page} -> ${ref} (export built with BASE_PATH=${built.slice(1) || '<unset>'}, ` +
+            `checked against ${PREFIX.slice(1) || '<unset>'})`,
+      );
       continue;
     }
 
