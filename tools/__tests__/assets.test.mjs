@@ -16,6 +16,9 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const DIST = join(ROOT, 'dist');
 
+/* Same normalisation the build uses, so the two cannot drift. */
+const PREFIX = process.env.BASE_PATH ? `/${process.env.BASE_PATH.replace(/^\/|\/$/g, '')}` : '';
+
 let checked = 0;
 const failures = [];
 
@@ -70,6 +73,23 @@ for (const file of files) {
     /* 404.html is served at an unknown depth and stays absolute by design. */
     if (page === '/404.html' && ref.startsWith('/')) continue;
     checked += 1;
+
+    /* The WebGL experience is a Next.js static export, and Next writes every
+     * asset path absolute with the deploy prefix already baked in. Those are
+     * correct, not broken — but only if the prefix they were built with
+     * matches the one this build used, which is exactly the mismatch worth
+     * catching. So they are resolved from the dist root against BASE_PATH
+     * rather than waved through, and a stale export built at the wrong prefix
+     * fails here instead of on the live site. */
+    if (page.startsWith('/experience/') && ref.startsWith('/')) {
+      if (!ref.startsWith(PREFIX)) {
+        failures.push(`${page} -> ${ref} (built for a different BASE_PATH; expected ${PREFIX})`);
+      } else if (!(await resolves(DIST, ref.slice(PREFIX.length)))) {
+        failures.push(`${page} -> ${ref} (missing)`);
+      }
+      continue;
+    }
+
     if (ref.startsWith('/')) {
       failures.push(`${page} -> ${ref} (site-absolute; will 404 under a path prefix)`);
       continue;

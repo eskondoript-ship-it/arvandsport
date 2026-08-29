@@ -318,6 +318,33 @@ await writeFile(
   `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
 );
 
+/* ------------------------------------------------------- WebGL experience */
+
+/**
+ * Fold experience/out into dist/experience, if it has been built.
+ *
+ * This belongs in the build rather than in the workflow beside it. The first
+ * thing this file does is delete dist/ outright, so a copy made anywhere else
+ * has to happen afterwards or it is thrown away — and "afterwards" is a rule
+ * that lives in someone's head right up until the day it does not. Doing it
+ * here makes the ordering a property of the build instead of a thing to
+ * remember.
+ *
+ * It is skipped silently when the app has not been built. The experience is a
+ * separate Next.js app with its own dependencies, and the main site still has
+ * to build on a clean checkout with nothing installed — which is the whole
+ * reason the two are separate.
+ */
+const EXPERIENCE_OUT = join(ROOT, 'experience/out');
+let experienceFiles = 0;
+try {
+  await stat(join(EXPERIENCE_OUT, 'index.html'));
+  await cp(EXPERIENCE_OUT, join(DIST, 'experience'), { recursive: true });
+  experienceFiles = (await walk(join(DIST, 'experience'))).length;
+} catch {
+  /* Not built. Nothing to say about it beyond the report line below. */
+}
+
 /* ------------------------------------------------------------------ report */
 
 const files = await walk(DIST);
@@ -326,3 +353,8 @@ for (const f of files) bytes += (await stat(join(DIST, f))).size;
 console.log(`pages:  ${routes.length + 1}`);
 console.log(`files:  ${files.length}`);
 console.log(`size:   ${(bytes / 1024 / 1024).toFixed(2)} MB`);
+console.log(
+  experienceFiles
+    ? `webgl:  dist/experience, ${experienceFiles} files`
+    : 'webgl:  not built — run `npm ci && npm run build` in experience/',
+);

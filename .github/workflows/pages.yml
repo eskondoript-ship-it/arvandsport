@@ -21,9 +21,15 @@ permissions:
   pages: write
   id-token: write
 
+# Pages allows one deployment at a time, so runs share a group. They queue
+# rather than cancel: with a ten-minute cron in the mix, cancel-in-progress
+# meant whichever run started second killed the first, and since the cron fires
+# far more often than anyone pushes, that was almost always a push being
+# cancelled. The commit still deployed on the next scheduled run, but every
+# push showed a red cross for a failure that never happened.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -38,21 +44,16 @@ jobs:
       # bad feed can never fail the deploy.
       - run: npm run news
         continue-on-error: true
-      # The build itself has no dependencies; it only reads content/ and src/.
-      # BASE_PATH is the Pages project-site prefix and is used only to keep
-      # 404.html styled: the host serves it at an unknown depth, so unlike
-      # every other page it cannot use relative asset paths.
-      - run: npm run build
-        env:
-          BASE_PATH: ${{ github.event.repository.name }}
-
       # The WebGL experience is a separate Next.js app with its own
-      # dependencies, statically exported into dist/experience/. It is cached
-      # on a hash of its own sources: this workflow also runs on a ten-minute
-      # cron for the news wire, and reinstalling three, R3F and Next to
-      # reproduce a byte-identical export every ten minutes is a waste of
-      # everyone's CI minutes. A cache hit skips both the install and the
-      # build; any change to the app misses the key and rebuilds.
+      # dependencies, statically exported into experience/out. It is built
+      # first: the site build deletes dist/ and then copies this in, so
+      # anything produced afterwards would be thrown away.
+      #
+      # It is cached on a hash of its own sources, because this workflow also
+      # runs on a ten-minute cron for the news wire and reinstalling three,
+      # R3F and Next to reproduce a byte-identical export every ten minutes is
+      # a waste of everyone's CI minutes. A cache hit skips the install and the
+      # build both; any change to the app misses the key and rebuilds.
       - id: experience-cache
         uses: actions/cache@v4
         with:
@@ -66,7 +67,16 @@ jobs:
         working-directory: experience
         env:
           BASE_PATH: ${{ github.event.repository.name }}
-      - run: cp -r experience/out dist/experience
+
+      # The site build itself has no dependencies; it only reads content/ and
+      # src/, and folds experience/out into dist/experience on its way past.
+      # BASE_PATH is the Pages project-site prefix. For the site it is used
+      # only to keep 404.html styled — the host serves that at an unknown
+      # depth, so unlike every other page it cannot use relative asset paths.
+      - run: npm run build
+        env:
+          BASE_PATH: ${{ github.event.repository.name }}
+      - run: npm test
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
