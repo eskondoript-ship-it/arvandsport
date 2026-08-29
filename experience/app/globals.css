@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #08080c;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  /* Lenis owns the scroll. Leaving smooth-scroll on here as well gives two
+     engines the same job and they arrive at different positions. */
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--color-ink);
+  color: #eaf4fb;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Lenis needs the document height to come from the content, not from a
+   scrolling element with its own overflow. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Anyone who asked for less motion gets the scene held at its opening frame
+   rather than scrubbed. The copy still scrolls and still reads. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

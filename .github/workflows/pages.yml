@@ -45,6 +45,29 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: ${{ github.event.repository.name }}
+
+      # The WebGL experience is a separate Next.js app with its own
+      # dependencies, statically exported into dist/experience/. It is cached
+      # on a hash of its own sources: this workflow also runs on a ten-minute
+      # cron for the news wire, and reinstalling three, R3F and Next to
+      # reproduce a byte-identical export every ten minutes is a waste of
+      # everyone's CI minutes. A cache hit skips both the install and the
+      # build; any change to the app misses the key and rebuilds.
+      - id: experience-cache
+        uses: actions/cache@v4
+        with:
+          path: experience/out
+          key: experience-${{ hashFiles('experience/app/**', 'experience/components/**', 'experience/lib/**', 'experience/public/**', 'experience/package-lock.json', 'experience/next.config.ts') }}
+      - if: steps.experience-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        working-directory: experience
+      - if: steps.experience-cache.outputs.cache-hit != 'true'
+        run: npm run build
+        working-directory: experience
+        env:
+          BASE_PATH: ${{ github.event.repository.name }}
+      - run: cp -r experience/out dist/experience
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
