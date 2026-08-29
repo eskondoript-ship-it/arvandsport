@@ -657,16 +657,24 @@ a.office__row:hover { color: var(--white); }
 }
 
 /* Display line ---------------------------------------------------------- */
-.apex__title { margin: 0; }
+/* The pin centres its grid items, which shrinks the heading to its content —
+   so space-between inside it had no free space to distribute and the halves
+   stayed bunched around the centre. Stretched, the halves reach the gutters
+   and the gap between them is genuinely centred. */
+.apex__title { margin: 0; width: 100%; justify-self: stretch; }
 .apex__display {
   /* One line, split. The gap is the ball's seat: the two halves sit at the
      outer edges and the object occupies the middle, so the line reads as one
      phrase interrupted rather than as two stacked labels. */
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; margin-inline: auto;
-  /* Sized so the pair plus the gap fits the viewport: the halves must not run
-     off the edge, and nowrap means they will if the type is a step too big. */
-  gap: clamp(120px, 24vw, 380px);
+  /* space-between, not centre. The two halves are different widths — ARVAND
+     is half again as wide as SPORT — so centring the line as a unit put the
+     gap off-centre while the ball stayed pinned at 50%, and it bit further
+     into one word than the other. Pushed to the edges instead, the gap is
+     always centred in the container, so the ball lands in the middle of it
+     whatever the words are. gap is then a minimum, not a fixed spacer. */
+  display: flex; align-items: center;
+  width: 100%; margin-inline: auto; padding-inline: var(--gutter);
+  gap: clamp(60px, 12vw, 200px);
   font-family: "Playfair Display", "Bodoni MT", Didot, "Times New Roman", Georgia, serif;
   font-weight: 400; font-style: normal;
   font-size: clamp(2.6rem, 8.8vw, 9.5rem);
@@ -675,6 +683,14 @@ a.office__row:hover { color: var(--white); }
 }
 
 /* The object ------------------------------------------------------------ */
+/* Each half takes an equal share of the line and sets its text against the
+   gap — lead flush right, tail flush left. Equal boxes put the gap's midpoint
+   exactly at the container's centre no matter how the two words differ in
+   width, which is the only way the ball can sit symmetrically between them. */
+.apex__word { flex: 1 1 0; min-width: 0; }
+.apex__word--lead { text-align: right; }
+.apex__word--tail { text-align: left; }
+
 .apex__object {
   position: absolute; top: 50%; left: 50%; z-index: 2;
   width: clamp(210px, 34vw, 430px); aspect-ratio: 1;
@@ -698,10 +714,13 @@ a.office__row:hover { color: var(--white); }
   }
 }
 /* A soft bloom under the facets so the core reads as lit from inside. */
+/* A halo behind the ball, not a bloom inside it: the ball is opaque white
+   now, so an internal glow only tinted the panels at its edges. This sits
+   wider than the ball and reads as light coming off it. */
 .apex__core {
-  position: absolute; inset: 26%; border-radius: 50%;
-  background: radial-gradient(circle, var(--accent) 0%, rgba(5, 237, 255, .28) 38%, transparent 70%);
-  filter: blur(26px); opacity: .55;
+  position: absolute; inset: -14%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(5, 237, 255, .16) 38%, rgba(5, 237, 255, .07) 58%, transparent 72%);
+  filter: blur(40px); opacity: .9;
 }
 
 /* Corner labels --------------------------------------------------------- */
