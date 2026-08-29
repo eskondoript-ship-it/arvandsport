@@ -3,6 +3,7 @@ import { ready } from './env.js';
 import { initMotion, teardownMotion, watchMotionPreference } from './motion.js';
 import { initHeader, syncChrome } from './header.js';
 import { initTheme } from './theme.js';
+import { initSmoothScroll, destroySmoothScroll } from './smooth.js';
 import { initRoster, initNewsSearch } from './roster.js';
 import { initForms } from './forms.js';
 import { initEmbeds } from './embed.js';
@@ -24,9 +25,15 @@ function initPage(container = document) {
 }
 
 ready(() => {
+  /* Before the motion system: ScrollTrigger reads the scroll position
+   * through Lenis once it is running, so it has to exist first. */
+  initSmoothScroll();
   initHeader();
   initTheme();
-  watchMotionPreference(destroyCursor);
+  watchMotionPreference(() => {
+    destroyCursor();
+    destroySmoothScroll();
+  });
   initCursor();
   initPage();
 

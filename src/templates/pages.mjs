@@ -25,8 +25,8 @@ function pageHero({ kicker, title, intro }) {
 function nextStep({ label, href, second }) {
   return `<section class="section section--tight closing">
   <div class="shell closing__inner">
-    <h2 class="closing__title">${esc(label)}</h2>
-    <div class="closing__actions">
+    <h2 class="closing__title" data-split>${esc(label)}</h2>
+    <div class="closing__actions" data-reveal>
       <a class="btn btn--solid" href="${attr(href)}" data-magnetic><span>${esc(second)}</span>${ICONS.arrow}</a>
       <a class="btn btn--ghost" href="/registration/" data-magnetic><span>Register</span></a>
     </div>

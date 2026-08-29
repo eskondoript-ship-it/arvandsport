@@ -1,5 +1,6 @@
 /** Sticky header state, scroll progress bar and the mobile drawer. */
 import { $, $$, gsap, canAnimate } from './env.js';
+import { scrollToTarget } from './smooth.js';
 
 /* Held at module scope so a page swap can put the header back on screen: the
  * bar is outside the swapped container, so it survives the transition with
@@ -123,7 +124,11 @@ export function initHeader() {
     if (!target) return;
     e.preventDefault();
     history.pushState(null, '', url.hash);
-    if (canAnimate() && window.ScrollToPlugin) {
+    /* Lenis owns the scroll position when it is running; a GSAP scrollTo would
+     * set scrollTop underneath it and be pulled straight back. */
+    if (scrollToTarget(target, header.offsetHeight + 12)) {
+      /* handled */
+    } else if (canAnimate() && window.ScrollToPlugin) {
       gsap.to(window, { duration: 1, ease: 'power3.inOut', scrollTo: { y: target, offsetY: header.offsetHeight + 12 } });
     } else {
       target.scrollIntoView();

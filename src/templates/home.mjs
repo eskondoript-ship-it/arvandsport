@@ -274,9 +274,9 @@ export function contact(site) {
 function closing(site) {
   return `<section class="section closing">
   <div class="shell closing__inner">
-    <p class="closing__kicker">${esc(site.brand.tagline)}</p>
-    <h2 class="closing__title">Work with Arvand Sport</h2>
-    <div class="closing__actions">
+    <p class="closing__kicker" data-reveal>${esc(site.brand.tagline)}</p>
+    <h2 class="closing__title" data-split>Work with Arvand Sport</h2>
+    <div class="closing__actions" data-reveal>
       <a class="btn btn--solid btn--lg" href="/registration/" data-magnetic><span>Player &amp; coach registration</span>${ICONS.arrow}</a>
       <a class="btn btn--ghost btn--lg" href="/contact/" data-magnetic><span>Contact us</span></a>
     </div>

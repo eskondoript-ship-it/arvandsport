@@ -189,6 +189,7 @@ ${header(site, current)}
   <main id="main" class="main">${content}</main>
   ${footer(site)}
 </div>
+<script src="/vendor/lenis/lenis.min.js" defer></script>
 <script src="/vendor/gsap/gsap.min.js" defer></script>
 <script src="/vendor/gsap/ScrollTrigger.min.js" defer></script>
 <script src="/vendor/gsap/ScrollToPlugin.min.js" defer></script>

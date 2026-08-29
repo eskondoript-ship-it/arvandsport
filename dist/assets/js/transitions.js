@@ -89,7 +89,12 @@ async function go(href, { push = true } = {}) {
      * spacers only settle once refresh has finished measuring. */
     const land = () => {
       if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView();
-      else window.scrollTo(0, 0);
+      else {
+        /* Lenis keeps its own idea of the scroll position, so a bare
+         * window.scrollTo leaves it out of sync and it scrolls back. */
+        window.lenis?.scrollTo(0, { immediate: true });
+        window.scrollTo(0, 0);
+      }
     };
     land();
     requestAnimationFrame(land);
