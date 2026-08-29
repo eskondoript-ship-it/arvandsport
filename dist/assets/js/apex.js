@@ -57,15 +57,27 @@ async function mountWebglBall(section, object) {
      * without the build having to rewrite anything inside a string. */
     const bundle = new URL('../hero/hero.js', import.meta.url).href;
     const modelUrl = new URL('../models/soccer-ball.glb', import.meta.url).href;
+    const portraitUrl = new URL('../img/ui/taremi-cutout.webp', import.meta.url).href;
+    /* Taremi as a mesh, when one has been supplied. The build sets this
+     * attribute only if the file is actually there, so the page never fetches
+     * it on the off-chance — an optional asset requested speculatively is a 404
+     * in every console on every desktop visit, and a console that cries wolf is
+     * one nobody reads when something is really wrong.
+     *
+     * Nothing is invented in his place. Without a real model the island uses
+     * his photograph, which is genuinely him; drop a mesh at
+     * experience/public/models/taremi.glb and this lights up. */
+    const figure = mount.dataset.apexFigure;
+    const figureUrl = figure ? new URL(`../models/${figure}`, import.meta.url).href : undefined;
 
     const hero = await import(/* @vite-ignore */ bundle);
-    const handle = hero.mount(mount, { modelUrl });
+    const handle = hero.mount(mount, { modelUrl, portraitUrl, figureUrl });
     await handle.ready;
 
     /* Only now does the sprite go. Swapping on mount rather than on first
      * frame would show an empty hole for as long as the model takes. */
     object.classList.add('is-webgl');
-    return handle.setSpin;
+    return handle;
   } catch (error) {
     console.warn('[arvand] WebGL hero unavailable, keeping the sprite', error);
     return null;
@@ -76,7 +88,6 @@ export function initApex(root = document) {
   const section = $('[data-apex]', root);
   if (!section) return;
 
-  const pin = $('[data-apex-pin]', section);
   const ball = $('[data-apex-ball]', section);
   const object = $('[data-apex-object]', section);
   const words = $$('[data-apex-word]', section);
@@ -109,8 +120,15 @@ export function initApex(root = document) {
   let driver = spriteFrame;
   const showFrame = (n) => driver(n);
 
-  mountWebglBall(section, object).then((setSpin) => {
-    if (setSpin) driver = (n) => setSpin(n / FRAMES);
+  /* Chapter two's opening shell. Null until the island is up, and null forever
+   * on the sprite path — a background image cannot come apart, so those
+   * visitors get the same chapter with the ball simply turning through it. */
+  let openShell = null;
+
+  mountWebglBall(section, object).then((handle) => {
+    if (!handle) return;
+    driver = (n) => handle.setSpin(n / FRAMES);
+    openShell = handle.setStory;
   });
 
   gsap.set(fades, { opacity: 0, y: 14 });
@@ -123,24 +141,53 @@ export function initApex(root = document) {
     .to(spin, { f: 0, duration: 1.5, ease: 'power3.out', onUpdate: () => showFrame(spin.f) }, 0)
     .to(fades, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.3);
 
-  /* Scroll: the ball turns and recedes while the two halves of the line part
-   * further, so the gap the ball sits in opens as the section leaves. */
+  /* Scroll drives both chapters from one timeline over the whole section.
+   *
+   * The stage is held by CSS `position: sticky`, not by a ScrollTrigger pin, so
+   * this trigger only reads the scroll — it never moves the element. That is
+   * why the end is `bottom bottom`: the section is two screens tall and the
+   * story runs the full length of it, finishing as the last screen clears,
+   * rather than at the moment the top leaves.
+   *
+   * The halves are 0 to 0.5 for the brand chapter and 0.5 to 1 for the player.
+   * Both are positions on one timeline rather than two triggers, because the
+   * ball carries straight through the join and two triggers would each want to
+   * own it across the handover. */
+  const stage = $('[data-apex-pin]', section);
+  const brand = $$('[data-apex-chapter="0"]', section);
+  const playerChapter = $('[data-apex-chapter="1"]', section);
+
   const exit = gsap.timeline({
     scrollTrigger: {
       trigger: section,
       start: 'top top',
-      end: 'bottom top',
+      end: 'bottom bottom',
       scrub: 0.4,
       invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        /* Chapter two's own progress, clamped to its half of the section. */
+        const story = Math.max(0, Math.min(1, (self.progress - 0.5) / 0.44));
+        openShell?.(story);
+        playerChapter?.classList.toggle('is-live', story > 0.5);
+        /* Phones read chapter two over a sprite that cannot come apart, so the
+         * ball has to get out of the way of the copy instead. CSS decides how
+         * far, and only at narrow widths -- on a desktop the ball opening is
+         * the whole point of the chapter. */
+        stage?.classList.toggle('is-story', story > 0.15);
+      },
     },
   });
-  /* Scroll turns the ball: a little over half a revolution across the
-   * section, which reads as deliberate rather than as a spinning loop. */
+
+  /* Scroll turns the ball right through: a little over half a revolution
+   * across the brand chapter, and on round as the shell opens, so the join
+   * between the two is not a place where it stalls. */
   const scrubbed = { f: 0 };
   exit
     .to(scrubbed, { f: 17, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0)
     .to(object, { scale: 1.14, ease: 'none' }, 0)
-    .to(pin, { opacity: 0.25, ease: 'none' }, 0.55);
+    .to(brand, { opacity: 0, y: -40, ease: 'none' }, 0.4)
+    .to(scrubbed, { f: 34, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0.5)
+    .fromTo(playerChapter, { opacity: 0, y: 30 }, { opacity: 1, y: 0, ease: 'none' }, 0.52);
 
 
   /* Kick it. Clicking the ball drives it away along a shallow arc, spinning

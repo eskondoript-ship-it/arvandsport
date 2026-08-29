@@ -640,15 +640,53 @@ a.office__row:hover { color: var(--white); }
   position: relative;
   background: radial-gradient(120% 90% at 50% 42%, #10233a 0%, #060c16 46%, #03070d 100%);
   color: #eaf4fb;
+  /* This section is dark whichever theme the page is in, so it carries its own
+     copies of the tokens anything inside it reads. Setting only `color` was not
+     enough: .btn takes its text and border from --fg and --line, which in light
+     mode are near-black on a near-black ground — both outlined buttons here
+     were invisible, and had been since the light theme was added. */
+  --fg: #eaf4fb;
   --accent: var(--cyan-400);
   --fg-faint: rgba(234, 244, 251, .42);
+  --line: rgba(234, 244, 251, .2);
+  --line-strong: rgba(5, 237, 255, .5);
 }
+/* Two chapters, one stage. The section is twice the viewport and the stage is
+   stuck to the top of it for the first screen's worth of scrolling, which is
+   what lets the ball stay put while the copy changes around it.
+
+   Sticky rather than a scroll library's pin: the browser holds it, so it
+   cannot fall out of sync with the scroll, it costs nothing on the main
+   thread, and it still holds with JavaScript off. What JS adds on top is only
+   which chapter is lit and how far the ball has opened.
+
+   The section must not clip. Any overflow other than `visible` on an ancestor
+   of a sticky element turns that ancestor into the scroll container the
+   element sticks within — so it sticks to a box that is itself scrolling away,
+   which looks exactly like sticky not working. The clipping stays on the
+   stage, where it is the element itself and therefore harmless. */
+.apex { min-height: 200svh; }
 .apex__pin {
-  position: relative; overflow: hidden;
-  min-height: 100svh;
+  position: sticky; top: 0; overflow: hidden;
+  height: 100svh;
   display: grid; place-items: center;
   padding: calc(var(--header-h) + 2.5rem) var(--gutter) clamp(2.5rem, 7vh, 5rem);
 }
+
+/* Both chapters occupy the same square of the stage and are crossfaded. They
+   are laid out on top of one another rather than swapped, so neither reflows
+   when the other arrives and the ball between them never moves. */
+.apex__chapter {
+  grid-area: 1 / 1;
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+}
+.apex__chapter--player {
+  opacity: 0;
+  pointer-events: none;
+  align-content: center;
+}
+.apex__chapter--player.is-live { pointer-events: auto; }
 
 .apex__eyebrow {
   position: absolute; top: calc(var(--header-h) + clamp(1rem, 4vh, 2.6rem)); left: var(--gutter);
@@ -745,6 +783,68 @@ a.office__row:hover { color: var(--white); }
   background: radial-gradient(circle, rgba(5, 237, 255, .16) 38%, rgba(5, 237, 255, .07) 58%, transparent 72%);
   filter: blur(40px); opacity: .9;
 }
+
+/* Chapter two: the player ------------------------------------------------ */
+/* A column down the left, clear of the ball, which the scene aims away from
+   as it opens. The portrait beside it is only for the visitors who are not
+   getting the WebGL figure — a phone, or a browser the bundle never reached —
+   so the chapter is never a column of text next to nothing. */
+.apex__chapter--player {
+  grid-template-columns: minmax(0, auto) minmax(0, 26rem);
+  justify-content: start; align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  padding-inline: var(--gutter);
+}
+.apex__portrait { margin: 0; width: clamp(140px, 17vw, 230px); }
+.apex__portrait img { display: block; width: 100%; height: auto; }
+.apex__object.is-webgl ~ .apex__chapter--player .apex__portrait { display: none; }
+
+.apex__eyebrow--inline {
+  position: static; margin: 0 0 .5rem;
+  color: var(--accent); letter-spacing: .24em;
+}
+.apex__player-name {
+  margin: 0; font-size: clamp(1.9rem, 4.4vw, 3.4rem);
+  font-weight: 300; line-height: 1.05; letter-spacing: -.01em; color: #fff;
+}
+.apex__player-role {
+  margin: .6rem 0 0; font-size: .9rem; color: var(--fg-faint);
+}
+
+.apex__facts {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px; margin: 1.6rem 0 1.8rem;
+  background: rgba(234, 244, 251, .12);
+  border: 1px solid rgba(234, 244, 251, .12);
+}
+.apex__facts > div { background: #060c16; padding: .7rem .9rem; }
+.apex__facts dt {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: .62rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accent);
+}
+.apex__facts dd {
+  margin: .3rem 0 0; font-size: 1.7rem; font-weight: 300; line-height: 1;
+  color: #fff; font-variant-numeric: tabular-nums;
+}
+.apex__facts p {
+  margin: .35rem 0 0;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: .6rem; line-height: 1.3; color: rgba(234, 244, 251, .38);
+}
+
+@media (max-width: 760px) {
+  .apex__chapter--player {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center; gap: 1.2rem;
+  }
+  .apex__portrait { width: clamp(110px, 34vw, 170px); }
+  /* The sprite cannot open, so on a phone it steps back behind the copy rather
+     than sitting at half opacity underneath it, which is legible for a display
+     line and not for four stat cards and a paragraph. */
+  .apex__pin.is-story .apex__object { opacity: .14; }
+}
+.apex__object { transition: opacity .5s ease; }
 
 /* Corner labels --------------------------------------------------------- */
 /* The corner labels read as annotation on a dossier, so they take the

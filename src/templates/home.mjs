@@ -284,7 +284,7 @@ function closing(site) {
 </section>`;
 }
 
-export function renderHome({ site, players, news }) {
+export function renderHome({ site, players, news, taremiModel = false }) {
   const description = `${site.brand.shortName} — ${site.about.paragraphs[0].replace(/<[^>]+>/g, '').slice(0, 150)}`;
   return layout({
     site,
@@ -309,7 +309,7 @@ export function renderHome({ site, players, news }) {
         .map((o) => ({ '@type': 'PostalAddress', addressCountry: o.country, streetAddress: o.address })),
     },
     content: [
-      apex(site),
+      apex(site, players, { taremiModel }),
       about(site),
       servicesTeaser(site),
       roster(site, players),

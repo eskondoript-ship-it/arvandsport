@@ -57,7 +57,15 @@ const { renderNotFound } = await import('../src/templates/notfound.mjs');
 const { renderRedirect } = await import('../src/templates/redirect.mjs');
 const { renderServices, renderAbout, renderContact } = await import('../src/templates/pages.mjs');
 
-const ctx = { site, players, news, feed };
+/* Whether a real Taremi mesh has been supplied. The homepage asks for one only
+ * when it exists: an optional asset fetched on the off-chance is a 404 in every
+ * console on every desktop visit, and a console that cries wolf is one nobody
+ * reads when something is actually wrong. */
+const taremiModel = await stat(join(ROOT, 'experience/public/models/taremi.glb'))
+  .then(() => true)
+  .catch(() => false);
+
+const ctx = { site, players, news, feed, taremiModel };
 
 /* --------------------------------------------------------------- helpers */
 
@@ -370,6 +378,17 @@ try {
     join(ROOT, 'experience/public/models/soccer-ball.glb'),
     join(DIST, 'assets/models/soccer-ball.glb'),
   );
+  /* Taremi as a mesh, when one exists. Absent by default -- the island falls
+   * back to his photograph, which is genuinely him, rather than to a body
+   * modelled from nothing and given a real client's name. */
+  try {
+    await cp(
+      join(ROOT, 'experience/public/models/taremi.glb'),
+      join(DIST, 'assets/models/taremi.glb'),
+    );
+  } catch {
+    /* No model supplied yet. */
+  }
   heroBundle = meta;
 } catch {
   /* Not built. The hero keeps its sprite, which is the fallback anyway. */

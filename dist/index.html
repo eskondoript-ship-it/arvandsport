@@ -66,36 +66,73 @@
 <div data-barba="container" data-barba-namespace="home">
   <main id="main" class="main"><section class="apex" id="home" data-apex aria-labelledby="apex-title">
   <div class="apex__pin" data-apex-pin>
-    <p class="apex__eyebrow" data-apex-fade>FIFA-licensed football &amp; match agency</p>
 
-    <h1 class="apex__title" id="apex-title">
-      <span class="u-sr-only">ARVAND SPORT — A STREAM TO SUCCESS</span>
-      <span class="apex__display" aria-hidden="true">
-        <span class="apex__word apex__word--lead" data-apex-word>ARVAND</span>
-        <span class="apex__word apex__word--tail" data-apex-word>SPORT</span>
-      </span>
-    </h1>
+    <div class="apex__chapter apex__chapter--brand" data-apex-chapter="0">
+      <p class="apex__eyebrow" data-apex-fade>FIFA-licensed football &amp; match agency</p>
+
+      <h1 class="apex__title" id="apex-title">
+        <span class="u-sr-only">ARVAND SPORT — A STREAM TO SUCCESS</span>
+        <span class="apex__display" aria-hidden="true">
+          <span class="apex__word apex__word--lead" data-apex-word>ARVAND</span>
+          <span class="apex__word apex__word--tail" data-apex-word>SPORT</span>
+        </span>
+      </h1>
+
+      <p class="apex__label apex__label--right" data-apex-fade>Twenty-five years<br>at the top level</p>
+      <p class="apex__label apex__label--left" data-apex-fade>230+ players<br>46 countries</p>
+
+      <div class="apex__actions" data-apex-fade>
+        <a class="btn btn--solid btn--lg" href="./player/" data-magnetic><span>Our players</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></a>
+        <a class="btn btn--ghost btn--lg" href="./registration/" data-magnetic><span>Register</span></a>
+      </div>
+
+      <a class="apex__scroll" href="#about" data-apex-fade aria-label="Scroll to content">
+        <span class="apex__scroll-line"></span><span>Scroll</span>
+      </a>
+    </div>
 
     <div class="apex__object" data-apex-object aria-hidden="true">
       <span class="apex__core"></span>
       <span class="apex__ball" data-apex-ball></span>
-      <!-- Empty until apex.js decides this visitor gets the WebGL ball, and
-           the React island mounts into it. The sprite above stays in the
-           markup and keeps rendering until it does. -->
+      <!-- Empty until apex.js decides this visitor gets the WebGL ball and the
+           island mounts into it. The sprite above stays in the markup and keeps
+           rendering until it does, and stays for good if it never does. -->
       <div class="apex__webgl" data-apex-webgl></div>
     </div>
 
-    <p class="apex__label apex__label--right" data-apex-fade>Twenty-five years<br>at the top level</p>
-    <p class="apex__label apex__label--left" data-apex-fade>230+ players<br>46 countries</p>
+    <div class="apex__chapter apex__chapter--player" data-apex-chapter="1">
+      <figure class="apex__portrait" data-apex-portrait>
+        <img src="./assets/img/players/mehdi-taremi.png" alt="Mehdi Taremi" width="529" height="760" loading="lazy" decoding="async">
+      </figure>
 
-    <div class="apex__actions" data-apex-fade>
-      <a class="btn btn--solid btn--lg" href="./player/" data-magnetic><span>Our players</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></a>
-      <a class="btn btn--ghost btn--lg" href="./registration/" data-magnetic><span>Register</span></a>
+      <div class="apex__player">
+        <p class="apex__eyebrow apex__eyebrow--inline">Client spotlight</p>
+        <h2 class="apex__player-name">Mehdi Taremi</h2>
+        <p class="apex__player-role">Centre-Forward · Olympiacos</p>
+
+        <dl class="apex__facts">
+          <div>
+            <dt>Caps</dt>
+            <dd>79</dd>
+            <p>Iran senior national team</p>
+          </div><div>
+            <dt>Goals</dt>
+            <dd>43</dd>
+            <p>for Iran</p>
+          </div><div>
+            <dt>Height</dt>
+            <dd>1,85 m</dd>
+            
+          </div><div>
+            <dt>Foot</dt>
+            <dd>Right</dd>
+            <p>preferred</p>
+          </div>
+        </dl>
+
+        <a class="btn btn--ghost" href="./player/mehdi-taremi/" data-magnetic><span>Full profile</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></a>
+      </div>
     </div>
-
-    <a class="apex__scroll" href="#about" data-apex-fade aria-label="Scroll to content">
-      <span class="apex__scroll-line"></span><span>Scroll</span>
-    </a>
   </div>
 </section>
 <section class="about section section--paper" id="about">
