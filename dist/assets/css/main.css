@@ -2084,7 +2084,7 @@ a.office__row:hover { color: var(--white); }
   color: rgba(255, 255, 255, .3);
 }
 
-/* Taremi's figures, down the right, chapter three only ------------------- */
+/* The agency's figures, down the right, chapter three only --------------- */
 .apex__stats {
   position: absolute; right: 3rem; top: 50%; translate: 0 -50%;
   width: 14rem; display: none; flex-direction: column; gap: .5rem;
@@ -2092,7 +2092,14 @@ a.office__row:hover { color: var(--white); }
 @media (min-width: 1100px) { .apex__stats { display: flex; } }
 
 .apex__stats-name {
-  margin: 0; padding: .25rem 0;
+  /* Carded like the figures below it. Bare text here sat directly over the
+     opened shell and lost whole letters behind a lit panel -- the cards were
+     already given a ground for exactly that reason and this line needs the
+     same one. */
+  margin: 0; padding: .5rem .75rem;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(8, 8, 12, .8);
+  backdrop-filter: blur(12px);
   font-size: .625rem; letter-spacing: .24em; text-transform: uppercase;
   color: rgba(108, 232, 255, .8);
   opacity: 0; transition: opacity .7s ease;
@@ -2132,8 +2139,8 @@ a.office__row:hover { color: var(--white); }
 .apex__career-club { margin: 0; font-size: .875rem; color: rgba(255, 255, 255, .85); }
 .apex__career-detail { margin: 0; font-size: .625rem; color: rgba(255, 255, 255, .35); }
 
-/* Lit only on the last chapter — the figures are about the player, and he is
-   not in the scene before the strike. */
+/* Lit only on the last chapter — the first two are about the ball, and the
+   agency's own figures have nothing to say over them. */
 .apex__pin.is-chapter-3 .apex__stats-name,
 .apex__pin.is-chapter-3 .apex__stat,
 .apex__pin.is-chapter-3 .apex__career { opacity: 1; translate: 0 0; }

@@ -41,16 +41,15 @@ const CROSSHAIR = `<svg class="apex__crosshair" viewBox="0 0 40 40" aria-hidden=
   <path d="M20 0v9M20 31v9M0 20h9M31 20h9" stroke="currentColor" stroke-width=".75" opacity=".7" />
 </svg>`;
 
-export function apex(site, players = [], { taremiModel = false } = {}) {
+export function apex(site, _players = [], { taremiModel = false } = {}) {
   const [lead, tail] = ['ARVAND', 'SPORT'];
   const chapters = site.story?.chapters || [];
-  const featured = players.find((p) => p.slug === (site.strike?.playerSlug || 'mehdi-taremi'));
 
   return `<section class="apex" id="home" data-apex aria-labelledby="apex-title">
   <div class="apex__pin" data-apex-pin>
     <span class="apex__aurora" aria-hidden="true"></span>
 
-    ${blueprint(site, featured)}
+    ${blueprint(site)}
 
     <!-- Empty until apex.js decides this visitor gets the WebGL scene and the
          island mounts into it. It fills the whole stage rather than sitting in
@@ -79,7 +78,7 @@ export function apex(site, players = [], { taremiModel = false } = {}) {
       </div>
     </div>
 
-    ${chapters.map((chapter, i) => storyChapter(chapter, i, featured)).join('\n')}
+    ${chapters.map((chapter, i) => storyChapter(chapter, i)).join('\n')}
   </div>
 </section>`;
 }
@@ -90,7 +89,7 @@ export function apex(site, players = [], { taremiModel = false } = {}) {
  * two spans below rather than re-rendering anything, because they change every
  * frame of a scrub and everything around them does not.
  */
-function blueprint(site, player) {
+function blueprint(site) {
   return `<div class="apex__hud" aria-hidden="true">
       <span class="apex__rule apex__rule--top"></span>
       <span class="apex__rule apex__rule--bottom"></span>
@@ -113,38 +112,41 @@ function blueprint(site, player) {
       </div>
 
       <p class="apex__readout"><span data-apex-readout>X 0.0  Y 0.0°</span></p>
-      ${player ? statColumn(player) : ''}
+      ${statColumn(site)}
     </div>`;
 }
 
-/** Taremi's figures, down the right. Chapter three only. */
-function statColumn(player) {
-  const stats = [
-    ['Caps', player.caps, 'Iran senior national team'],
-    ['Goals', player.goals, 'for Iran'],
-    ['Height', player.height, ''],
-    ['Foot', player.foot, 'preferred'],
-  ].filter(([, value]) => value);
+/**
+ * The agency's own figures, down the right. Chapter three only.
+ *
+ * These are the four numbers in content/site.json's stats block -- the same
+ * ones the About section counts up -- rather than a set written for this
+ * layout. The licences beneath them are what the agency actually holds, and
+ * they are the reason the numbers are worth anything.
+ */
+function statColumn(site) {
+  const stats = (site.stats || []).map((stat) => [
+    stat.label,
+    `${stat.value}${stat.suffix || ''}`,
+  ]);
 
-  const moves = [
-    ['2020', 'FC Porto', 'Joined 31 August 2020'],
-    ['2024', 'Inter Milan', 'Free transfer'],
-    ['2025', 'Olympiacos', 'Joined August 2025'],
+  const licences = [
+    ['FIFA', 'Football agent', 'Licensed to represent players'],
+    ['FIFA', 'Match agent', 'Licensed to arrange fixtures'],
   ];
 
   return `<div class="apex__stats" data-apex-stats>
-        <p class="apex__stats-name">${esc(player.name)} — ${esc(player.position?.detail || '')}</p>
+        <p class="apex__stats-name">${esc(site.brand.shortName)} — ${esc(site.brand.tagline)}</p>
         ${stats
           .map(
-            ([label, value, note], i) => `<div class="apex__stat" style="--i:${i}">
+            ([label, value], i) => `<div class="apex__stat" style="--i:${i}">
           <p class="apex__stat-label">${esc(label)}</p>
           <p class="apex__stat-value">${esc(value)}</p>
-          ${note ? `<p class="apex__stat-note">${esc(note)}</p>` : ''}
         </div>`,
           )
           .join('')}
         <div class="apex__career">
-          ${moves
+          ${licences
             .map(
               ([year, club, detail]) => `<div>
             <p class="apex__career-year">${esc(year)}</p>
@@ -158,7 +160,7 @@ function statColumn(player) {
 }
 
 /** One chapter of copy. The brand line above is chapter zero's companion. */
-function storyChapter(chapter, index, player) {
+function storyChapter(chapter, index) {
   const [first, ...rest] = chapter.title.split('\n');
   return `<div class="apex__chapter apex__chapter--story" data-apex-chapter="${index + 1}">
       <div class="apex__copy">
@@ -166,8 +168,8 @@ function storyChapter(chapter, index, player) {
         <h2 class="apex__headline">${esc(first)}${rest.map((line) => `<br>${esc(line)}`).join('')}</h2>
         <p class="apex__body">${esc(chapter.body)}</p>
         ${
-          index === 2 && player
-            ? `<a class="btn btn--ghost" href="${attr(player.url)}" data-magnetic><span>Full profile</span>${ICONS.arrow}</a>`
+          index === 2
+            ? `<a class="btn btn--ghost" href="/about/" data-magnetic><span>About the agency</span>${ICONS.arrow}</a>`
             : ''
         }
       </div>

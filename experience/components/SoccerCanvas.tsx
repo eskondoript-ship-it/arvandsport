@@ -1,6 +1,6 @@
 'use client';
 
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Environment, Lightformer, Grid, AdaptiveDpr, Preload } from '@react-three/drei';
 import { EffectComposer, SelectiveBloom, Selection, Select, Vignette } from '@react-three/postprocessing';
@@ -10,7 +10,6 @@ import * as THREE from 'three';
 import SoccerModel from '@/components/SoccerModel';
 import { buildProceduralPanels } from '@/lib/ball';
 import { asset, scrollState } from '@/lib/scroll';
-import { TAREMI } from '@/lib/taremi';
 
 /* ------------------------------------------------------------------ *
  * GLB fallback
@@ -63,62 +62,6 @@ function ProceduralBall() {
 }
 
 /* ------------------------------------------------------------------ *
- * Taremi
- * ------------------------------------------------------------------ */
-
-/**
- * Taremi himself, as a cut-out plane in the scene.
- *
- * This is his actual photograph from the site, standing in 3D space and lit by
- * the same rig as the ball -- not a modelled figure. There is no scanned mesh
- * of him, and inventing a body for a real, named client is not a thing this
- * repo does. A photograph that is genuinely him beats an approximation that is
- * not, and it costs 45KB instead of several megabytes.
- *
- * He sweeps in from the left across the strike, arriving as the ball leaves.
- */
-function Taremi() {
-  const mesh = useRef<THREE.Mesh>(null);
-  const texture = useLoader(THREE.TextureLoader, asset(TAREMI.portrait));
-
-  useMemo(() => {
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 8;
-  }, [texture]);
-
-  // 529 x 760 in the source; keep the aspect or he stretches.
-  const height = 3.2;
-  const width = height * (529 / 760);
-
-  useFrame((state) => {
-    if (!mesh.current) return;
-    const p = scrollState.progress;
-    // Nothing until the strike is close, then a fast entry and a slow settle.
-    const entry = THREE.MathUtils.clamp((p - 0.26) / 0.16, 0, 1);
-    const settle = THREE.MathUtils.clamp((p - 0.66) / 0.2, 0, 1);
-    const eased = 1 - Math.pow(1 - entry, 3);
-
-    mesh.current.position.set(
-      THREE.MathUtils.lerp(-6.6, -3.0, eased) - settle * 0.25,
-      -1.45 + Math.sin(state.clock.elapsedTime * 0.6) * 0.03,
-      THREE.MathUtils.lerp(-2.4, -1.0, eased) + settle * 0.35,
-    );
-    mesh.current.rotation.y = THREE.MathUtils.lerp(0.55, 0.22, eased) - settle * 0.14;
-
-    const material = mesh.current.material as THREE.MeshBasicMaterial;
-    material.opacity = entry * 0.98;
-    mesh.current.visible = entry > 0.005;
-  });
-
-  return (
-    <mesh ref={mesh} visible={false}>
-      <planeGeometry args={[width, height]} />
-      <meshBasicMaterial map={texture} transparent opacity={0} depthWrite={false} toneMapped={false} />
-    </mesh>
-  );
-}
-
-/* ------------------------------------------------------------------ *
  * The owner
  * ------------------------------------------------------------------ */
 
@@ -127,9 +70,10 @@ function Taremi() {
  *
  * His mesh is the client's own -- a Tripo scan, decimated from 192,296
  * triangles to 19,512 by tools/decimate-glb.py, which is what makes a
- * 4.6MB figure a 456KB one. He is here from the opening and steps back as
- * Taremi arrives, so the scene starts with a person on a field rather than an
- * object in a void.
+ * 4.6MB figure a 456KB one. He is here from the opening and walks in for the
+ * last chapter, which is the agency's -- so the scene starts with a person on a
+ * field rather than an object in a void, and ends on the person whose agency it
+ * is.
  *
  * He is matte grey until his photograph is baked in. The Tripo mesh has no UVs
  * at all, so there is no coordinate for an image to be read at;
@@ -188,13 +132,23 @@ function Owner() {
   useFrame(() => {
     if (!holder.current) return;
     const p = scrollState.progress;
-    /* Present from the start, and out of the way by the time the third chapter
-     * brings Taremi into the same corner of the frame. */
-    const leave = THREE.MathUtils.clamp((p - 0.58) / 0.18, 0, 1);
-    holder.current.visible = leave < 0.999;
-    holder.current.position.set(-3.15 - leave * 1.6, -2.1, -1.5 - leave * 1.2);
-    holder.current.rotation.y = 0.42;
-    holder.current.scale.setScalar(3.1);
+    /* He is the last chapter's subject, so he stays for all of it and comes
+     * forward as it arrives -- closer, squarer to the camera, clear of the
+     * opened ball. Earlier he stepped aside at this point, which was right
+     * when the chapter belonged to a player and is not any more. */
+    const near = THREE.MathUtils.clamp((p - 0.66) / 0.24, 0, 1);
+    const eased = 1 - Math.pow(1 - near, 3);
+    holder.current.visible = true;
+    holder.current.position.set(
+      THREE.MathUtils.lerp(-3.15, -2.35, eased),
+      -2.1,
+      THREE.MathUtils.lerp(-1.5, 0.6, eased),
+    );
+    /* Turned toward the camera as he comes in. The photograph is projected
+     * front-on, so the further he turns the more it smears -- this stops
+     * short of anywhere that shows. */
+    holder.current.rotation.y = THREE.MathUtils.lerp(0.42, 0.16, eased);
+    holder.current.scale.setScalar(3.1 + eased * 0.5);
   });
 
   if (!figure) return null;
@@ -265,9 +219,6 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
         infiniteGrid
       />
 
-      <Suspense fallback={null}>
-        <Taremi />
-      </Suspense>
       <Owner />
 
       <Selection>

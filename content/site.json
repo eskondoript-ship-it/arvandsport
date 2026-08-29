@@ -447,7 +447,7 @@
     }
   },
   "story": {
-    "_note": "The homepage story and the study at /experience/ are one scene told once. Both read these three chapters — the site templates render them into HTML, and experience/lib/taremi.ts imports this file — so the copy cannot say two different things in two places. Figures quoted in the body must match content/players.json.",
+    "_note": "The homepage story and the study at /experience/ are one scene told once. Both read these three chapters — the site templates render them into HTML, and experience/lib/taremi.ts imports this file — so the copy cannot say two different things in two places. Every figure quoted here must match content/site.json stats or content/players.json; nothing in this block is rounded up or written for the rhythm.",
     "chapters": [
       {
         "index": "01",
@@ -463,9 +463,9 @@
       },
       {
         "index": "03",
-        "kicker": "The player",
-        "title": "Mehdi Taremi,\nOlympiacos",
-        "body": "Seventy-nine caps for Iran and forty-three goals in them. Porto in 2020, Inter on a free in 2024, Olympiacos since August 2025."
+        "kicker": "The agency",
+        "title": "Twenty-five years,\nforty-six countries",
+        "body": "A FIFA-licensed football and match agency. Two hundred and thirty players placed across eighty clubs, and the licences to do it in either seat — for the player, and for the match."
       }
     ]
   }
