@@ -680,6 +680,11 @@ a.office__row:hover { color: var(--white); }
   font-size: clamp(2.6rem, 8.8vw, 9.5rem);
   line-height: .9; letter-spacing: .01em; text-transform: uppercase;
   white-space: nowrap;
+  /* The tight .9 line-height pulls uppercase caps toward the top of the line
+     box, so the words ride above the flex-centre that the ball is pinned to.
+     Nudge the whole line down so the glyphs' visual centre sits on the ball's
+     equator rather than above it. */
+  translate: 0 .08em;
 }
 
 /* The object ------------------------------------------------------------ */
