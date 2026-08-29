@@ -652,8 +652,7 @@ a.office__row:hover { color: var(--white); }
 
 .apex__eyebrow {
   position: absolute; top: calc(var(--header-h) + clamp(1rem, 4vh, 2.6rem)); left: var(--gutter);
-  font-size: .68rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase;
-  color: var(--fg-faint);
+  font-size: .7rem; text-transform: uppercase;
 }
 
 /* Display line ---------------------------------------------------------- */
@@ -680,6 +679,13 @@ a.office__row:hover { color: var(--white); }
   font-size: clamp(2.6rem, 8.8vw, 9.5rem);
   line-height: .9; letter-spacing: .01em; text-transform: uppercase;
   white-space: nowrap;
+  /* Pure white, not the page's soft blue-white. A thin serif at this size
+     over the hero's mid-navy glow was washing out — #eaf4fb against #10233a
+     is nowhere near enough separation for hairline strokes. The shadow is
+     not decoration: it holds the thin verticals apart from the glow behind
+     the ball, where the contrast is at its worst. */
+  color: #fff;
+  text-shadow: 0 2px 28px rgba(3, 7, 13, .78), 0 1px 3px rgba(3, 7, 13, .5);
   /* The tight .9 line-height pulls uppercase caps toward the top of the line
      box, so the words ride above the flex-centre that the ball is pinned to.
      Nudge the whole line down so the glyphs' visual centre sits on the ball's
@@ -729,11 +735,31 @@ a.office__row:hover { color: var(--white); }
 }
 
 /* Corner labels --------------------------------------------------------- */
+/* The corner labels read as annotation on a dossier, so they take the
+   monospace voice rather than more Roboto: a genuinely different texture
+   against the serif, and no webfont to download. Roboto uppercase at .28em
+   tracking was neither one thing nor the other. Tracking comes right down —
+   monospace is already wide — and the opacity comes up: 42% was faint enough
+   that they read as an artefact rather than as copy. */
+.apex__label,
+.apex__eyebrow,
+.apex__scroll {
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 500;
+  letter-spacing: .06em;
+  color: rgba(234, 244, 251, .62);
+}
 .apex__label {
   position: absolute; z-index: 3;
-  font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
-  line-height: 1.6; color: var(--fg-faint);
+  font-size: .74rem; text-transform: uppercase;
+  line-height: 1.75;
 }
+/* A hairline rule ties each label to the edge it is pinned to. */
+.apex__label::before {
+  content: ""; display: block; width: 26px; height: 1px; margin-bottom: .6rem;
+  background: var(--accent); opacity: .7;
+}
+.apex__label--right::before { margin-inline-start: auto; }
 .apex__label--right { right: var(--gutter); top: 30%; text-align: right; }
 .apex__label--left { left: var(--gutter); top: 30%; }
 
@@ -744,7 +770,7 @@ a.office__row:hover { color: var(--white); }
 .apex__scroll {
   position: absolute; right: var(--gutter); bottom: clamp(1rem, 3vh, 2rem); z-index: 3;
   display: grid; justify-items: center; gap: .6rem;
-  font-size: .68rem; letter-spacing: .24em; text-transform: uppercase; color: var(--fg-faint);
+  font-size: .68rem; text-transform: uppercase;
   writing-mode: vertical-rl;
 }
 .apex__scroll-line { display: block; width: 1px; height: 48px; background: linear-gradient(var(--accent), transparent); }
