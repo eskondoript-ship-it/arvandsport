@@ -5,6 +5,7 @@ import { initHeader, syncChrome } from './header.js';
 import { initTheme } from './theme.js';
 import { initSmoothScroll, destroySmoothScroll } from './smooth.js';
 import { initRoster, initNewsSearch } from './roster.js';
+import { initCarousel } from './carousel.js';
 import { initForms } from './forms.js';
 import { initEmbeds } from './embed.js';
 import { initWire } from './wire.js';
@@ -15,6 +16,7 @@ import { initTransitions } from './transitions.js';
 
 function initPage(container = document) {
   initRoster(container);
+  initCarousel(container);
   initNewsSearch(container);
   initForms(container);
   initEmbeds(container);

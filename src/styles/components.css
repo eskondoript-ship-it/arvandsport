@@ -521,3 +521,35 @@ fieldset.field { border: 0; padding: 0; }
   .carousel__track { animation: none; }
   .carousel__lap:last-child { display: none; }
 }
+
+/* The roster row, in perspective ------------------------------------------ */
+/*
+ * Cards curve away from the middle of the frame instead of sliding past it
+ * flat. src/scripts/carousel.js writes the four custom properties below from
+ * the track animation's own clock; CSS does the rest, so the transform stays a
+ * compositor property and nothing here triggers layout.
+ *
+ * `is-dimensional` is added by that script, so a visitor whose JavaScript
+ * never ran gets the flat row rather than a row of cards frozen at whatever
+ * angle the stylesheet happened to name.
+ */
+.carousel.is-dimensional { perspective: 1000px; perspective-origin: 50% 45%; }
+.carousel.is-dimensional .carousel__track,
+.carousel.is-dimensional .carousel__lap { transform-style: preserve-3d; }
+.carousel.is-dimensional .player-card {
+  /* No perspective() in here. The container already establishes one, and a
+     second on the element gives every card its own vanishing point centred on
+     itself -- which is why the first attempt wrote correct rotations and still
+     rendered a row of almost-flat cards. One shared vanishing point is what
+     makes it a fan rather than twenty-two independently turned rectangles. */
+  transform: rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0px)) scale(var(--cs, 1));
+  opacity: var(--co, 1);
+  transform-origin: 50% 50%;
+  /* No transition. These are rewritten every frame, and a transition on top
+     would make each card chase a value that has already moved on. */
+}
+/* A card being looked at comes back square to the viewer. */
+.carousel.is-dimensional .player-card:hover {
+  --ry: 0deg; --tz: 40px; --cs: 1.02; --co: 1;
+  transition: transform .5s var(--ease-out), opacity .5s var(--ease-out);
+}
