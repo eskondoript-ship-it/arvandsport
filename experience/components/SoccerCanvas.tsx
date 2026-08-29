@@ -131,11 +131,14 @@ function Taremi() {
  * Taremi arrives, so the scene starts with a person on a field rather than an
  * object in a void.
  *
- * He is untextured for now, and deliberately so. The mesh has no UVs at all,
- * so there is nothing for a photograph to be applied to yet; a front
- * projection can give him his own face once the source image is to hand. Until
- * then he is a matte figure lit by the scene, which is honest about being a
- * form rather than a likeness.
+ * He is matte grey until his photograph is baked in. The Tripo mesh has no UVs
+ * at all, so there is no coordinate for an image to be read at;
+ * tools/project-texture.py makes them by projecting the photograph along +z,
+ * which is the direction the scan faces, and writes the picture into the file.
+ * The moment a model with a base colour map is dropped in, this uses it.
+ *
+ * The projection is front-on, so he should not be turned far from that axis --
+ * the texture smears on anything facing away from where the camera was.
  */
 function Owner() {
   const holder = useRef<THREE.Group>(null);
@@ -150,6 +153,20 @@ function Owner() {
         gltf.scene.traverse((child) => {
           const mesh = child as THREE.Mesh;
           if (!mesh.isMesh) return;
+          const existing = (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as
+            | THREE.MeshStandardMaterial
+            | undefined;
+          /* Once tools/project-texture.py has given him his own photograph, the
+           * file arrives with a base colour map and that is the whole point of
+           * it -- so it is kept, and only the finish is nudged to sit in this
+           * scene's light. Without one he falls back to matte grey, which is
+           * honest about being a form rather than a likeness. */
+          if (existing?.map) {
+            existing.roughness = 0.82;
+            existing.metalness = 0.02;
+            existing.envMapIntensity = 0.8;
+            return;
+          }
           mesh.material = new THREE.MeshStandardMaterial({
             color: '#8e9bab',
             roughness: 0.72,

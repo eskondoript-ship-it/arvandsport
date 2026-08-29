@@ -10,7 +10,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "model": "python3 ../tools/obj-to-glb.py ../assets-src/soccer-ball.obj public/models/soccer-ball.glb",
-    "build:hero": "node scripts/build-hero.mjs"
+    "build:hero": "node scripts/build-hero.mjs",
+    "owner": "python3 ../tools/decimate-glb.py ../assets-src/owner.glb public/models/owner.glb --target 22000 --name owner",
+    "owner:paint": "python3 ../tools/project-texture.py public/models/owner.glb ../assets-src/owner-photo.jpg public/models/owner.glb --axis +z --name owner"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.6",
