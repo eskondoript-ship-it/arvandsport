@@ -237,3 +237,32 @@
 }
 .page-about .section-head[data-n]::before,
 .page-contact .section-head[data-n]::before { content: none; }
+
+/* --------------------------------------------------------- section glows */
+/*
+ * Soft gradients behind the content, so the glass surfaces above have colour
+ * to pick up and the long dark scroll has some weather in it. They alternate
+ * side so the eye is led down the page rather than straight through it.
+ *
+ * Painted on a pseudo-element rather than the section's own background,
+ * because several sections already set one, and this has to sit under the
+ * content without disturbing it.
+ */
+.section { isolation: isolate; }
+.section::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 12% 0%, var(--accent-soft), transparent 62%),
+    radial-gradient(50% 50% at 92% 82%, color-mix(in srgb, var(--accent-2) 26%, transparent), transparent 66%);
+  opacity: .5;
+}
+.section:nth-of-type(even)::before {
+  background:
+    radial-gradient(55% 50% at 88% 4%, var(--accent-soft), transparent 62%),
+    radial-gradient(50% 55% at 8% 88%, color-mix(in srgb, var(--accent-2) 26%, transparent), transparent 66%);
+}
+/* The paper section is a deliberate flat break in the rhythm; a glow in it
+   just muddies the one place the page is meant to go quiet. */
+.section--paper::before { display: none; }
+
+@media (max-width: 760px) { .section::before { opacity: .32; } }
