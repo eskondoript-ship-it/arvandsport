@@ -85,10 +85,14 @@ export function services(site) {
  * a screen reader should hear the roster once.
  */
 function roster(site, players) {
-  const lap = players.map((p, i) => playerCard(p, i)).join('');
+  /* Gallery cards are 348px at their widest, so the browser needs to be told
+     to fetch the 529 rather than the 265 it would pick from the grid's hint. */
+  const lap = players
+    .map((p, i) => playerCard(p, i, { sizes: '(max-width: 640px) 62vw, (max-width: 1024px) 34vw, 348px' }))
+    .join('');
   const speed = Math.max(28, players.length * 4.5);
 
-  return `<section class="roster section" id="players">
+  return `<section class="roster roster--gallery section" id="players">
   <div class="shell">
     ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro), n: '04' })}
   </div>

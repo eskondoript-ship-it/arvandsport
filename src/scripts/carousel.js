@@ -19,9 +19,11 @@
 import { $$, canAnimate } from './env.js';
 
 /** How hard the row curves away at the edges. Degrees at the frame's edge. */
-const MAX_TILT = 30;
+const MAX_TILT = 14;
 /** How far the outer cards fall back, in pixels of Z. */
-const MAX_DEPTH = 240;
+const MAX_DEPTH = 200;
+/** How far out of focus a card at the edge of the frame goes, in pixels. */
+const MAX_BLUR = 5;
 
 export function initCarousel(root = document) {
   const stops = [];
@@ -78,8 +80,14 @@ export function initCarousel(root = document) {
         card.style.setProperty('--tz', `${-Math.abs(t) * MAX_DEPTH}px`);
         /* A little smaller and a little dimmer as it falls back, so depth
          * reads even where the rotation is nearly edge-on. */
-        card.style.setProperty('--cs', String(1 - Math.abs(t) * 0.09));
+        card.style.setProperty('--cs', String(1 - Math.abs(t) * 0.14));
         card.style.setProperty('--co', String(1 - Math.abs(t) * 0.35));
+        /* Depth of field. One card is the one being looked at and the rest are
+         * around it -- which the eye reads from focus long before it reads it
+         * from size. Quadratic, so the middle of the frame stays sharp across a
+         * useful width instead of only at the exact centre. */
+        card.style.setProperty('--cb', `${(t * t * MAX_BLUR).toFixed(2)}px`);
+        card.style.setProperty('--cl', String(1 - t * t * 0.4));
       }
     };
 

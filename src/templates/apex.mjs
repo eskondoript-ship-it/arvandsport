@@ -3,7 +3,7 @@
  *
  *   01  the ball turns, the camera closes in
  *   02  the strike — the shell opens along its seams and crosses to wireframe
- *   03  the camera comes round to Taremi and his figures
+ *   03  the camera comes round to the owner and the agency's figures
  *
  * This is the same scene as the page at /experience/, not a version of it. The
  * WebGL half is literally that app's own components, bundled by
@@ -30,9 +30,12 @@ import { esc, attr, ICONS } from './layout.mjs';
  * screen with a working WebGL2 context it is the real mesh: its four panels are
  * recovered from the geometry by tools/glb-panels.py, which is what lets the
  * scene open it along its actual seams rather than along invented ones.
- * Everywhere else it is a 30-frame rotation sprite of the older ball, which
- * costs one background-position write per frame and stays on the compositor.
- * See the note in src/scripts/apex.js for who gets which, and why.
+ * Everywhere else it is a 30-frame rotation sprite, which costs one
+ * background-position write per frame and stays on the compositor. The sprite
+ * is rendered from that same file by tools/render-sprite.mjs -- it used to be a
+ * render of a different ball, so the page opened on one ball and swapped it for
+ * another in front of the visitor. See the note in src/scripts/apex.js for who
+ * gets which, and why.
  */
 
 const CROSSHAIR = `<svg class="apex__crosshair" viewBox="0 0 40 40" aria-hidden="true" fill="none">

@@ -704,10 +704,11 @@ a.office__row:hover { color: var(--white); }
   translate: -50% -50%;
   pointer-events: none;
 }
-/* The ball is a 30-frame rotation of the client's own model, laid out 6x5.
-   Phones get the single still instead: the sheet is 291 KB against the
-   still's 17, and behind the stacked type at half opacity the rotation is
-   not visible enough to be worth the download. */
+/* The ball is a 30-frame rotation of the client's own model, laid out 6x5 and
+   rendered from the very GLB the WebGL scene loads by tools/render-sprite.mjs.
+   Phones get the single still instead: the sheet is 347 KB against the still's
+   38, and behind the stacked type at half opacity the rotation is not visible
+   enough to be worth the download. */
 .apex__ball {
   display: block; width: 100%; height: 100%;
   background-image: url("../img/ui/ball-still.webp");

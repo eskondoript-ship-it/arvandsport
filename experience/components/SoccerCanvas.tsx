@@ -109,6 +109,14 @@ function Owner() {
             existing.roughness = 0.82;
             existing.metalness = 0.02;
             existing.envMapIntensity = 0.8;
+            /* The photograph was taken in daylight and already carries its own
+             * light; this scene is a dark room with one key off to the right,
+             * which shades a daylight photograph down to a silhouette. Feeding
+             * the same map back as emission restores roughly the exposure it
+             * was taken at, and the scene's shading still plays over the top. */
+            existing.emissiveMap = existing.map;
+            existing.emissive = new THREE.Color('#ffffff');
+            existing.emissiveIntensity = 0.42;
             return;
           }
           mesh.material = new THREE.MeshStandardMaterial({
@@ -139,10 +147,13 @@ function Owner() {
     const near = THREE.MathUtils.clamp((p - 0.66) / 0.24, 0, 1);
     const eased = 1 - Math.pow(1 - near, 3);
     holder.current.visible = true;
+    /* He starts well left and well back -- far enough that he is not standing
+     * behind the first chapter's copy, which is where he was and which made
+     * both of them harder to read. */
     holder.current.position.set(
-      THREE.MathUtils.lerp(-3.15, -2.35, eased),
+      THREE.MathUtils.lerp(-4.3, -2.35, eased),
       -2.1,
-      THREE.MathUtils.lerp(-1.5, 0.6, eased),
+      THREE.MathUtils.lerp(-2.8, 0.6, eased),
     );
     /* Turned toward the camera as he comes in. The photograph is projected
      * front-on, so the further he turns the more it smears -- this stops

@@ -67,7 +67,13 @@ export function picture(src, { widths, sizes, alt = '', width, height, className
  * template and tools/optimize-images.py cannot drift apart. */
 export const PORTRAIT_WIDTHS = [265, 400, 529];
 
-export function playerCard(player, index = 0) {
+/* `sizes` is a caller's decision, not the card's: the same card is a 250px
+ * column on the /player/ grid and a 348px gallery card on the homepage, and a
+ * hint written for one has the browser fetching the wrong derivative for the
+ * other. Default stays the grid, which is where most of them are. */
+export function playerCard(player, index = 0, {
+  sizes = '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 250px',
+} = {}) {
   return `<article class="player-card" style="--i:${index}"
   data-player
   data-position="${attr(player.position.group)}"
@@ -76,7 +82,7 @@ export function playerCard(player, index = 0) {
   data-club="${attr((player.club || '').toLowerCase())}">
   <a class="player-card__link" href="${attr(player.url)}">
     <span class="player-card__media">
-      ${picture(player.image, { widths: PORTRAIT_WIDTHS, sizes: "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 250px", alt: player.name, width: 529, height: 760 })}
+      ${picture(player.image, { widths: PORTRAIT_WIDTHS, sizes, alt: player.name, width: 529, height: 760 })}
       <span class="player-card__glow" aria-hidden="true"></span>
       <span class="player-card__badge">${esc(player.position.group)}</span>
     </span>

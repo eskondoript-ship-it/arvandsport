@@ -544,12 +544,126 @@ fieldset.field { border: 0; padding: 0; }
      makes it a fan rather than twenty-two independently turned rectangles. */
   transform: rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0px)) scale(var(--cs, 1));
   opacity: var(--co, 1);
+  filter: blur(var(--cb, 0px)) brightness(var(--cl, 1));
   transform-origin: 50% 50%;
   /* No transition. These are rewritten every frame, and a transition on top
      would make each card chase a value that has already moved on. */
 }
 /* A card being looked at comes back square to the viewer. */
 .carousel.is-dimensional .player-card:hover {
-  --ry: 0deg; --tz: 40px; --cs: 1.02; --co: 1;
+  --ry: 0deg; --tz: 40px; --cs: 1.02; --co: 1; --cb: 0px; --cl: 1;
   transition: transform .5s var(--ease-out), opacity .5s var(--ease-out);
 }
+
+/* The roster as a gallery -------------------------------------------------
+ *
+ * One card at a time, big, with the player's name lying over the picture
+ * rather than in a slab beneath it -- the row reads as a gallery being walked
+ * through instead of a shelf of thumbnails going past.
+ *
+ * It is the same markup the /player/ index uses, restyled from the section
+ * down. Nothing here changes playerCard(), so the grid on that page is
+ * untouched: this is a different arrangement of the same card, not a second
+ * card to keep in step with the first.
+ *
+ * The portraits are 529px wide at source, which is what caps the card size.
+ * Larger cards would be softer on a dense display, and the row would be
+ * showing fewer players at once for the privilege.
+ */
+/* Dark in both themes, and its own tokens rather than `section--paper`. That
+   modifier is the *contrast* band: it is dark on a light page and light on a
+   dark one, which put white names over cream the moment the page was in dark
+   mode. This section wants one ground, always, the way the hero does. */
+.roster--gallery {
+  background:
+    radial-gradient(64% 52% at 22% 6%, rgba(16, 84, 74, .34), transparent 64%),
+    radial-gradient(58% 48% at 84% 30%, rgba(58, 36, 122, .32), transparent 66%),
+    #080c14;
+  color: #eaf4fb;
+  --fg: #eaf4fb;
+  --fg-muted: rgba(234, 244, 251, .68);
+  --fg-faint: rgba(234, 244, 251, .42);
+  --line: rgba(234, 244, 251, .2);
+  --line-strong: rgba(5, 237, 255, .5);
+  --accent: var(--cyan-400);
+}
+
+.roster--gallery .carousel {
+  padding-block: clamp(1rem, 3vw, 2rem);
+}
+.roster--gallery .carousel__lap {
+  grid-auto-columns: clamp(232px, 26vw, 348px);
+  gap: clamp(1rem, 2.2vw, 1.85rem);
+}
+
+/* No frame of ours. The portraits are cutouts that already carry a card
+   outline, their own position mark and the club crest, on transparency -- put
+   a bordered panel behind one and it is a card inside a card. The image is the
+   card; this only holds it and lays the name over it. The ratio is the
+   artwork's own, so nothing is cropped. */
+.roster--gallery .player-card__link {
+  display: block; position: relative;
+  aspect-ratio: 529 / 760;
+  padding: 0; overflow: hidden;
+  border: 0; border-radius: 20px; background: none; box-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.roster--gallery .player-card__link:hover {
+  transform: none; box-shadow: none; border-color: transparent;
+}
+/* The glass recipe's bright top edge. It is what sells a pane; on a card with
+   no pane it is a hairline hanging above the player's head. */
+.roster--gallery .player-card__link::after { display: none; }
+
+/* aspect-ratio has to go, not just be overridden by the insets: an absolutely
+   positioned box with top and bottom both zero is over-constrained against a
+   ratio, and the ratio is what wins -- which left the artwork ending well short
+   of the card's foot and the name lying across the player's chest. */
+.roster--gallery .player-card__media {
+  position: absolute; inset: 0; margin: 0;
+  aspect-ratio: auto; height: 100%;
+  border-radius: inherit; background: none;
+}
+.roster--gallery .player-card__media picture,
+.roster--gallery .player-card__media img {
+  width: 100%; height: 100%;
+  object-fit: contain; object-position: center;
+  filter: none;
+}
+.roster--gallery .player-card__link:hover .player-card__media img { transform: none; }
+
+/* The artwork already prints the position at the top of every card. */
+.roster--gallery .player-card__badge { display: none; }
+
+/* The name block, over a scrim rather than over the picture itself: white type
+   straight onto a photograph is legible until the one photograph with a pale
+   shirt behind the text, and then it is not. */
+.roster--gallery .player-card__body {
+  position: absolute; inset: auto 0 0 0; z-index: 2;
+  display: grid; gap: .5rem;
+  padding: clamp(1.1rem, 2.2vw, 1.6rem);
+  background: linear-gradient(to top,
+    rgba(4, 6, 10, .94) 8%, rgba(4, 6, 10, .72) 46%, rgba(4, 6, 10, 0) 100%);
+}
+.roster--gallery .player-card__name em {
+  font-size: .68rem; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .55);
+  margin-bottom: .3rem;
+}
+.roster--gallery .player-card__name strong {
+  font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+  font-weight: 500; letter-spacing: -.025em; line-height: 1;
+  color: #fff;
+}
+.roster--gallery .player-card__meta {
+  font-size: .78rem; color: rgba(255, 255, 255, .62);
+}
+.roster--gallery .player-card__role { color: rgba(255, 255, 255, .62); }
+.roster--gallery .player-card__club { color: rgba(255, 255, 255, .45); }
+/* The whole card is the link. A "Profile →" line under the name costs a third
+   of the artwork on a phone-sized card and says what the card already is. */
+.roster--gallery .player-card__cta { display: none; }
+
+/* The glow was a hover wash over a card that was mostly slab. Over a
+   full-bleed portrait it just fogs the player. */
+.roster--gallery .player-card__glow { display: none; }

@@ -452,14 +452,14 @@
       {
         "index": "01",
         "kicker": "The ball",
-        "title": "Match-grade,\nthirty-two panels",
-        "body": "Twelve pentagons, twenty hexagons, one welded shell. The model turning here is the agency’s own, read straight from the supplied mesh rather than rebuilt from a primitive."
+        "title": "Four panels,\none moulded shell",
+        "body": "The FIFA Trionda, read straight from the model the agency supplied. Four curved panels wrap the whole ball, and the scene comes apart along the seams where they actually meet — found in the mesh rather than drawn on it."
       },
       {
         "index": "02",
         "kicker": "The strike",
         "title": "Contact,\nand everything opens",
-        "body": "A right-footed centre-forward puts his laces through it. At the moment of contact the shell comes apart along its seams and the panels carry their own construction outward."
+        "body": "The shell comes apart at the moment of contact. Each panel carries its own share of the construction outward, and what was one object is four."
       },
       {
         "index": "03",

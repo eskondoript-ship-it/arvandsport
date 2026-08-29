@@ -4,7 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Arvand Sport — Match Ball Study',
   description:
-    'A scroll-driven WebGL study of a thirty-two panel match ball, struck by Mehdi Taremi. Built for Arvand Sport, the FIFA-licensed football agency.',
+    'A scroll-driven WebGL study of the FIFA Trionda match ball, opened along its own four panels. Built for Arvand Sport, the FIFA-licensed football agency.',
 };
 
 export const viewport: Viewport = {
