@@ -62,32 +62,22 @@ export const CAREER: CareerMove[] = [
   { year: '2025', club: 'Olympiacos', detail: 'Joined August 2025' },
 ];
 
-/** The three scroll chapters. The HUD and the 3D timeline share this list. */
-export const CHAPTERS = [
-  {
-    index: '01',
-    kicker: 'The ball',
-    title: 'Match-grade,\nthirty-two panels',
-    body:
-      'Twelve pentagons, twenty hexagons, one welded shell. The model turning ' +
-      'here is the agency’s own, read straight from the supplied mesh rather ' +
-      'than rebuilt from a primitive.',
-  },
-  {
-    index: '02',
-    kicker: 'The strike',
-    title: 'Contact,\nand everything opens',
-    body:
-      'A right-footed centre-forward puts his laces through it. At the moment ' +
-      'of contact the shell comes apart along its seams and the panels carry ' +
-      'their own construction outward.',
-  },
-  {
-    index: '03',
-    kicker: 'The player',
-    title: 'Mehdi Taremi,\nOlympiacos',
-    body:
-      'Seventy-nine caps for Iran and forty-three goals in them. Porto in ' +
-      '2020, Inter on a free in 2024, Olympiacos since August 2025.',
-  },
-] as const;
+/**
+ * The three scroll chapters.
+ *
+ * Imported from the site's own content rather than written here, because the
+ * homepage renders the same three chapters into HTML from the same file. Two
+ * copies of this copy would disagree the first time one of them was edited,
+ * and the whole point of the homepage running this scene is that it is the
+ * same scene.
+ */
+import siteContent from '../../content/site.json';
+
+export type Chapter = {
+  index: string;
+  kicker: string;
+  title: string;
+  body: string;
+};
+
+export const CHAPTERS: Chapter[] = siteContent.story.chapters;

@@ -1,38 +1,42 @@
 /**
  * The opening set piece's choreography.
  *
- * The ball assembles from scattered facets as the section is scrolled, the two
- * halves of the display line drift apart to make room for it, and everything
- * else fades up. Scroll-driven rather than timed, so the visitor controls it.
+ * Three chapters over one sticky stage: the brand line, then the ball, the
+ * strike and the player. This side owns the copy, the instrument frame and the
+ * scrub; the ball itself is drawn by the React Three Fiber island in
+ * experience/hero/, which is the same scene as the page at /experience/ rather
+ * than a version of it.
  *
- * Budget matters here: this is the first thing a phone renders. Facets are
- * animated in one batched tween with a stagger rather than one tween each, and
- * only transform and opacity are touched, so the whole sequence stays on the
- * compositor. With GSAP absent or reduced motion set, the markup already
- * describes the assembled ball and nothing needs to run.
+ * Budget matters here: this is the first thing a phone renders. Only transform
+ * and opacity are touched, so the whole sequence stays on the compositor, and
+ * the readouts are written straight to the DOM rather than tweened. With GSAP
+ * absent or reduced motion set, the markup already describes a composed still
+ * and nothing needs to run.
  */
 import { $, $$, gsap, ScrollTrigger, canAnimate } from './env.js';
 
 /**
  * Decide whether this visitor gets the real thing, and if so, fetch it.
  *
- * The WebGL ball is 319KB gzipped — React, react-dom and three, which is what
- * React Three Fiber costs and there is no version of it that is cheap. That is
- * more than the rest of this site put together, so it is not something every
- * visitor is handed. It goes to wide screens with a mouse and a working WebGL2
- * context, and it is fetched after the page has already painted, over the top
- * of a sprite that is already turning.
+ * The scene is 364KB gzipped of JavaScript — React, react-dom and three, which
+ * is what React Three Fiber costs and there is no version of it that is cheap —
+ * plus a 939KB Trionda with its textures. That is far more than the rest of this
+ * site put together, so it is not something every visitor is handed. It goes to
+ * wide screens with a mouse and a working WebGL2 context, and it is fetched
+ * after the page has already painted, over the top of a sprite that is already
+ * turning.
  *
- * Phones keep the sprite. A phone is where the weight hurts most and where the
- * ball is smallest and half-faded behind the type — it would be paying the
- * whole cost for the least of the benefit.
+ * Phones keep the sprite and read the same three chapters over it. A phone is
+ * where the weight hurts most and where the ball is smallest and half-faded
+ * behind the type — it would be paying the whole cost for the least of the
+ * benefit.
  *
  * Every way this can fail ends the same way: the sprite stays, and nothing on
  * the page notices.
  */
-async function mountWebglBall(section, object) {
+async function mountWebglBall(section, stage) {
   const mount = $('[data-apex-webgl]', section);
-  if (!mount || !object) return null;
+  if (!mount || !stage) return null;
 
   /* Wide, mouse-driven, and not asking for less motion. */
   if (!window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches) return null;
@@ -56,27 +60,17 @@ async function mountWebglBall(section, object) {
      * whatever depth the page is served from and under a deploy prefix,
      * without the build having to rewrite anything inside a string. */
     const bundle = new URL('../hero/hero.js', import.meta.url).href;
-    const modelUrl = new URL('../models/soccer-ball.glb', import.meta.url).href;
-    const portraitUrl = new URL('../img/ui/taremi-cutout.webp', import.meta.url).href;
-    /* Taremi as a mesh, when one has been supplied. The build sets this
-     * attribute only if the file is actually there, so the page never fetches
-     * it on the off-chance — an optional asset requested speculatively is a 404
-     * in every console on every desktop visit, and a console that cries wolf is
-     * one nobody reads when something is really wrong.
-     *
-     * Nothing is invented in his place. Without a real model the island uses
-     * his photograph, which is genuinely him; drop a mesh at
-     * experience/public/models/taremi.glb and this lights up. */
-    const figure = mount.dataset.apexFigure;
-    const figureUrl = figure ? new URL(`../models/${figure}`, import.meta.url).href : undefined;
-
+    /* The scene keeps its own assets in one directory and asks for them by the
+     * paths it uses at /experience/; the site just tells it where that
+     * directory is here. */
+    const assetBase = new URL('../scene', import.meta.url).href;
     const hero = await import(/* @vite-ignore */ bundle);
-    const handle = hero.mount(mount, { modelUrl, portraitUrl, figureUrl });
+    const handle = hero.mount(mount, { assetBase });
     await handle.ready;
 
     /* Only now does the sprite go. Swapping on mount rather than on first
      * frame would show an empty hole for as long as the model takes. */
-    object.classList.add('is-webgl');
+    stage.classList.add('is-webgl');
     return handle;
   } catch (error) {
     console.warn('[arvand] WebGL hero unavailable, keeping the sprite', error);
@@ -90,6 +84,7 @@ export function initApex(root = document) {
 
   const ball = $('[data-apex-ball]', section);
   const object = $('[data-apex-object]', section);
+  const pin = $('[data-apex-pin]', section);
   const words = $$('[data-apex-word]', section);
   const fades = $$('[data-apex-fade]', section);
 
@@ -120,15 +115,22 @@ export function initApex(root = document) {
   let driver = spriteFrame;
   const showFrame = (n) => driver(n);
 
-  /* Chapter two's opening shell. Null until the island is up, and null forever
-   * on the sprite path — a background image cannot come apart, so those
-   * visitors get the same chapter with the ball simply turning through it. */
-  let openShell = null;
+  /* The scene's own progress. Null until the island is up, and null forever on
+   * the sprite path — a background image cannot come apart or fly, so those
+   * visitors get the same three chapters with the ball simply turning behind
+   * them. */
+  let setSceneProgress = null;
 
-  mountWebglBall(section, object).then((handle) => {
+  mountWebglBall(section, pin).then((handle) => {
     if (!handle) return;
-    driver = (n) => handle.setSpin(n / FRAMES);
-    openShell = handle.setStory;
+    setSceneProgress = handle.setProgress;
+    /* The scene owns its own rotation from here, so the sprite's frame writes
+     * stop rather than fighting it. */
+    driver = () => {};
+    /* Faded from here rather than by the `is-webgl` class, because the intro
+     * tween leaves an inline opacity on the sprite and no stylesheet rule
+     * outranks an inline style -- the ball sat there in front of the scene. */
+    gsap.to(object, { opacity: 0, duration: 0.5, ease: 'power2.out' });
   });
 
   gsap.set(fades, { opacity: 0, y: 14 });
@@ -154,9 +156,56 @@ export function initApex(root = document) {
    * ball carries straight through the join and two triggers would each want to
    * own it across the handover. */
   const stage = $('[data-apex-pin]', section);
-  const brand = $$('[data-apex-chapter="0"]', section);
-  const playerChapter = $('[data-apex-chapter="1"]', section);
+  const chapters = $$('[data-apex-chapter]', section);
+  const rail = $$('[data-apex-rail]', section);
+  const bar = $('[data-apex-bar]', section);
+  const count = $('[data-apex-count]', section);
+  const readout = $('[data-apex-readout]', section);
 
+  /* Which chapter a given progress sits in. The same three windows the scene
+   * uses -- see experience/lib/choreography.ts, which is the one description of
+   * this story that both the homepage and /experience/ read. */
+  const chapterFor = (p) => (p < 0.3 ? 0 : p < 0.7 ? 1 : 2);
+  let lit = -1;
+
+  /* Everything the scrub has to write on a frame, in one place. The readouts go
+   * straight to the DOM rather than through tweens: they change every frame and
+   * a tween per frame per element is the one thing that would cost real time
+   * here. Class work is guarded on the chapter actually changing, so it runs
+   * three times over the whole page instead of on every frame. */
+  const paint = (p) => {
+    setSceneProgress?.(p);
+
+    const pct = String(Math.round(p * 100)).padStart(3, '0');
+    if (count) count.textContent = pct;
+    if (bar) {
+      bar.style.transform = window.matchMedia('(max-width: 760px)').matches
+        ? `scaleX(${p.toFixed(4)})`
+        : `scaleY(${p.toFixed(4)})`;
+    }
+    if (readout) {
+      readout.textContent = `X ${(Math.sin(p * 6.28) * 100).toFixed(1)}  Y ${(p * 360).toFixed(1)}°`;
+    }
+    stage?.classList.toggle('is-story', p > 0.04);
+
+    const now = chapterFor(p);
+    if (now === lit) return;
+    lit = now;
+    rail.forEach((el, i) => el.classList.toggle('is-live', i === now));
+    stage?.classList.toggle('is-chapter-3', now === 2);
+  };
+
+  /* Scroll drives everything from one trigger over the whole section.
+   *
+   * The stage is held by CSS `position: sticky`, not by a ScrollTrigger pin, so
+   * this only reads the scroll and never moves the element. `bottom bottom` is
+   * therefore right: the section is four screens tall and the story runs the
+   * full length of it, finishing as the last screen clears rather than at the
+   * moment the top leaves.
+   *
+   * The readouts are written straight to the DOM here rather than through a
+   * tween, because they change every frame of a scrub and a tween per frame per
+   * element is the one thing that would make this drop frames. */
   const exit = gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -164,31 +213,65 @@ export function initApex(root = document) {
       end: 'bottom bottom',
       scrub: 0.4,
       invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        /* Chapter two's own progress, clamped to its half of the section. */
-        const story = Math.max(0, Math.min(1, (self.progress - 0.5) / 0.44));
-        openShell?.(story);
-        playerChapter?.classList.toggle('is-live', story > 0.5);
-        /* Phones read chapter two over a sprite that cannot come apart, so the
-         * ball has to get out of the way of the copy instead. CSS decides how
-         * far, and only at narrow widths -- on a desktop the ball opening is
-         * the whole point of the chapter. */
-        stage?.classList.toggle('is-story', story > 0.15);
-      },
+      onUpdate: (self) => paint(self.progress),
     },
   });
 
-  /* Scroll turns the ball right through: a little over half a revolution
-   * across the brand chapter, and on round as the shell opens, so the join
-   * between the two is not a place where it stalls. */
-  const scrubbed = { f: 0 };
-  exit
-    .to(scrubbed, { f: 17, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0)
-    .to(object, { scale: 1.14, ease: 'none' }, 0)
-    .to(brand, { opacity: 0, y: -40, ease: 'none' }, 0.4)
-    .to(scrubbed, { f: 34, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0.5)
-    .fromTo(playerChapter, { opacity: 0, y: 30 }, { opacity: 1, y: 0, ease: 'none' }, 0.52);
+  /* The brand line is chapter zero: the homepage still has to say whose it is
+   * before it becomes a study. It leaves as the first act opens, and the three
+   * chapters then hand over at the same seams the scene does -- 0.3 and 0.7 --
+   * so the copy and the ball are always describing the same moment.
+   *
+   * Positions on one timeline rather than four triggers, because the scene runs
+   * straight through the joins and separate triggers would each want to own it
+   * there. The windows overlap by a fade's width on purpose: a hard cut between
+   * two pieces of copy over a continuous scene reads as a glitch. */
+  const WINDOWS = [
+    [0, 0.1],     // ARVAND / SPORT
+    [0.08, 0.3],  // 01 the ball
+    [0.3, 0.7],   // 02 the strike
+    [0.7, 1],     // 03 the player
+  ];
+  const FADE = 0.05;
 
+  /* A spacer that fixes the timeline at exactly one unit long.
+   *
+   * ScrollTrigger maps the section's scroll range onto the timeline's duration,
+   * and a timeline's duration is wherever its last tween happens to end -- so
+   * without this, every position below means a fraction of *that*, not of the
+   * section. Measured: 0.75 without it, which put the last chapter's fade at
+   * 0.70-0.75 three quarters of the way down a page it should have finished
+   * at, and it read as a chapter that never quite arrived.
+   *
+   * It has to animate something real. A tween on a bare {} has no properties to
+   * touch, so GSAP discards it and the length is unchanged -- which is exactly
+   * what happened on the first attempt at this. */
+  exit.to({ length: 0 }, { length: 1, duration: 1, ease: 'none' }, 0);
+
+  /* The sprite's own rotation, for everyone who is not getting the scene: a
+   * little over half a revolution across the section, which reads as deliberate
+   * rather than as a loop. Once the island is up this is a no-op, because the
+   * mesh turns itself from the same progress. */
+  const scrubbed = { f: 0 };
+  exit.to(scrubbed, { f: 17, duration: 1, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0);
+
+  chapters.forEach((chapter, i) => {
+    const [from, to] = WINDOWS[i] || [0, 1];
+    if (i === 0) {
+      /* Already visible on load, so it only needs its exit. */
+      exit.to(chapter, { opacity: 0, ease: 'none', duration: FADE }, to - FADE);
+      return;
+    }
+    exit.fromTo(chapter, { opacity: 0 }, { opacity: 1, ease: 'none', duration: FADE }, from);
+    if (i < chapters.length - 1) {
+      exit.to(chapter, { opacity: 0, ease: 'none', duration: FADE }, to - FADE);
+    }
+  });
+
+  /* The trigger only fires once the scroll moves, so the frame the page lands
+   * on would otherwise show an unlit rail and a blank counter. */
+  exit.scrollTrigger?.refresh();
+  paint(exit.scrollTrigger?.progress ?? 0);
 
   /* Kick it. Clicking the ball drives it away along a shallow arc, spinning
    * hard, then lets it come back and settle — a toy, but the kind visitors

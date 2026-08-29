@@ -2,12 +2,11 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 
 import { asset, scrollState } from '@/lib/scroll';
+import { EXPLODE_DISTANCE, sceneState } from '@/lib/choreography';
 import {
   buildProceduralPanels,
   makePanelMaterial,
@@ -22,24 +21,11 @@ import {
 
 const MODEL_URL = '/models/soccer-ball.glb';
 
-/** How far each panel travels outward at full explode, in ball radii. */
-const EXPLODE_DISTANCE = 0.95;
-
 export type SoccerModelProps = {
   /** Force the procedural build. The error boundary in SoccerCanvas sets it. */
   procedural?: boolean;
   /** Panels the HUD wants to hang callouts off, by index. */
   onPanelsReady?: (panels: Panel[]) => void;
-};
-
-/** The scrub writes here; useFrame reads it. Never React state -- see lib/scroll. */
-type Anim = {
-  spin: number;
-  dolly: number;
-  kick: number;
-  explode: number;
-  wire: number;
-  detail: number;
 };
 
 export default function SoccerModel({ procedural = false, onPanelsReady }: SoccerModelProps) {
@@ -57,7 +43,7 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     return fromFile.length ? fromFile : buildProceduralPanels();
   }, [procedural, gltf]);
 
-  const materials = useMemo(() => panels.map((panel) => makePanelMaterial(panel.kind)), [panels]);
+  const materials = useMemo(() => panels.map((panel) => makePanelMaterial(panel)), [panels]);
 
   useLayoutEffect(() => {
     onPanelsReady?.(panels);
@@ -70,55 +56,13 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     };
   }, [panels, materials]);
 
-  const anim = useRef<Anim>({ spin: 0, dolly: 0, kick: 0, explode: 0, wire: 0, detail: 0 });
-
-  /**
-   * The scroll timeline.
-   *
-   * gsap.context() scopes every tween and trigger created inside it, so the
-   * revert on cleanup takes all of them with it. Without it React 19's strict
-   * mode double-invoke leaves a second ScrollTrigger attached to the same
-   * element, both scrubbing the same object, and the scene stutters in
-   * development in a way it never does in production -- which is the worst
-   * kind of bug to chase.
-   */
-  useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      const target = anim.current;
-      const timeline = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: '#scroll-track',
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.6,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // 01 -- approach. One full turn while the camera closes in.
-      timeline.to(target, { spin: 1, dolly: 1, duration: 0.3 }, 0);
-
-      // 02 -- the strike. Contact is quick and the shell opens behind it, so
-      // the kick runs out well before the explode finishes.
-      timeline.to(target, { kick: 1, duration: 0.4, ease: 'power2.out' }, 0.3);
-      timeline.to(target, { explode: 1, duration: 0.34 }, 0.36);
-      timeline.to(target, { wire: 1, duration: 0.3 }, 0.34);
-
-      // 03 -- detail. The camera comes round the side to the callouts.
-      timeline.to(target, { detail: 1, duration: 0.3 }, 0.7);
-    });
-
-    return () => ctx.revert();
-  }, []);
-
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const lookAt = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state, delta) => {
-    const a = anim.current;
+    /* Derived, not stored. Whoever is hosting the scene has already put the
+     * page's progress in scrollState; this turns it into positions. */
+    const a = sceneState(scrollState.progress);
     const t = state.clock.elapsedTime;
 
     /* --- the ball itself --- */
@@ -147,8 +91,10 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
       const mesh = panelRefs.current[i];
       if (!mesh) continue;
       const dir = panels[i].dir;
-      // Pentagons lead by a fraction so the shell peels rather than bursting.
-      const lead = panels[i].kind === 'pent' ? 1.12 : 0.94;
+      /* On the thirty-two panel ball the pentagons lead by a fraction so the
+       * shell peels rather than bursting. A four-panel ball has no pentagons
+       * and its quarters simply part. */
+      const lead = panels[i].kind === 'pent' ? 1.12 : panels[i].kind === 'hex' ? 0.94 : 1;
       mesh.position.copy(dir).multiplyScalar(distance * lead);
       mesh.rotation.set(
         dir.x * a.explode * 0.7,
@@ -255,4 +201,8 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
   );
 }
 
-useGLTF.preload(asset(MODEL_URL));
+/* Deliberately not useGLTF.preload() here. That runs when the module is
+ * evaluated, which is before the homepage has had a chance to call
+ * setAssetBase -- so the preload fetched the model from the wrong place, got a
+ * 404, and the real load happened anyway a moment later. One request, made
+ * once the component knows where things are. */

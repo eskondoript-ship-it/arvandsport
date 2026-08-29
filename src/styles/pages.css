@@ -651,48 +651,6 @@ a.office__row:hover { color: var(--white); }
   --line: rgba(234, 244, 251, .2);
   --line-strong: rgba(5, 237, 255, .5);
 }
-/* Two chapters, one stage. The section is twice the viewport and the stage is
-   stuck to the top of it for the first screen's worth of scrolling, which is
-   what lets the ball stay put while the copy changes around it.
-
-   Sticky rather than a scroll library's pin: the browser holds it, so it
-   cannot fall out of sync with the scroll, it costs nothing on the main
-   thread, and it still holds with JavaScript off. What JS adds on top is only
-   which chapter is lit and how far the ball has opened.
-
-   The section must not clip. Any overflow other than `visible` on an ancestor
-   of a sticky element turns that ancestor into the scroll container the
-   element sticks within — so it sticks to a box that is itself scrolling away,
-   which looks exactly like sticky not working. The clipping stays on the
-   stage, where it is the element itself and therefore harmless. */
-.apex { min-height: 200svh; }
-.apex__pin {
-  position: sticky; top: 0; overflow: hidden;
-  height: 100svh;
-  display: grid; place-items: center;
-  padding: calc(var(--header-h) + 2.5rem) var(--gutter) clamp(2.5rem, 7vh, 5rem);
-}
-
-/* Both chapters occupy the same square of the stage and are crossfaded. They
-   are laid out on top of one another rather than swapped, so neither reflows
-   when the other arrives and the ball between them never moves. */
-.apex__chapter {
-  grid-area: 1 / 1;
-  width: 100%; height: 100%;
-  display: grid; place-items: center;
-}
-.apex__chapter--player {
-  opacity: 0;
-  pointer-events: none;
-  align-content: center;
-}
-.apex__chapter--player.is-live { pointer-events: auto; }
-
-.apex__eyebrow {
-  position: absolute; top: calc(var(--header-h) + clamp(1rem, 4vh, 2.6rem)); left: var(--gutter);
-  font-size: .7rem; text-transform: uppercase;
-}
-
 /* Display line ---------------------------------------------------------- */
 /* The pin centres its grid items, which shrinks the heading to its content —
    so space-between inside it had no free space to distribute and the halves
@@ -770,10 +728,13 @@ a.office__row:hover { color: var(--white); }
 .apex__webgl {
   position: absolute; inset: 0; z-index: 1;
   opacity: 0; transition: opacity .5s ease;
+  pointer-events: none;
 }
 .apex__ball { transition: opacity .5s ease; }
-.apex__object.is-webgl .apex__webgl { opacity: 1; }
-.apex__object.is-webgl .apex__ball { opacity: 0; }
+/* The scene and the sprite are never both visible; the sprite simply stays if
+   the scene never arrives. */
+.apex__pin.is-webgl .apex__webgl { opacity: 1; }
+.apex__pin.is-webgl .apex__object { opacity: 0; }
 
 /* A halo behind the ball, not a bloom inside it: the ball is opaque white
    now, so an internal glow only tinted the panels at its edges. This sits
@@ -784,108 +745,198 @@ a.office__row:hover { color: var(--white); }
   filter: blur(40px); opacity: .9;
 }
 
-/* Chapter two: the player ------------------------------------------------ */
-/* A column down the left, clear of the ball, which the scene aims away from
-   as it opens. The portrait beside it is only for the visitors who are not
-   getting the WebGL figure — a phone, or a browser the bundle never reached —
-   so the chapter is never a column of text next to nothing. */
-.apex__chapter--player {
-  grid-template-columns: minmax(0, auto) minmax(0, 26rem);
-  justify-content: start; align-items: center;
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  padding-inline: var(--gutter);
-}
-.apex__portrait { margin: 0; width: clamp(140px, 17vw, 230px); }
-.apex__portrait img { display: block; width: 100%; height: auto; }
-.apex__object.is-webgl ~ .apex__chapter--player .apex__portrait { display: none; }
+/* Three chapters, one stage ---------------------------------------------- */
+/* The section is four viewport-heights and the stage is stuck to the top of it
+   for the first three, which is what lets the ball stay put while the copy
+   changes around it.
 
-.apex__eyebrow--inline {
-  position: static; margin: 0 0 .5rem;
-  color: var(--accent); letter-spacing: .24em;
+   Sticky rather than a scroll library's pin: the browser holds it, so it cannot
+   fall out of sync with the scroll, it costs nothing on the main thread, and it
+   still holds with JavaScript off. What JS adds on top is which chapter is lit
+   and how far through the story the scene is.
+
+   The section must not clip. Any overflow other than `visible` on an ancestor
+   of a sticky element turns that ancestor into the scroll container the element
+   sticks within — so it sticks to a box that is itself scrolling away, which
+   looks exactly like sticky not working. The clipping stays on the stage, where
+   it is the element itself and therefore harmless. */
+.apex {
+  min-height: 400svh;
+  /* The study's own ground, so the two are the same picture. The old radial
+     navy was the hero's; this scene brings its own grid and vignette and sat
+     oddly on top of it. */
+  background: #08080c;
 }
-.apex__player-name {
-  margin: 0; font-size: clamp(1.9rem, 4.4vw, 3.4rem);
-  font-weight: 300; line-height: 1.05; letter-spacing: -.01em; color: #fff;
-}
-.apex__player-role {
-  margin: .6rem 0 0; font-size: .9rem; color: var(--fg-faint);
+.apex__pin {
+  position: sticky; top: 0; overflow: hidden;
+  height: 100svh;
+  display: grid; place-items: center;
+  padding: calc(var(--header-h) + 2.5rem) var(--gutter) clamp(2.5rem, 7vh, 5rem);
 }
 
-.apex__facts {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px; margin: 1.6rem 0 1.8rem;
-  background: rgba(234, 244, 251, .12);
-  border: 1px solid rgba(234, 244, 251, .12);
+/* Every chapter occupies the same square of the stage and they are crossfaded,
+   laid over one another rather than swapped, so nothing reflows as one arrives
+   and the ball behind them never moves. */
+.apex__chapter {
+  grid-area: 1 / 1;
+  position: relative; z-index: 2;
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  pointer-events: none;
 }
-.apex__facts > div { background: #060c16; padding: .7rem .9rem; }
-.apex__facts dt {
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: .62rem; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--accent);
+.apex__chapter--story { opacity: 0; align-content: center; justify-items: start; }
+/* The copy and the scene both want the left of the frame -- Taremi walks in
+   exactly where the second chapter's body text sits -- and no arrangement of
+   the two keeps them apart. A gradient the text sits on solves it once, for
+   every chapter, rather than choreographing each collision. */
+.apex__chapter--story::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; z-index: -1;
+  width: min(48rem, 58vw);
+  background: linear-gradient(to right, #08080c, rgba(8, 8, 12, .82) 45%, transparent);
 }
-.apex__facts dd {
-  margin: .3rem 0 0; font-size: 1.7rem; font-weight: 300; line-height: 1;
+@media (max-width: 760px) {
+  .apex__chapter--story::before { width: 100%; background: rgba(8, 8, 12, .78); }
+}
+.apex__chapter.is-live { pointer-events: auto; }
+
+.apex__copy { max-width: 30rem; }
+@media (min-width: 1280px) { .apex__copy { max-width: 26rem; } }
+
+.apex__kicker {
+  font-family: var(--font-hud);
+  font-size: .625rem; letter-spacing: .3em; text-transform: uppercase;
+  color: rgba(108, 232, 255, .78);
+}
+.apex__headline {
+  margin: .9rem 0 0;
+  font-size: clamp(1.9rem, 4.2vw, 3rem);
+  font-weight: 300; line-height: 1.06; letter-spacing: -.015em; color: #fff;
+}
+.apex__body {
+  margin: 1.15rem 0 0;
+  font-size: .875rem; line-height: 1.65; color: rgba(255, 255, 255, .55);
+}
+.apex__copy .btn { margin-top: 1.6rem; }
+
+/* The blueprint frame ---------------------------------------------------- */
+/* Instrument dressing: hairlines inset from the edges, crosshairs on two
+   corners, a chapter rail and two live readouts. It is one static block that
+   apex.js writes numbers into, never re-renders — they change every frame of a
+   scrub and everything around them does not. */
+.apex {
+  --font-hud: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+}
+.apex__hud {
+  position: absolute; inset: 0; z-index: 4;
+  pointer-events: none; user-select: none;
+  font-family: var(--font-hud);
+}
+.apex__rule { position: absolute; background: rgba(255, 255, 255, .07); }
+.apex__rule--top { inset: 5rem 3rem auto; height: 1px; }
+.apex__rule--bottom { inset: auto 3rem 5rem; height: 1px; }
+.apex__rule--left { inset: 3rem auto 3rem 3rem; width: 1px; }
+.apex__rule--right { inset: 3rem 3rem 3rem auto; width: 1px; }
+
+.apex__crosshair { position: absolute; width: 1.5rem; height: 1.5rem; color: rgba(108, 232, 255, .4); }
+.apex__crosshair--tl { left: 3rem; top: 5rem; translate: -50% -50%; }
+.apex__crosshair--br { right: 3rem; bottom: 5rem; translate: 50% 50%; }
+
+.apex__stamp {
+  position: absolute; top: calc(var(--header-h) + .6rem);
+  margin: 0;
+  font-size: .625rem; letter-spacing: .28em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .45);
+}
+.apex__stamp--left { left: 3rem; }
+.apex__stamp--right { right: 3rem; }
+
+.apex__rail {
+  position: absolute; left: 3rem; bottom: 7rem;
+  display: flex; align-items: flex-end; gap: 1rem;
+}
+.apex__rail-index {
+  display: flex; flex-direction: column; gap: .5rem;
+  font-size: .625rem; letter-spacing: .2em;
+}
+.apex__rail-index span { color: rgba(255, 255, 255, .25); transition: color .5s ease; }
+.apex__rail-index span.is-live { color: rgb(108, 232, 255); }
+.apex__rail-track { position: relative; width: 1px; height: 6rem; background: rgba(255, 255, 255, .1); }
+.apex__rail-track span {
+  position: absolute; inset: 0; transform-origin: top;
+  background: rgba(108, 232, 255, .8); transform: scaleY(0);
+}
+.apex__rail-count {
+  margin: 0 0 .1rem;
+  font-size: .625rem; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .4);
+}
+.apex__rail-count span + span { color: rgba(255, 255, 255, .2); }
+
+.apex__readout {
+  position: absolute; right: 3rem; bottom: 1.5rem; margin: 0;
+  font-size: .625rem; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .3);
+}
+
+/* Taremi's figures, down the right, chapter three only ------------------- */
+.apex__stats {
+  position: absolute; right: 3rem; top: 50%; translate: 0 -50%;
+  width: 14rem; display: none; flex-direction: column; gap: .5rem;
+}
+@media (min-width: 1100px) { .apex__stats { display: flex; } }
+
+.apex__stats-name {
+  margin: 0; padding: .25rem 0;
+  font-size: .625rem; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(108, 232, 255, .8);
+  opacity: 0; transition: opacity .7s ease;
+}
+.apex__stat {
+  /* Opaque enough to read against the exploded ball, which passes directly
+     behind this column in the third chapter. A near-transparent card looked
+     right on an empty background and became unreadable the moment a lit panel
+     drifted under it. */
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(8, 8, 12, .8);
+  backdrop-filter: blur(12px);
+  padding: .75rem 1rem;
+  opacity: 0; translate: 0 .75rem;
+  transition: opacity .7s ease, translate .7s ease;
+  transition-delay: calc(var(--i) * 90ms);
+}
+.apex__stat-label {
+  margin: 0; font-size: .625rem; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(108, 232, 255, .7);
+}
+.apex__stat-value {
+  margin: .25rem 0 0; font-size: 1.875rem; font-weight: 300; line-height: 1;
   color: #fff; font-variant-numeric: tabular-nums;
 }
-.apex__facts p {
-  margin: .35rem 0 0;
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: .6rem; line-height: 1.3; color: rgba(234, 244, 251, .38);
-}
+.apex__stat-note { margin: .375rem 0 0; font-size: .625rem; line-height: 1.3; color: rgba(255, 255, 255, .4); }
 
-@media (max-width: 760px) {
-  .apex__chapter--player {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center; gap: 1.2rem;
-  }
-  .apex__portrait { width: clamp(110px, 34vw, 170px); }
-  /* The sprite cannot open, so on a phone it steps back behind the copy rather
-     than sitting at half opacity underneath it, which is legible for a display
-     line and not for four stat cards and a paragraph. */
-  .apex__pin.is-story .apex__object { opacity: .14; }
+.apex__career {
+  margin-top: .5rem; padding: .75rem;
+  border: 1px solid rgba(255, 255, 255, .1); border-left-color: rgba(108, 232, 255, .4);
+  background: rgba(8, 8, 12, .8); backdrop-filter: blur(12px);
+  opacity: 0; translate: 0 .75rem;
+  transition: opacity .7s ease .42s, translate .7s ease .42s;
 }
-.apex__object { transition: opacity .5s ease; }
+.apex__career > div + div { margin-top: .5rem; }
+.apex__career-year { margin: 0; font-size: .625rem; letter-spacing: .2em; color: rgba(108, 232, 255, .6); }
+.apex__career-club { margin: 0; font-size: .875rem; color: rgba(255, 255, 255, .85); }
+.apex__career-detail { margin: 0; font-size: .625rem; color: rgba(255, 255, 255, .35); }
 
-/* Corner labels --------------------------------------------------------- */
-/* The corner labels read as annotation on a dossier, so they take the
-   monospace voice rather than more Roboto: a genuinely different texture
-   against the serif, and no webfont to download. Roboto uppercase at .28em
-   tracking was neither one thing nor the other. Tracking comes right down —
-   monospace is already wide — and the opacity comes up: 42% was faint enough
-   that they read as an artefact rather than as copy. */
-.apex__label,
-.apex__eyebrow,
-.apex__scroll {
-  font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-weight: 500;
-  letter-spacing: .06em;
-  color: rgba(234, 244, 251, .62);
-}
-.apex__label {
-  position: absolute; z-index: 3;
-  font-size: .74rem; text-transform: uppercase;
-  line-height: 1.75;
-}
-/* A hairline rule ties each label to the edge it is pinned to. */
-.apex__label::before {
-  content: ""; display: block; width: 26px; height: 1px; margin-bottom: .6rem;
-  background: var(--accent); opacity: .7;
-}
-.apex__label--right::before { margin-inline-start: auto; }
-.apex__label--right { right: var(--gutter); top: 30%; text-align: right; }
-.apex__label--left { left: var(--gutter); top: 30%; }
+/* Lit only on the last chapter — the figures are about the player, and he is
+   not in the scene before the strike. */
+.apex__pin.is-chapter-3 .apex__stats-name,
+.apex__pin.is-chapter-3 .apex__stat,
+.apex__pin.is-chapter-3 .apex__career { opacity: 1; translate: 0 0; }
 
 .apex__actions {
   position: absolute; left: 50%; bottom: clamp(2.5rem, 9vh, 5.5rem); translate: -50% 0; z-index: 3;
   display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center;
 }
-.apex__scroll {
-  position: absolute; right: var(--gutter); bottom: clamp(1rem, 3vh, 2rem); z-index: 3;
-  display: grid; justify-items: center; gap: .6rem;
-  font-size: .68rem; text-transform: uppercase;
-  writing-mode: vertical-rl;
-}
-.apex__scroll-line { display: block; width: 1px; height: 48px; background: linear-gradient(var(--accent), transparent); }
 
 /* The outlined button reads at about 3% contrast on this ground, which is
    effectively invisible — it needs a real edge here. */
@@ -898,23 +949,35 @@ a.office__row:hover { color: var(--white); }
 
 /* Phones ---------------------------------------------------------------- */
 @media (max-width: 760px) {
-  /* Stacked, the two halves need the ball behind them rather than between. */
   /* No room to split a line on a phone: the halves stack and the ball sits
      behind them rather than between. */
   .apex__display {
     flex-direction: column; justify-content: center; align-items: center;
     gap: .1rem; font-size: clamp(2.7rem, 15vw, 4.6rem);
   }
-  /* Behind the type here, not in front of it: with the halves stacked there
-     is no gap to sit in, and an object on top just greys out the letters. */
   .apex__object { width: min(86vw, 400px); opacity: .5; z-index: 0; }
   .apex__title { position: relative; z-index: 2; }
-  .apex__label--right { top: auto; bottom: 22%; }
-  .apex__label--left { bottom: 15%; }
-  .apex__scroll { display: none; }
   .apex__actions { bottom: clamp(1.5rem, 5vh, 3rem); width: min(100%, 22rem); }
   .apex__actions .btn { flex: 1 1 auto; justify-content: center; }
+
+  /* The frame is instrument dressing and there is no room for it here. The
+     rail's reading survives as one hairline across the foot. */
+  .apex__rule, .apex__crosshair, .apex__stamp--left, .apex__readout { display: none; }
+  .apex__stamp--right { right: var(--gutter); }
+  .apex__rail {
+    left: var(--gutter); right: var(--gutter); bottom: 1.25rem;
+    align-items: center; gap: .75rem;
+  }
+  .apex__rail-index { flex-direction: row; gap: .5rem; }
+  .apex__rail-track { width: auto; flex: 1; height: 1px; }
+  .apex__rail-track span { transform-origin: left; transform: scaleX(0); }
+
+  /* The copy has the full width here and the sprite cannot open, so the ball
+     steps back behind the text rather than sitting at half opacity under it. */
+  .apex__chapter--story { justify-items: stretch; }
+  .apex__pin.is-story .apex__object { opacity: .12; }
 }
+.apex__object { transition: opacity .5s ease; }
 
 /* Composed still when nothing is allowed to move. */
 @media (prefers-reduced-motion: reduce) {

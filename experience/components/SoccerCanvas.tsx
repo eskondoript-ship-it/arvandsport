@@ -121,7 +121,12 @@ function Taremi() {
  * Canvas
  * ------------------------------------------------------------------ */
 
-export default function SoccerCanvas() {
+export type SoccerCanvasProps = {
+  /** Fires once the ball's panels exist and the scene has something to draw. */
+  onReady?: () => void;
+};
+
+export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
   const keyLight = useRef<THREE.DirectionalLight>(null);
   const fillLight = useRef<THREE.DirectionalLight>(null);
   const [lightsReady, setLightsReady] = useState(false);
@@ -198,7 +203,7 @@ export default function SoccerCanvas() {
         <Select enabled>
           <ModelBoundary fallback={<ProceduralBall />}>
             <Suspense fallback={<ProceduralBall />}>
-              <SoccerModel />
+              <SoccerModel onPanelsReady={onReady && (() => onReady())} />
             </Suspense>
           </ModelBoundary>
         </Select>

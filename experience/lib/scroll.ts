@@ -91,8 +91,21 @@ export function initSmoothScroll(): () => void {
   };
 }
 
-/** Public asset URL, honouring the Pages sub-path the export is mounted at. */
+/**
+ * Public asset URL.
+ *
+ * The default is the Pages sub-path this export is mounted at, which Next bakes
+ * in at build time. The homepage runs the same scene from a bundle rather than
+ * from this app, serving the same files out of its own assets directory at a
+ * path Next knows nothing about — so it sets the base itself before mounting.
+ * One scene, two hosts, and neither has to know where the other keeps things.
+ */
+let assetBase = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+export function setAssetBase(base: string): void {
+  assetBase = base.replace(/\/$/, '');
+}
+
 export function asset(path: string): string {
-  const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${base}${path}`;
+  return `${assetBase}${path}`;
 }

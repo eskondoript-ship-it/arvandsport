@@ -13,10 +13,23 @@ import * as THREE from 'three';
 
 export type Panel = {
   name: string;
-  kind: 'pent' | 'hex';
+  /**
+   * Which kind of panel this is. 'pent' and 'hex' belong to a truncated
+   * icosahedron and carry their own colour; 'shell' is a quarter of a
+   * four-panel ball, which brings its own textured material from the file and
+   * is not coloured here.
+   */
+  kind: 'pent' | 'hex' | 'shell';
   geometry: THREE.BufferGeometry;
   /** Unit vector from the ball's centre through the panel. Drives the explode. */
   dir: THREE.Vector3;
+  /**
+   * The material the file shipped with, when it has one worth keeping. The
+   * Trionda is a textured ball: base colour, roughness and normal maps that
+   * are the whole reason it looks like the real thing. Those are extended with
+   * the wireframe shader rather than thrown away for a flat colour.
+   */
+  source?: THREE.MeshStandardMaterial;
 };
 
 /**
@@ -212,7 +225,11 @@ export function panelsFromGltf(scene: THREE.Object3D): Panel[] {
     if (!(child as THREE.Mesh).isMesh) return;
     const mesh = child as THREE.Mesh;
     const extras = (mesh.userData ?? {}) as { panel?: string; dir?: number[] };
-    const kind = extras.panel === 'pent' ? 'pent' : 'hex';
+    const kind: Panel['kind'] =
+      extras.panel === 'pent' ? 'pent' : extras.panel === 'shell' ? 'shell' : 'hex';
+    const source = (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as
+      | THREE.MeshStandardMaterial
+      | undefined;
     const dir = extras.dir
       ? new THREE.Vector3(...extras.dir)
       : // Fall back to the centroid direction if the extras did not survive
@@ -227,6 +244,7 @@ export function panelsFromGltf(scene: THREE.Object3D): Panel[] {
       kind,
       geometry: withBarycentrics(mesh.geometry),
       dir,
+      source: source?.isMeshStandardMaterial ? source : undefined,
     });
   });
   return panels;
@@ -254,14 +272,23 @@ export type PanelMaterial = THREE.MeshStandardMaterial & {
  * faint ghost and the triangle edges are glowing neon, bright enough to pass
  * the bloom pass's luminance threshold.
  */
-export function makePanelMaterial(kind: 'pent' | 'hex'): PanelMaterial {
-  const material = new THREE.MeshStandardMaterial({
-    color: kind === 'pent' ? '#08090c' : '#eef1f4',
-    roughness: kind === 'pent' ? 0.42 : 0.36,
-    metalness: kind === 'pent' ? 0.1 : 0.05,
-    transparent: true,
-    side: THREE.DoubleSide,
-  }) as PanelMaterial;
+export function makePanelMaterial(panel: Pick<Panel, 'kind' | 'source'>): PanelMaterial {
+  /* A textured ball brings its own material and its maps are the point of it,
+   * so that is cloned and extended. A ball built from geometry alone gets the
+   * flat black-and-white the older mesh was rendered with. Either way the same
+   * shader goes in on top, because the wireframe crossfade is a property of
+   * this scene rather than of any one ball. */
+  const material = (
+    panel.source
+      ? panel.source.clone()
+      : new THREE.MeshStandardMaterial({
+          color: panel.kind === 'pent' ? '#08090c' : '#eef1f4',
+          roughness: panel.kind === 'pent' ? 0.42 : 0.36,
+          metalness: panel.kind === 'pent' ? 0.1 : 0.05,
+        })
+  ) as PanelMaterial;
+  material.transparent = true;
+  material.side = THREE.DoubleSide;
 
   const uProgress = { value: 0 };
   const uNeon = { value: NEON.clone() };
@@ -301,14 +328,24 @@ export function makePanelMaterial(kind: 'pent' | 'hex'): PanelMaterial {
         `#include <dithering_fragment>
         /* The panel's own outline carries the picture; the triangulation is
          * texture behind it, at a quarter of the strength. */
-        float outline = 1.0 - smoothstep(0.0, 0.16, vEdge);
+        /* A narrow band, measured as a fraction of the panel's own half-width.
+         * 0.16 was right for a hexagon; on a quarter-shell it is a sixth of a
+         * very large piece and the glow washed most of the printed surface. */
+        float outline = 1.0 - smoothstep(0.0, 0.05, vEdge);
         float wire = max(outline, meshFactor() * 0.26);
         vec3 neon = uNeon * (0.45 + outline * 1.25);
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, uProgress * wire);
-        /* The interior does not vanish completely: a little left behind keeps
-         * the ball reading as a solid being opened up rather than as a flat
-         * tangle of lines. */
-        gl_FragColor.a *= mix(1.0, max(wire, 0.055), uProgress);`,
+
+        /* The neon goes on the seams, not over the surface. On the flat
+         * black-and-white ball this was a full crossfade to a glowing cage,
+         * which was the whole point of it; with a textured ball the surface is
+         * the point, and washing a printed Trionda panel to cyan threw away the
+         * thing worth looking at. So the mix is weighted to the outline and the
+         * interior keeps most of itself. */
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, uProgress * mix(wire * 0.35, outline, 0.75));
+        /* And it no longer dissolves. A quarter-shell going see-through reads as
+         * a rendering fault rather than as a diagram; it holds its surface and
+         * lets the lit seams do the work. */
+        gl_FragColor.a *= mix(1.0, 0.92, uProgress);`,
       );
   };
 

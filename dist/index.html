@@ -67,9 +67,84 @@
   <main id="main" class="main"><section class="apex" id="home" data-apex aria-labelledby="apex-title">
   <div class="apex__pin" data-apex-pin>
 
-    <div class="apex__chapter apex__chapter--brand" data-apex-chapter="0">
-      <p class="apex__eyebrow" data-apex-fade>FIFA-licensed football &amp; match agency</p>
+    <div class="apex__hud" aria-hidden="true">
+      <span class="apex__rule apex__rule--top"></span>
+      <span class="apex__rule apex__rule--bottom"></span>
+      <span class="apex__rule apex__rule--left"></span>
+      <span class="apex__rule apex__rule--right"></span>
+      <svg class="apex__crosshair apex__crosshair--tl" viewBox="0 0 40 40" aria-hidden="true" fill="none">
+  <circle cx="20" cy="20" r="11.5" stroke="currentColor" stroke-width=".75" opacity=".5" />
+  <circle cx="20" cy="20" r="1.6" fill="currentColor" />
+  <path d="M20 0v9M20 31v9M0 20h9M31 20h9" stroke="currentColor" stroke-width=".75" opacity=".7" />
+</svg>
+      <svg class="apex__crosshair apex__crosshair--br" viewBox="0 0 40 40" aria-hidden="true" fill="none">
+  <circle cx="20" cy="20" r="11.5" stroke="currentColor" stroke-width=".75" opacity=".5" />
+  <circle cx="20" cy="20" r="1.6" fill="currentColor" />
+  <path d="M20 0v9M20 31v9M0 20h9M31 20h9" stroke="currentColor" stroke-width=".75" opacity=".7" />
+</svg>
 
+      <p class="apex__stamp apex__stamp--left">Match ball · structural study</p>
+      <p class="apex__stamp apex__stamp--right">FIFA licensed</p>
+
+      <div class="apex__rail">
+        <div class="apex__rail-index">
+          <span data-apex-rail="0">01</span><span data-apex-rail="1">02</span><span data-apex-rail="2">03</span>
+        </div>
+        <div class="apex__rail-track"><span data-apex-bar></span></div>
+        <p class="apex__rail-count"><span data-apex-count>000</span><span> / 100</span></p>
+      </div>
+
+      <p class="apex__readout"><span data-apex-readout>X 0.0  Y 0.0°</span></p>
+      <div class="apex__stats" data-apex-stats>
+        <p class="apex__stats-name">Mehdi Taremi — Centre-Forward</p>
+        <div class="apex__stat" style="--i:0">
+          <p class="apex__stat-label">Caps</p>
+          <p class="apex__stat-value">79</p>
+          <p class="apex__stat-note">Iran senior national team</p>
+        </div><div class="apex__stat" style="--i:1">
+          <p class="apex__stat-label">Goals</p>
+          <p class="apex__stat-value">43</p>
+          <p class="apex__stat-note">for Iran</p>
+        </div><div class="apex__stat" style="--i:2">
+          <p class="apex__stat-label">Height</p>
+          <p class="apex__stat-value">1,85 m</p>
+          
+        </div><div class="apex__stat" style="--i:3">
+          <p class="apex__stat-label">Foot</p>
+          <p class="apex__stat-value">Right</p>
+          <p class="apex__stat-note">preferred</p>
+        </div>
+        <div class="apex__career">
+          <div>
+            <p class="apex__career-year">2020</p>
+            <p class="apex__career-club">FC Porto</p>
+            <p class="apex__career-detail">Joined 31 August 2020</p>
+          </div><div>
+            <p class="apex__career-year">2024</p>
+            <p class="apex__career-club">Inter Milan</p>
+            <p class="apex__career-detail">Free transfer</p>
+          </div><div>
+            <p class="apex__career-year">2025</p>
+            <p class="apex__career-club">Olympiacos</p>
+            <p class="apex__career-detail">Joined August 2025</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty until apex.js decides this visitor gets the WebGL scene and the
+         island mounts into it. It fills the whole stage rather than sitting in
+         the sprite's box: the scene is a full-frame composition -- grid floor,
+         vignette, a camera that pulls back a long way -- and boxed into a
+         430px square it renders a ball the size of a coin. -->
+    <div class="apex__webgl" data-apex-webgl></div>
+
+    <div class="apex__object" data-apex-object aria-hidden="true">
+      <span class="apex__core"></span>
+      <span class="apex__ball" data-apex-ball></span>
+    </div>
+
+    <div class="apex__chapter apex__chapter--brand" data-apex-chapter="0">
       <h1 class="apex__title" id="apex-title">
         <span class="u-sr-only">ARVAND SPORT — A STREAM TO SUCCESS</span>
         <span class="apex__display" aria-hidden="true">
@@ -78,58 +153,33 @@
         </span>
       </h1>
 
-      <p class="apex__label apex__label--right" data-apex-fade>Twenty-five years<br>at the top level</p>
-      <p class="apex__label apex__label--left" data-apex-fade>230+ players<br>46 countries</p>
-
       <div class="apex__actions" data-apex-fade>
         <a class="btn btn--solid btn--lg" href="./player/" data-magnetic><span>Our players</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></a>
         <a class="btn btn--ghost btn--lg" href="./registration/" data-magnetic><span>Register</span></a>
       </div>
-
-      <a class="apex__scroll" href="#about" data-apex-fade aria-label="Scroll to content">
-        <span class="apex__scroll-line"></span><span>Scroll</span>
-      </a>
     </div>
 
-    <div class="apex__object" data-apex-object aria-hidden="true">
-      <span class="apex__core"></span>
-      <span class="apex__ball" data-apex-ball></span>
-      <!-- Empty until apex.js decides this visitor gets the WebGL ball and the
-           island mounts into it. The sprite above stays in the markup and keeps
-           rendering until it does, and stays for good if it never does. -->
-      <div class="apex__webgl" data-apex-webgl></div>
+    <div class="apex__chapter apex__chapter--story" data-apex-chapter="1">
+      <div class="apex__copy">
+        <p class="apex__kicker">01 — The ball</p>
+        <h2 class="apex__headline">Match-grade,<br>thirty-two panels</h2>
+        <p class="apex__body">Twelve pentagons, twenty hexagons, one welded shell. The model turning here is the agency’s own, read straight from the supplied mesh rather than rebuilt from a primitive.</p>
+        
+      </div>
     </div>
-
-    <div class="apex__chapter apex__chapter--player" data-apex-chapter="1">
-      <figure class="apex__portrait" data-apex-portrait>
-        <img src="./assets/img/players/mehdi-taremi.png" alt="Mehdi Taremi" width="529" height="760" loading="lazy" decoding="async">
-      </figure>
-
-      <div class="apex__player">
-        <p class="apex__eyebrow apex__eyebrow--inline">Client spotlight</p>
-        <h2 class="apex__player-name">Mehdi Taremi</h2>
-        <p class="apex__player-role">Centre-Forward · Olympiacos</p>
-
-        <dl class="apex__facts">
-          <div>
-            <dt>Caps</dt>
-            <dd>79</dd>
-            <p>Iran senior national team</p>
-          </div><div>
-            <dt>Goals</dt>
-            <dd>43</dd>
-            <p>for Iran</p>
-          </div><div>
-            <dt>Height</dt>
-            <dd>1,85 m</dd>
-            
-          </div><div>
-            <dt>Foot</dt>
-            <dd>Right</dd>
-            <p>preferred</p>
-          </div>
-        </dl>
-
+<div class="apex__chapter apex__chapter--story" data-apex-chapter="2">
+      <div class="apex__copy">
+        <p class="apex__kicker">02 — The strike</p>
+        <h2 class="apex__headline">Contact,<br>and everything opens</h2>
+        <p class="apex__body">A right-footed centre-forward puts his laces through it. At the moment of contact the shell comes apart along its seams and the panels carry their own construction outward.</p>
+        
+      </div>
+    </div>
+<div class="apex__chapter apex__chapter--story" data-apex-chapter="3">
+      <div class="apex__copy">
+        <p class="apex__kicker">03 — The player</p>
+        <h2 class="apex__headline">Mehdi Taremi,<br>Olympiacos</h2>
+        <p class="apex__body">Seventy-nine caps for Iran and forty-three goals in them. Porto in 2020, Inter on a free in 2024, Olympiacos since August 2025.</p>
         <a class="btn btn--ghost" href="./player/mehdi-taremi/" data-magnetic><span>Full profile</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.2 4.6 20.6 12l-7.4 7.4-1.4-1.42 5-4.98H3.4v-2h13.4l-5-4.98 1.4-1.42Z"/></svg></a>
       </div>
     </div>

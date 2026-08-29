@@ -373,22 +373,12 @@ try {
   const meta = JSON.parse(await readFile(join(ROOT, 'experience/dist-hero/hero.meta.json'), 'utf8'));
   await mkdir(join(DIST, 'assets/hero'), { recursive: true });
   await cp(join(ROOT, 'experience/dist-hero/hero.js'), join(DIST, 'assets/hero/hero.js'));
-  await mkdir(join(DIST, 'assets/models'), { recursive: true });
-  await cp(
-    join(ROOT, 'experience/public/models/soccer-ball.glb'),
-    join(DIST, 'assets/models/soccer-ball.glb'),
-  );
-  /* Taremi as a mesh, when one exists. Absent by default -- the island falls
-   * back to his photograph, which is genuinely him, rather than to a body
-   * modelled from nothing and given a real client's name. */
-  try {
-    await cp(
-      join(ROOT, 'experience/public/models/taremi.glb'),
-      join(DIST, 'assets/models/taremi.glb'),
-    );
-  } catch {
-    /* No model supplied yet. */
-  }
+
+  /* The scene's own assets, laid out exactly as the app serves them at
+   * /experience/ -- models/ and players/ under one directory. The island is
+   * told where that directory is and asks for the same paths it always does,
+   * so neither host has to know how the other arranges its files. */
+  await cp(join(ROOT, 'experience/public'), join(DIST, 'assets/scene'), { recursive: true });
   heroBundle = meta;
 } catch {
   /* Not built. The hero keeps its sprite, which is the fallback anyway. */

@@ -1,48 +1,69 @@
 /**
- * The homepage's opening story: two chapters over one held stage.
+ * The homepage's opening: the match-ball study, told over three chapters.
  *
- *   01  ARVAND / SPORT, with the ball turning in the gap between them
- *   02  the shell opens along its seams and Taremi arrives with his figures
+ *   01  the ball turns, the camera closes in
+ *   02  the strike — the shell opens along its seams and crosses to wireframe
+ *   03  the camera comes round to Taremi and his figures
  *
- * The reference is an editorial studio hero — near-black ground, one huge thin
- * serif line, an object occluding its middle, a single coloured core, small
- * uppercase labels pinned to the corners.
+ * This is the same scene as the page at /experience/, not a version of it. The
+ * WebGL half is literally that app's own components, bundled by
+ * experience/scripts/build-hero.mjs; the choreography is one shared function of
+ * scroll progress; the chapter copy is one block in content/site.json that both
+ * read. The only things that differ are where the assets sit and who reads the
+ * scroll, and both of those are arguments rather than second copies.
  *
- * The stage is held by `position: sticky`, not by a scroll library. Two hundred
- * viewport-heights of section, one screen of sticky stage inside it: the
- * browser does the holding, it cannot desynchronise from the scroll, and it
- * still works with JavaScript off. What JS adds is the scrub — which chapter is
- * lit, and how far the ball has opened.
+ * What is here rather than in the bundle is everything made of words: the
+ * chapters, the readouts, the stat cards. They are real HTML from the site's
+ * own templates, so they are in the page for search engines, for anyone the
+ * bundle never reaches, and for the phones deliberately not sent it.
  *
- * Every word of both chapters is here, in HTML, rendered by the site's own
- * templates and styled by its stylesheet. None of it lives inside the WebGL
- * bundle. So it is in the page for search engines, for anyone whose browser
- * never gets that bundle, and for the phones that are deliberately not sent it
- * — and there is no second copy of the copy to drift out of step.
+ * The stage is held by `position: sticky`, not by a scroll library. Four
+ * viewport-heights of section, one screen of stage inside it: the browser does
+ * the holding, so it cannot desynchronise from the scroll and it still holds
+ * with JavaScript off. JS adds the scrub on top.
  *
- * The figures are the agency's own, from content/players.json.
+ * Every figure is the agency's own, from content/players.json.
  */
 import { esc, attr, ICONS } from './layout.mjs';
 
-/* The ball is the client's own model. On a wide screen with a working WebGL2
- * context it is the real mesh — 32 panels recovered from the supplied OBJ by
- * tools/obj-to-glb.py, drawn by the React Three Fiber island in
- * experience/hero/. Everywhere else it is a 30-frame rotation sprite rendered
- * from the same mesh by tools/render-ball.py, which costs one
- * background-position write per frame and stays on the compositor. See the
- * note in src/scripts/apex.js for who gets which, and why.
+/* The ball is the FIFA Trionda, the client's own supplied model. On a wide
+ * screen with a working WebGL2 context it is the real mesh: its four panels are
+ * recovered from the geometry by tools/glb-panels.py, which is what lets the
+ * scene open it along its actual seams rather than along invented ones.
+ * Everywhere else it is a 30-frame rotation sprite of the older ball, which
+ * costs one background-position write per frame and stays on the compositor.
+ * See the note in src/scripts/apex.js for who gets which, and why.
  */
+
+const CROSSHAIR = `<svg class="apex__crosshair" viewBox="0 0 40 40" aria-hidden="true" fill="none">
+  <circle cx="20" cy="20" r="11.5" stroke="currentColor" stroke-width=".75" opacity=".5" />
+  <circle cx="20" cy="20" r="1.6" fill="currentColor" />
+  <path d="M20 0v9M20 31v9M0 20h9M31 20h9" stroke="currentColor" stroke-width=".75" opacity=".7" />
+</svg>`;
 
 export function apex(site, players = [], { taremiModel = false } = {}) {
   const [lead, tail] = ['ARVAND', 'SPORT'];
+  const chapters = site.story?.chapters || [];
   const featured = players.find((p) => p.slug === (site.strike?.playerSlug || 'mehdi-taremi'));
 
   return `<section class="apex" id="home" data-apex aria-labelledby="apex-title">
   <div class="apex__pin" data-apex-pin>
 
-    <div class="apex__chapter apex__chapter--brand" data-apex-chapter="0">
-      <p class="apex__eyebrow" data-apex-fade>FIFA-licensed football &amp; match agency</p>
+    ${blueprint(site, featured)}
 
+    <!-- Empty until apex.js decides this visitor gets the WebGL scene and the
+         island mounts into it. It fills the whole stage rather than sitting in
+         the sprite's box: the scene is a full-frame composition -- grid floor,
+         vignette, a camera that pulls back a long way -- and boxed into a
+         430px square it renders a ball the size of a coin. -->
+    <div class="apex__webgl" data-apex-webgl></div>
+
+    <div class="apex__object" data-apex-object aria-hidden="true">
+      <span class="apex__core"></span>
+      <span class="apex__ball" data-apex-ball></span>
+    </div>
+
+    <div class="apex__chapter apex__chapter--brand" data-apex-chapter="0">
       <h1 class="apex__title" id="apex-title">
         <span class="u-sr-only">${esc(site.brand.name)} — ${esc(site.brand.tagline)}</span>
         <span class="apex__display" aria-hidden="true">
@@ -51,70 +72,103 @@ export function apex(site, players = [], { taremiModel = false } = {}) {
         </span>
       </h1>
 
-      <p class="apex__label apex__label--right" data-apex-fade>Twenty-five years<br>at the top level</p>
-      <p class="apex__label apex__label--left" data-apex-fade>${esc(site.stats?.[3]?.value || '230')}+ players<br>${esc(site.stats?.[1]?.value || '46')} countries</p>
-
       <div class="apex__actions" data-apex-fade>
         <a class="btn btn--solid btn--lg" href="/player/" data-magnetic><span>Our players</span>${ICONS.arrow}</a>
         <a class="btn btn--ghost btn--lg" href="/registration/" data-magnetic><span>Register</span></a>
       </div>
-
-      <a class="apex__scroll" href="#about" data-apex-fade aria-label="Scroll to content">
-        <span class="apex__scroll-line"></span><span>Scroll</span>
-      </a>
     </div>
 
-    <div class="apex__object" data-apex-object aria-hidden="true">
-      <span class="apex__core"></span>
-      <span class="apex__ball" data-apex-ball></span>
-      <!-- Empty until apex.js decides this visitor gets the WebGL ball and the
-           island mounts into it. The sprite above stays in the markup and keeps
-           rendering until it does, and stays for good if it never does. -->
-      <div class="apex__webgl" data-apex-webgl${taremiModel ? ' data-apex-figure="taremi.glb"' : ''}></div>
-    </div>
-
-    ${featured ? playerChapter(site, featured) : ''}
+    ${chapters.map((chapter, i) => storyChapter(chapter, i, featured)).join('\n')}
   </div>
 </section>`;
 }
 
 /**
- * Chapter two. The portrait here is shown only when the WebGL figure is not —
- * on a phone, or wherever the bundle did not load — so the chapter is never a
- * column of text beside an empty space.
+ * The instrument frame: hairline rules, crosshairs, the chapter rail and the
+ * live readouts. Static markup — apex.js writes the numbers straight into the
+ * two spans below rather than re-rendering anything, because they change every
+ * frame of a scrub and everything around them does not.
  */
-function playerChapter(site, player) {
-  const image = site.strike?.image || player.image;
-  const facts = [
+function blueprint(site, player) {
+  return `<div class="apex__hud" aria-hidden="true">
+      <span class="apex__rule apex__rule--top"></span>
+      <span class="apex__rule apex__rule--bottom"></span>
+      <span class="apex__rule apex__rule--left"></span>
+      <span class="apex__rule apex__rule--right"></span>
+      ${CROSSHAIR.replace('apex__crosshair', 'apex__crosshair apex__crosshair--tl')}
+      ${CROSSHAIR.replace('apex__crosshair', 'apex__crosshair apex__crosshair--br')}
+
+      <p class="apex__stamp apex__stamp--left">Match ball · structural study</p>
+      <p class="apex__stamp apex__stamp--right">FIFA licensed</p>
+
+      <div class="apex__rail">
+        <div class="apex__rail-index">
+          ${(site.story?.chapters || [])
+            .map((c, i) => `<span data-apex-rail="${i}">${esc(c.index)}</span>`)
+            .join('')}
+        </div>
+        <div class="apex__rail-track"><span data-apex-bar></span></div>
+        <p class="apex__rail-count"><span data-apex-count>000</span><span> / 100</span></p>
+      </div>
+
+      <p class="apex__readout"><span data-apex-readout>X 0.0  Y 0.0°</span></p>
+      ${player ? statColumn(player) : ''}
+    </div>`;
+}
+
+/** Taremi's figures, down the right. Chapter three only. */
+function statColumn(player) {
+  const stats = [
     ['Caps', player.caps, 'Iran senior national team'],
     ['Goals', player.goals, 'for Iran'],
     ['Height', player.height, ''],
     ['Foot', player.foot, 'preferred'],
   ].filter(([, value]) => value);
 
-  return `<div class="apex__chapter apex__chapter--player" data-apex-chapter="1">
-      <figure class="apex__portrait" data-apex-portrait>
-        <img src="${attr(image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
-      </figure>
+  const moves = [
+    ['2020', 'FC Porto', 'Joined 31 August 2020'],
+    ['2024', 'Inter Milan', 'Free transfer'],
+    ['2025', 'Olympiacos', 'Joined August 2025'],
+  ];
 
-      <div class="apex__player">
-        <p class="apex__eyebrow apex__eyebrow--inline">${esc(site.strike?.kicker || 'Client spotlight')}</p>
-        <h2 class="apex__player-name">${esc(player.name)}</h2>
-        <p class="apex__player-role">${esc([player.position?.detail, player.club].filter(Boolean).join(' · '))}</p>
-
-        <dl class="apex__facts">
-          ${facts
+  return `<div class="apex__stats" data-apex-stats>
+        <p class="apex__stats-name">${esc(player.name)} — ${esc(player.position?.detail || '')}</p>
+        ${stats
+          .map(
+            ([label, value, note], i) => `<div class="apex__stat" style="--i:${i}">
+          <p class="apex__stat-label">${esc(label)}</p>
+          <p class="apex__stat-value">${esc(value)}</p>
+          ${note ? `<p class="apex__stat-note">${esc(note)}</p>` : ''}
+        </div>`,
+          )
+          .join('')}
+        <div class="apex__career">
+          ${moves
             .map(
-              ([label, value, note]) => `<div>
-            <dt>${esc(label)}</dt>
-            <dd>${esc(value)}</dd>
-            ${note ? `<p>${esc(note)}</p>` : ''}
+              ([year, club, detail]) => `<div>
+            <p class="apex__career-year">${esc(year)}</p>
+            <p class="apex__career-club">${esc(club)}</p>
+            <p class="apex__career-detail">${esc(detail)}</p>
           </div>`,
             )
             .join('')}
-        </dl>
+        </div>
+      </div>`;
+}
 
-        <a class="btn btn--ghost" href="${attr(player.url)}" data-magnetic><span>Full profile</span>${ICONS.arrow}</a>
+/** One chapter of copy. The brand line above is chapter zero's companion. */
+function storyChapter(chapter, index, player) {
+  const [first, ...rest] = chapter.title.split('\n');
+  return `<div class="apex__chapter apex__chapter--story" data-apex-chapter="${index + 1}">
+      <div class="apex__copy">
+        <p class="apex__kicker">${esc(chapter.index)} — ${esc(chapter.kicker)}</p>
+        <h2 class="apex__headline">${esc(first)}${rest.map((line) => `<br>${esc(line)}`).join('')}</h2>
+        <p class="apex__body">${esc(chapter.body)}</p>
+        ${
+          index === 2 && player
+            ? `<a class="btn btn--ghost" href="${attr(player.url)}" data-magnetic><span>Full profile</span>${ICONS.arrow}</a>`
+            : ''
+        }
       </div>
     </div>`;
 }
