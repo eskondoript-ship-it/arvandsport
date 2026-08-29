@@ -1,9 +1,10 @@
 'use client';
 
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Environment, Lightformer, Grid, AdaptiveDpr, Preload } from '@react-three/drei';
 import { EffectComposer, SelectiveBloom, Selection, Select, Vignette } from '@react-three/postprocessing';
-import { Component, Suspense, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 
 import SoccerModel from '@/components/SoccerModel';
@@ -118,6 +119,76 @@ function Taremi() {
 }
 
 /* ------------------------------------------------------------------ *
+ * The owner
+ * ------------------------------------------------------------------ */
+
+/**
+ * The agency's founder, standing on the grid.
+ *
+ * His mesh is the client's own -- a Tripo scan, decimated from 192,296
+ * triangles to 19,512 by tools/decimate-glb.py, which is what makes a
+ * 4.6MB figure a 456KB one. He is here from the opening and steps back as
+ * Taremi arrives, so the scene starts with a person on a field rather than an
+ * object in a void.
+ *
+ * He is untextured for now, and deliberately so. The mesh has no UVs at all,
+ * so there is nothing for a photograph to be applied to yet; a front
+ * projection can give him his own face once the source image is to hand. Until
+ * then he is a matte figure lit by the scene, which is honest about being a
+ * form rather than a likeness.
+ */
+function Owner() {
+  const holder = useRef<THREE.Group>(null);
+  const [figure, setFigure] = useState<THREE.Object3D | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    new GLTFLoader().load(
+      asset('/models/owner.glb'),
+      (gltf) => {
+        if (cancelled) return;
+        gltf.scene.traverse((child) => {
+          const mesh = child as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.material = new THREE.MeshStandardMaterial({
+            color: '#8e9bab',
+            roughness: 0.72,
+            metalness: 0.08,
+          });
+        });
+        setFigure(gltf.scene);
+      },
+      undefined,
+      () => {
+        /* No figure is better than a broken one; the scene stands without him. */
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useFrame(() => {
+    if (!holder.current) return;
+    const p = scrollState.progress;
+    /* Present from the start, and out of the way by the time the third chapter
+     * brings Taremi into the same corner of the frame. */
+    const leave = THREE.MathUtils.clamp((p - 0.58) / 0.18, 0, 1);
+    holder.current.visible = leave < 0.999;
+    holder.current.position.set(-3.15 - leave * 1.6, -2.1, -1.5 - leave * 1.2);
+    holder.current.rotation.y = 0.42;
+    holder.current.scale.setScalar(3.1);
+  });
+
+  if (!figure) return null;
+  return (
+    <group ref={holder}>
+      <primitive object={figure} />
+    </group>
+  );
+}
+
+/* ------------------------------------------------------------------ *
  * Canvas
  * ------------------------------------------------------------------ */
 
@@ -180,6 +251,7 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
       <Suspense fallback={null}>
         <Taremi />
       </Suspense>
+      <Owner />
 
       <Selection>
         {/* autoClear off: the composer draws over the transparent canvas rather

@@ -129,11 +129,12 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
      * everything else and never fights the scrub for ownership of the object.
      *
      * Distance is a sum of what each phase wants, not a single lerp. The
-     * approach pulls in, but the shell then grows to more than twice its own
-     * radius, so the explode has to push straight back out or the panels fill
-     * the frame and the scene stops reading as a ball at all.
+     * approach pulls in, but the shell then opens to nearly four times its own
+     * radius, so the explode has to push straight back out -- further than the
+     * pieces travel -- or they leave the frame entirely and the scene stops
+     * reading as a ball coming apart and starts reading as one that vanished.
      */
-    let range = 6.4 - a.dolly * 2.1 + a.explode * 3.4 - a.detail * 1.1;
+    let range = 6.4 - a.dolly * 2.1 + a.explode * 5.4 - a.detail * 1.1;
 
     /* A perspective camera's field of view is vertical, so a portrait viewport
      * keeps all of the height and loses the width: the ball goes from

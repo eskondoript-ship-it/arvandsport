@@ -61,11 +61,17 @@ export function sceneState(progress: number): SceneState {
 /**
  * How far each panel travels outward at full explode, in ball radii.
  *
- * Tuned for the four-panel ball: a quarter-shell is a much bigger piece than a
- * hexagon and covers a lot of frame on its way out, so it parts less far than
- * the thirty-two small panels did.
+ * Far enough that the ball comes fully apart. The reference this scene follows
+ * takes its camera all the way to pieces -- the elements end up separated by
+ * clear space, laid out as an exploded diagram rather than a cracked object --
+ * and a shell that only gapes is the least convincing point on that journey.
+ * At 1.75 radii the four quarters clear each other completely and you can see
+ * straight through the middle of the ball.
+ *
+ * The camera has to give ground to match: see the explode term in
+ * SoccerModel's range, which pulls back further than the pieces travel.
  */
-export const EXPLODE_DISTANCE = 0.62;
+export const EXPLODE_DISTANCE = 1.75;
 
 /** Which of the three chapters a given progress sits in. */
 export function chapterFor(progress: number): number {

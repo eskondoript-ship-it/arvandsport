@@ -256,6 +256,50 @@ export function panelsFromGltf(scene: THREE.Object3D): Panel[] {
 
 export const NEON = new THREE.Color('#39f6ff');
 
+/**
+ * A textured panel, re-made as glass.
+ *
+ * The reference this scene is modelled on renders its object as an instrument
+ * seen through itself -- the body is transparent, the internals show through,
+ * and the printing survives as a tint rather than as paint. Physical
+ * transmission does exactly that: light passes through the shell, the base
+ * colour map tints what comes out the other side, and the panels read as
+ * moulded glass with the Trionda's print suspended in them.
+ *
+ * Transmission and `transparent` do not mix. Transparency sorts and blends the
+ * surface; transmission samples what is already behind it, which needs the
+ * material drawn as opaque into a buffer the renderer prepares for it. Setting
+ * both gives a pane that blends its own transmission over itself and reads as
+ * fog.
+ */
+function toGlass(source: THREE.MeshStandardMaterial): THREE.MeshPhysicalMaterial {
+  const glass = new THREE.MeshPhysicalMaterial({
+    map: source.map,
+    normalMap: source.normalMap,
+    roughnessMap: source.roughnessMap,
+    metalnessMap: source.metalnessMap,
+    color: new THREE.Color('#dfe9f5'),
+    metalness: 0,
+    roughness: 0.16,
+    transmission: 0.92,
+    thickness: 0.55,
+    ior: 1.42,
+    /* What the light picks up on its way through. A neutral pane over a dark
+     * scene looks grey, so there is a tint -- but only just. At #7fd8e8 over
+     * 2.4 units it swamped the Trionda's own print and the ball came out a
+     * single cyan; pale, and over a much longer distance, the tint reads as
+     * glass while the panel still reads as the panel. */
+    attenuationColor: new THREE.Color('#cfeef6'),
+    attenuationDistance: 7.5,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.18,
+    envMapIntensity: 1.4,
+    transparent: false,
+    side: THREE.DoubleSide,
+  });
+  return glass;
+}
+
 export type PanelMaterial = THREE.MeshStandardMaterial & {
   userData: { uProgress: { value: number }; uNeon: { value: THREE.Color } };
 };
@@ -280,14 +324,14 @@ export function makePanelMaterial(panel: Pick<Panel, 'kind' | 'source'>): PanelM
    * this scene rather than of any one ball. */
   const material = (
     panel.source
-      ? panel.source.clone()
+      ? toGlass(panel.source)
       : new THREE.MeshStandardMaterial({
           color: panel.kind === 'pent' ? '#08090c' : '#eef1f4',
           roughness: panel.kind === 'pent' ? 0.42 : 0.36,
           metalness: panel.kind === 'pent' ? 0.1 : 0.05,
+          transparent: true,
         })
   ) as PanelMaterial;
-  material.transparent = true;
   material.side = THREE.DoubleSide;
 
   const uProgress = { value: 0 };
@@ -342,10 +386,8 @@ export function makePanelMaterial(panel: Pick<Panel, 'kind' | 'source'>): PanelM
          * thing worth looking at. So the mix is weighted to the outline and the
          * interior keeps most of itself. */
         gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, uProgress * mix(wire * 0.35, outline, 0.75));
-        /* And it no longer dissolves. A quarter-shell going see-through reads as
-         * a rendering fault rather than as a diagram; it holds its surface and
-         * lets the lit seams do the work. */
-        gl_FragColor.a *= mix(1.0, 0.92, uProgress);`,
+        /* No alpha work. The glass path is drawn opaque -- see toGlass -- and
+         * the see-through is transmission rather than blending. */`,
       );
   };
 
