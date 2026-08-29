@@ -6,7 +6,8 @@ import { EffectComposer, SelectiveBloom, Selection, Select, Vignette } from '@re
 import { Component, Suspense, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 
-import SoccerModel, { buildProceduralPanels } from '@/components/SoccerModel';
+import SoccerModel from '@/components/SoccerModel';
+import { buildProceduralPanels } from '@/lib/ball';
 import { asset, scrollState } from '@/lib/scroll';
 import { TAREMI } from '@/lib/taremi';
 

@@ -57,8 +57,13 @@ jobs:
       - id: experience-cache
         uses: actions/cache@v4
         with:
-          path: experience/out
-          key: experience-${{ hashFiles('experience/app/**', 'experience/components/**', 'experience/lib/**', 'experience/public/**', 'experience/package-lock.json', 'experience/next.config.ts') }}
+          # Both outputs, cached together under one key: they come from the
+          # same sources and the same install, and letting one hit while the
+          # other misses would only mean rebuilding everything anyway.
+          path: |
+            experience/out
+            experience/dist-hero
+          key: experience-${{ hashFiles('experience/app/**', 'experience/components/**', 'experience/hero/**', 'experience/lib/**', 'experience/public/**', 'experience/scripts/**', 'experience/package-lock.json', 'experience/next.config.ts') }}
       - if: steps.experience-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: experience
@@ -67,6 +72,12 @@ jobs:
         working-directory: experience
         env:
           BASE_PATH: ${{ github.event.repository.name }}
+      # The homepage hero's WebGL ball: the same components, bundled by esbuild
+      # into one module the static site loads on desktop. It fails the build if
+      # it grows past its size ceiling, which is the point of having one.
+      - if: steps.experience-cache.outputs.cache-hit != 'true'
+        run: npm run build:hero
+        working-directory: experience
 
       # The site build itself has no dependencies; it only reads content/ and
       # src/, and folds experience/out into dist/experience on its way past.

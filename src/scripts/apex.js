@@ -13,6 +13,65 @@
  */
 import { $, $$, gsap, ScrollTrigger, canAnimate } from './env.js';
 
+/**
+ * Decide whether this visitor gets the real thing, and if so, fetch it.
+ *
+ * The WebGL ball is 319KB gzipped — React, react-dom and three, which is what
+ * React Three Fiber costs and there is no version of it that is cheap. That is
+ * more than the rest of this site put together, so it is not something every
+ * visitor is handed. It goes to wide screens with a mouse and a working WebGL2
+ * context, and it is fetched after the page has already painted, over the top
+ * of a sprite that is already turning.
+ *
+ * Phones keep the sprite. A phone is where the weight hurts most and where the
+ * ball is smallest and half-faded behind the type — it would be paying the
+ * whole cost for the least of the benefit.
+ *
+ * Every way this can fail ends the same way: the sprite stays, and nothing on
+ * the page notices.
+ */
+async function mountWebglBall(section, object) {
+  const mount = $('[data-apex-webgl]', section);
+  if (!mount || !object) return null;
+
+  /* Wide, mouse-driven, and not asking for less motion. */
+  if (!window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches) return null;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  /* Save-Data is an explicit request not to be sent a third of a megabyte. */
+  if (navigator.connection?.saveData) return null;
+
+  /* Ask for a context rather than sniffing for support: software renderers and
+   * blocklisted drivers both answer this honestly, and a lost context here is
+   * far cheaper than a dead canvas where the hero used to be. */
+  try {
+    const probe = document.createElement('canvas').getContext('webgl2');
+    if (!probe) return null;
+    probe.getExtension('WEBGL_lose_context')?.loseContext();
+  } catch {
+    return null;
+  }
+
+  try {
+    /* Both paths are resolved against this module's own URL, so they hold at
+     * whatever depth the page is served from and under a deploy prefix,
+     * without the build having to rewrite anything inside a string. */
+    const bundle = new URL('../hero/hero.js', import.meta.url).href;
+    const modelUrl = new URL('../models/soccer-ball.glb', import.meta.url).href;
+
+    const hero = await import(/* @vite-ignore */ bundle);
+    const handle = hero.mount(mount, { modelUrl });
+    await handle.ready;
+
+    /* Only now does the sprite go. Swapping on mount rather than on first
+     * frame would show an empty hole for as long as the model takes. */
+    object.classList.add('is-webgl');
+    return handle.setSpin;
+  } catch (error) {
+    console.warn('[arvand] WebGL hero unavailable, keeping the sprite', error);
+    return null;
+  }
+}
+
 export function initApex(root = document) {
   const section = $('[data-apex]', root);
   if (!section) return;
@@ -33,12 +92,26 @@ export function initApex(root = document) {
   const FRAMES = COLS * ROWS;
   const spriteActive = () => window.matchMedia('(min-width: 761px)').matches;
 
-  const showFrame = (n) => {
+  const spriteFrame = (n) => {
     if (!ball || !spriteActive()) return;
     const f = ((Math.round(n) % FRAMES) + FRAMES) % FRAMES;
     ball.style.backgroundPositionX = `${((f % COLS) / (COLS - 1)) * 100}%`;
     ball.style.backgroundPositionY = `${(Math.floor(f / COLS) / (ROWS - 1)) * 100}%`;
   };
+
+  /* Every timeline below turns the ball by calling showFrame with a frame
+   * number. That indirection is the whole seam between the two ways of drawing
+   * it: the sprite rounds the number and moves a background, and the WebGL
+   * ball turns a mesh by the same fraction of a revolution. Handing over is
+   * one reassignment, and no timeline knows which is on the other side — so
+   * the choreography cannot drift between the two, because there is only one
+   * copy of it. */
+  let driver = spriteFrame;
+  const showFrame = (n) => driver(n);
+
+  mountWebglBall(section, object).then((setSpin) => {
+    if (setSpin) driver = (n) => setSpin(n / FRAMES);
+  });
 
   gsap.set(fades, { opacity: 0, y: 14 });
 

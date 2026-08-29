@@ -724,7 +724,19 @@ a.office__row:hover { color: var(--white); }
     background-position: 0% 0%;
   }
 }
-/* A soft bloom under the facets so the core reads as lit from inside. */
+/* The WebGL ball, for the visitors who get one. It sits over the sprite
+   rather than replacing it in the layout, so handing over is one class and
+   cannot shift anything around it. Both exist for the second it takes React
+   to mount and the model to arrive; only one is ever visible, and if the
+   bundle never loads the sprite simply stays. */
+.apex__webgl {
+  position: absolute; inset: 0; z-index: 1;
+  opacity: 0; transition: opacity .5s ease;
+}
+.apex__ball { transition: opacity .5s ease; }
+.apex__object.is-webgl .apex__webgl { opacity: 1; }
+.apex__object.is-webgl .apex__ball { opacity: 0; }
+
 /* A halo behind the ball, not a bloom inside it: the ball is opaque white
    now, so an internal glow only tinted the panels at its edges. This sits
    wider than the ball and reads as light coming off it. */

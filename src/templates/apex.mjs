@@ -40,6 +40,10 @@ export function apex(site) {
     <div class="apex__object" data-apex-object aria-hidden="true">
       <span class="apex__core"></span>
       <span class="apex__ball" data-apex-ball></span>
+      <!-- Empty until apex.js decides this visitor gets the WebGL ball, and
+           the React island mounts into it. The sprite above stays in the
+           markup and keeps rendering until it does. -->
+      <div class="apex__webgl" data-apex-webgl></div>
     </div>
 
     <p class="apex__label apex__label--right" data-apex-fade>Twenty-five years<br>at the top level</p>

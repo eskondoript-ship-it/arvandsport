@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "model": "python3 ../tools/obj-to-glb.py ../assets-src/soccer-ball.obj public/models/soccer-ball.glb"
+    "model": "python3 ../tools/obj-to-glb.py ../assets-src/soccer-ball.obj public/models/soccer-ball.glb",
+    "build:hero": "node scripts/build-hero.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.6",
@@ -29,6 +30,7 @@
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@types/three": "^0.180.0",
+    "esbuild": "^0.28.2",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2"
   }

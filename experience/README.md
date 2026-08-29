@@ -42,8 +42,34 @@ OBJ in `../assets-src/`. You only need it if the source mesh changes.
 | `components/SoccerCanvas.tsx` | The R3F canvas: tone mapping, lighting, selective bloom, Taremi, and the fallback boundary |
 | `components/SoccerModel.tsx` | The ball — geometry, the PBR-to-wireframe shader, and the GSAP scroll timeline |
 | `components/BlueprintHUD.tsx` | Everything that is text: stat cards, crosshairs, chapter counters |
+| `lib/ball.ts` | The ball's geometry, panel recovery and shader — shared with the homepage hero |
 | `lib/scroll.ts` | The single scroll-progress source both the scene and the HUD read |
 | `lib/taremi.ts` | The player data, copied from the repo's own content files |
+| `hero/index.tsx` | The homepage hero's ball, built as a standalone bundle (see below) |
+
+## The homepage hero
+
+The site's own homepage runs a second, much smaller R3F island: the same ball,
+turning with the scroll, in place of the sprite. `npm run build:hero` bundles
+`hero/index.tsx` with esbuild into `dist-hero/hero.js`, and the site build
+copies it to `assets/hero/hero.js`.
+
+It is **319KB gzipped** — React, react-dom and three, which is what R3F costs
+and there is no cheap version of it. So it is not sent to everyone. `apex.js`
+loads it only on a wide screen with a fine pointer, a live WebGL2 context, no
+reduced-motion preference and no Save-Data header, and only after the page has
+painted over a sprite that is already turning. Phones keep the sprite: it is
+where the weight hurts most and where the ball is smallest and half-faded
+behind the type.
+
+The two share one seam. Every timeline in `apex.js` turns the ball by calling
+`showFrame(n)` with a frame number; the sprite rounds it and moves a background
+position, the WebGL ball turns a mesh by `n / 30` of a revolution. Handing over
+is one reassignment, so the choreography cannot drift between them — there is
+only one copy of it.
+
+`build-hero.mjs` fails if the bundle passes 340KB gzipped. It loads on the
+homepage, so a quiet regression there is a slow homepage nobody noticed.
 
 ### The timeline
 

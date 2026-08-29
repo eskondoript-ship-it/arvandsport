@@ -345,6 +345,36 @@ try {
   /* Not built. Nothing to say about it beyond the report line below. */
 }
 
+/* -------------------------------------------------------------- WebGL hero */
+
+/**
+ * The homepage hero's WebGL ball: a bundle built from the same sources, and
+ * the model it loads.
+ *
+ * Both land under assets/ beside the site's own scripts, because that is where
+ * apex.js looks for them — it resolves them relative to its own module URL, so
+ * they follow the page to whatever depth or deploy prefix it is served at
+ * without the build rewriting a path inside a string.
+ *
+ * The model is copied from the experience app rather than kept in static/. One
+ * ball, one file, generated from the client's OBJ by tools/obj-to-glb.py; a
+ * second copy would be the one that went stale.
+ */
+let heroBundle = null;
+try {
+  const meta = JSON.parse(await readFile(join(ROOT, 'experience/dist-hero/hero.meta.json'), 'utf8'));
+  await mkdir(join(DIST, 'assets/hero'), { recursive: true });
+  await cp(join(ROOT, 'experience/dist-hero/hero.js'), join(DIST, 'assets/hero/hero.js'));
+  await mkdir(join(DIST, 'assets/models'), { recursive: true });
+  await cp(
+    join(ROOT, 'experience/public/models/soccer-ball.glb'),
+    join(DIST, 'assets/models/soccer-ball.glb'),
+  );
+  heroBundle = meta;
+} catch {
+  /* Not built. The hero keeps its sprite, which is the fallback anyway. */
+}
+
 /* ------------------------------------------------------------------ report */
 
 const files = await walk(DIST);
@@ -357,4 +387,9 @@ console.log(
   experienceFiles
     ? `webgl:  dist/experience, ${experienceFiles} files`
     : 'webgl:  not built — run `npm ci && npm run build` in experience/',
+);
+console.log(
+  heroBundle
+    ? `hero:   ${(heroBundle.gzipped / 1024).toFixed(0)}KB gzipped, desktop only`
+    : 'hero:   not built — run `npm run build:hero` in experience/ (sprite is used)',
 );
