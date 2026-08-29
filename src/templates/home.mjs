@@ -71,17 +71,43 @@ export function services(site) {
 </section>`;
 }
 
+/**
+ * The roster, as a carousel that never reaches an end.
+ *
+ * The track carries the players twice and slides by exactly half its width, so
+ * the moment it would show the join it is back where it started -- there is no
+ * jump to hide because the frame at 100% and the frame at 0% are the same
+ * picture. It is a CSS animation on a transform, which means it runs on the
+ * compositor and keeps running while the main thread is busy; a JS loop here
+ * would stutter every time something else on the page did.
+ *
+ * The second copy is aria-hidden. It is the same eleven players said twice, and
+ * a screen reader should hear the roster once.
+ */
 function roster(site, players) {
+  const lap = players.map((p, i) => playerCard(p, i)).join('');
+  const speed = Math.max(28, players.length * 4.5);
+
   return `<section class="roster section" id="players">
   <div class="shell">
     ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro), n: '04' })}
-    <div class="roster__grid">${players.map((p, i) => playerCard(p, i)).join('')}</div>
+  </div>
+
+  <div class="carousel" data-carousel style="--carousel-speed:${speed}s">
+    <div class="carousel__track" data-carousel-track>
+      <div class="carousel__lap">${lap}</div>
+      <div class="carousel__lap" aria-hidden="true">${lap}</div>
+    </div>
+  </div>
+
+  <div class="shell">
     <div class="roster__more" data-reveal>
       <a class="btn btn--line" href="/player/" data-magnetic><span>All players</span>${ICONS.arrow}</a>
     </div>
   </div>
 </section>`;
 }
+
 
 
 /**

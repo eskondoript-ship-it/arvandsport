@@ -48,6 +48,7 @@ export function apex(site, players = [], { taremiModel = false } = {}) {
 
   return `<section class="apex" id="home" data-apex aria-labelledby="apex-title">
   <div class="apex__pin" data-apex-pin>
+    <span class="apex__aurora" aria-hidden="true"></span>
 
     ${blueprint(site, featured)}
 

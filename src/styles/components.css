@@ -475,3 +475,49 @@ fieldset.field { border: 0; padding: 0; }
     background: var(--card-bg);
   }
 }
+
+/* -------------------------------------------------------------- carousel */
+/*
+ * A loop with no seam. The track holds the roster twice and travels exactly
+ * -50% of itself, so the last frame of the animation is pixel-identical to the
+ * first and it can restart without anything to conceal.
+ *
+ * Full-bleed rather than inside the shell, because a carousel that stops at a
+ * container edge reads as a row that has run out; running off both sides is
+ * what says there is more of it. The mask feathers those edges so cards leave
+ * the frame instead of being cut by it.
+ */
+.carousel {
+  --carousel-speed: 40s;
+  position: relative; overflow: hidden;
+  padding-block: clamp(.5rem, 2vw, 1rem);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.carousel__track {
+  display: flex; width: max-content;
+  animation: carousel-drift var(--carousel-speed) linear infinite;
+  will-change: transform;
+}
+.carousel__lap {
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: clamp(200px, 21vw, 268px);
+  gap: clamp(.9rem, 2vw, 1.5rem);
+  padding-inline: clamp(.45rem, 1vw, .75rem);
+}
+@keyframes carousel-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Hovering is a request to look at something, so the row stops for it. */
+.carousel:hover .carousel__track,
+.carousel:focus-within .carousel__track { animation-play-state: paused; }
+
+/* Anyone who asked for less motion gets a row they scroll themselves, rather
+   than a still frame of a carousel with most of the roster off-screen. */
+@media (prefers-reduced-motion: reduce) {
+  .carousel { overflow-x: auto; scrollbar-width: thin; }
+  .carousel__track { animation: none; }
+  .carousel__lap:last-child { display: none; }
+}

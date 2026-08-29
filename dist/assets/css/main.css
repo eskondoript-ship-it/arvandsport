@@ -1098,6 +1098,52 @@ fieldset.field { border: 0; padding: 0; }
   }
 }
 
+/* -------------------------------------------------------------- carousel */
+/*
+ * A loop with no seam. The track holds the roster twice and travels exactly
+ * -50% of itself, so the last frame of the animation is pixel-identical to the
+ * first and it can restart without anything to conceal.
+ *
+ * Full-bleed rather than inside the shell, because a carousel that stops at a
+ * container edge reads as a row that has run out; running off both sides is
+ * what says there is more of it. The mask feathers those edges so cards leave
+ * the frame instead of being cut by it.
+ */
+.carousel {
+  --carousel-speed: 40s;
+  position: relative; overflow: hidden;
+  padding-block: clamp(.5rem, 2vw, 1rem);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.carousel__track {
+  display: flex; width: max-content;
+  animation: carousel-drift var(--carousel-speed) linear infinite;
+  will-change: transform;
+}
+.carousel__lap {
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: clamp(200px, 21vw, 268px);
+  gap: clamp(.9rem, 2vw, 1.5rem);
+  padding-inline: clamp(.45rem, 1vw, .75rem);
+}
+@keyframes carousel-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Hovering is a request to look at something, so the row stops for it. */
+.carousel:hover .carousel__track,
+.carousel:focus-within .carousel__track { animation-play-state: paused; }
+
+/* Anyone who asked for less motion gets a row they scroll themselves, rather
+   than a still frame of a carousel with most of the roster off-screen. */
+@media (prefers-reduced-motion: reduce) {
+  .carousel { overflow-x: auto; scrollbar-width: thin; }
+  .carousel__track { animation: none; }
+  .carousel__lap:last-child { display: none; }
+}
+
 
 /* ===== pages.css ===== */
 
@@ -1865,11 +1911,35 @@ a.office__row:hover { color: var(--white); }
    it is the element itself and therefore harmless. */
 .apex {
   min-height: 400svh;
-  /* The study's own ground, so the two are the same picture. The old radial
-     navy was the hero's; this scene brings its own grid and vignette and sat
-     oddly on top of it. */
-  background: #08080c;
+  /* Aurora rather than flat black. The reference this is modelled on holds a
+     deep green-to-violet wash behind the object and lets it drift as the story
+     runs -- it is what keeps three screens of near-darkness from reading as an
+     unloaded page, and it gives the glass surfaces further down something to
+     pick up. The base stays #08080c so the scene's own vignette still has
+     somewhere to fall off to. */
+  background:
+    radial-gradient(70% 55% at 18% 8%, rgba(16, 84, 74, .55), transparent 62%),
+    radial-gradient(60% 50% at 86% 22%, rgba(58, 36, 122, .5), transparent 64%),
+    radial-gradient(80% 60% at 50% 100%, rgba(10, 46, 74, .45), transparent 70%),
+    #08080c;
 }
+/* The wash drifts very slowly, so the ground is never quite the same twice.
+   Animating background-position on a gradient is a paint every frame, so this
+   moves a separate layer's transform instead and leaves the base alone. */
+.apex__aurora {
+  position: absolute; inset: -20%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 30% 30%, rgba(24, 128, 110, .38), transparent 68%),
+    radial-gradient(34% 30% at 72% 62%, rgba(88, 52, 168, .34), transparent 68%);
+  filter: blur(40px);
+  animation: apex-aurora 34s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes apex-aurora {
+  from { transform: translate3d(-3%, -2%, 0) scale(1); }
+  to   { transform: translate3d(4%, 3%, 0) scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) { .apex__aurora { animation: none; } }
 .apex__pin {
   position: sticky; top: 0; overflow: hidden;
   height: 100svh;

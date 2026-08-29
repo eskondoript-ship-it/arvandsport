@@ -762,11 +762,35 @@ a.office__row:hover { color: var(--white); }
    it is the element itself and therefore harmless. */
 .apex {
   min-height: 400svh;
-  /* The study's own ground, so the two are the same picture. The old radial
-     navy was the hero's; this scene brings its own grid and vignette and sat
-     oddly on top of it. */
-  background: #08080c;
+  /* Aurora rather than flat black. The reference this is modelled on holds a
+     deep green-to-violet wash behind the object and lets it drift as the story
+     runs -- it is what keeps three screens of near-darkness from reading as an
+     unloaded page, and it gives the glass surfaces further down something to
+     pick up. The base stays #08080c so the scene's own vignette still has
+     somewhere to fall off to. */
+  background:
+    radial-gradient(70% 55% at 18% 8%, rgba(16, 84, 74, .55), transparent 62%),
+    radial-gradient(60% 50% at 86% 22%, rgba(58, 36, 122, .5), transparent 64%),
+    radial-gradient(80% 60% at 50% 100%, rgba(10, 46, 74, .45), transparent 70%),
+    #08080c;
 }
+/* The wash drifts very slowly, so the ground is never quite the same twice.
+   Animating background-position on a gradient is a paint every frame, so this
+   moves a separate layer's transform instead and leaves the base alone. */
+.apex__aurora {
+  position: absolute; inset: -20%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 30% 30%, rgba(24, 128, 110, .38), transparent 68%),
+    radial-gradient(34% 30% at 72% 62%, rgba(88, 52, 168, .34), transparent 68%);
+  filter: blur(40px);
+  animation: apex-aurora 34s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes apex-aurora {
+  from { transform: translate3d(-3%, -2%, 0) scale(1); }
+  to   { transform: translate3d(4%, 3%, 0) scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) { .apex__aurora { animation: none; } }
 .apex__pin {
   position: sticky; top: 0; overflow: hidden;
   height: 100svh;
