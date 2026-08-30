@@ -18,12 +18,20 @@
  */
 import { $$, canAnimate } from './env.js';
 
-/** How hard the row curves away at the edges. Degrees at the frame's edge. */
-const MAX_TILT = 14;
+/* How hard the row curves away at the edges. Degrees at the frame's edge.
+ * Steep on purpose: the reference this follows turns its outer cards until
+ * they are nearly edge-on, and a gentle version of that does not read as
+ * depth at all -- it reads as a flat row that someone has nudged. */
+const MAX_TILT = 40;
 /** How far the outer cards fall back, in pixels of Z. */
-const MAX_DEPTH = 200;
+const MAX_DEPTH = 150;
+/* How far the outer cards are drawn back toward the middle, in pixels.
+ * Depth alone opens gaps: a card pushed away shrinks about its own centre and
+ * stops meeting its neighbours, so the row turns into islands. Pulling the
+ * turned cards inward closes that and gives the overlap a coverflow has. */
+const MAX_PULL = 96;
 /** How far out of focus a card at the edge of the frame goes, in pixels. */
-const MAX_BLUR = 5;
+const MAX_BLUR = 4;
 
 export function initCarousel(root = document) {
   const stops = [];
@@ -78,9 +86,12 @@ export function initCarousel(root = document) {
         const card = cards[i];
         card.style.setProperty('--ry', `${-t * MAX_TILT}deg`);
         card.style.setProperty('--tz', `${-Math.abs(t) * MAX_DEPTH}px`);
+        card.style.setProperty('--tx', `${-t * MAX_PULL}px`);
         /* A little smaller and a little dimmer as it falls back, so depth
          * reads even where the rotation is nearly edge-on. */
-        card.style.setProperty('--cs', String(1 - Math.abs(t) * 0.14));
+        /* Light scale only. The perspective does most of the shrinking now,
+         * and doubling up on it made the outer cards tiny rather than far. */
+        card.style.setProperty('--cs', String(1 - Math.abs(t) * 0.05));
         card.style.setProperty('--co', String(1 - Math.abs(t) * 0.35));
         /* Depth of field. One card is the one being looked at and the rest are
          * around it -- which the eye reads from focus long before it reads it
