@@ -1098,203 +1098,233 @@ fieldset.field { border: 0; padding: 0; }
   }
 }
 
-/* ---------------------------------------------------------- roster rail */
+/* -------------------------------------------------------------- carousel */
 /*
- * The roster, walked past: a row of wide cards that travels sideways while the
- * page is scrolled down.
+ * A loop with no seam. The track holds the roster twice and travels exactly
+ * -50% of itself, so the last frame of the animation is pixel-identical to the
+ * first and it can restart without anything to conceal.
  *
- * The vertical distance is real -- the section is several screens tall and its
- * frame is held by `position: sticky`, so nothing here fights the scroll or
- * has to guess where it is. src/scripts/rail.js turns the section's progress
- * into two numbers, `--travel` on the track and `--f` on each card, and every
- * rule below is a calc() off one of them.
- *
- * Without `is-live` this is a plain horizontally scrollable strip: the same
- * cards in the same order, moved by hand. That is the no-JavaScript rendering
- * and the reduced-motion one, and it is a perfectly good way to read a roster.
+ * Full-bleed rather than inside the shell, because a carousel that stops at a
+ * container edge reads as a row that has run out; running off both sides is
+ * what says there is more of it. The mask feathers those edges so cards leave
+ * the frame instead of being cut by it.
  */
-.roster--rail {
-  --plate-w: clamp(260px, 34vw, 460px);
-  --plate-gap: clamp(1rem, 2.4vw, 2rem);
-  padding-block: 0;
+.carousel {
+  --carousel-speed: 40s;
+  position: relative; overflow: hidden;
+  padding-block: clamp(.5rem, 2vw, 1rem);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.carousel__track {
+  display: flex; width: max-content;
+  animation: carousel-drift var(--carousel-speed) linear infinite;
+  will-change: transform;
+}
+.carousel__lap {
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: clamp(200px, 21vw, 268px);
+  gap: clamp(.9rem, 2vw, 1.5rem);
+  padding-inline: clamp(.45rem, 1vw, .75rem);
+}
+@keyframes carousel-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Hovering is a request to look at something, so the row stops for it. */
+.carousel:hover .carousel__track,
+.carousel:focus-within .carousel__track { animation-play-state: paused; }
+
+/* Anyone who asked for less motion gets a row they scroll themselves, rather
+   than a still frame of a carousel with most of the roster off-screen. */
+@media (prefers-reduced-motion: reduce) {
+  .carousel { overflow-x: auto; scrollbar-width: thin; }
+  .carousel__track { animation: none; }
+  .carousel__lap:last-child { display: none; }
+}
+
+/* The roster row, in perspective ------------------------------------------ */
+/*
+ * Cards curve away from the middle of the frame instead of sliding past it
+ * flat. src/scripts/carousel.js writes the four custom properties below from
+ * the track animation's own clock; CSS does the rest, so the transform stays a
+ * compositor property and nothing here triggers layout.
+ *
+ * `is-dimensional` is added by that script, so a visitor whose JavaScript
+ * never ran gets the flat row rather than a row of cards frozen at whatever
+ * angle the stylesheet happened to name.
+ */
+.carousel.is-dimensional { perspective: 1000px; perspective-origin: 50% 45%; }
+.carousel.is-dimensional .carousel__track,
+.carousel.is-dimensional .carousel__lap,
+.carousel.is-dimensional .player-card { transform-style: preserve-3d; }
+
+/* The rotation goes on the link, not on the card, and this is the whole reason
+   the row kept rendering flat however the numbers were tuned.
+
+   Two separate things were taking it:
+
+   * The reveal animation writes an inline `transform` on .player-card as it
+     brings the row in. An inline declaration beats a stylesheet one, so the
+     rotation here was computed, written to the custom properties, and then
+     thrown away every frame -- getComputedStyle on a card said
+     matrix(1,0,0,1,0,0) while --ry said 48deg.
+   * `filter` forces a used transform-style of flat on the element it is set
+     on, so blurring the card also flattened whatever 3D its children had.
+     Both properties belong on the same element for that reason.
+
+   The link is free of both, and .player-card keeps preserve-3d above so the
+   link's rotation happens in the row's shared perspective rather than in a
+   plane of its own. */
+.carousel.is-dimensional .player-card__link {
+  /* No perspective() in here. The container already establishes one, and a
+     second on the element gives every card its own vanishing point centred on
+     itself -- which is why an earlier attempt wrote correct rotations and still
+     rendered a row of almost-flat cards. One shared vanishing point is what
+     makes it a fan rather than twenty-two independently turned rectangles. */
+  transform: translateX(var(--tx, 0px)) rotateY(var(--ry, 0deg))
+    translateZ(var(--tz, 0px)) scale(var(--cs, 1));
+  opacity: var(--co, 1);
+  filter: blur(var(--cb, 0px)) brightness(var(--cl, 1));
+  transform-origin: 50% 50%;
+  /* No transition. These are rewritten every frame, and a transition on top
+     would make each card chase a value that has already moved on. */
+}
+/* A card being looked at comes back square to the viewer. */
+.carousel.is-dimensional .player-card:hover {
+  --ry: 0deg; --tz: 40px; --tx: 0px; --cs: 1.02; --co: 1; --cb: 0px; --cl: 1;
+}
+.carousel.is-dimensional .player-card:hover .player-card__link {
+  transition: transform .5s var(--ease-out), opacity .5s var(--ease-out),
+    filter .5s var(--ease-out);
+}
+
+/* The roster as a gallery -------------------------------------------------
+ *
+ * One card at a time, big, with the player's name lying over the picture
+ * rather than in a slab beneath it -- the row reads as a gallery being walked
+ * through instead of a shelf of thumbnails going past.
+ *
+ * It is the same markup the /player/ index uses, restyled from the section
+ * down. Nothing here changes playerCard(), so the grid on that page is
+ * untouched: this is a different arrangement of the same card, not a second
+ * card to keep in step with the first.
+ *
+ * The portraits are 529px wide at source, which is what caps the card size.
+ * Larger cards would be softer on a dense display, and the row would be
+ * showing fewer players at once for the privilege.
+ */
+/* Dark in both themes, and its own tokens rather than `section--paper`. That
+   modifier is the *contrast* band: it is dark on a light page and light on a
+   dark one, which put white names over cream the moment the page was in dark
+   mode. This section wants one ground, always, the way the hero does. */
+.roster--gallery {
   background:
-    radial-gradient(70% 60% at 15% 0%, rgba(16, 84, 74, .28), transparent 62%),
-    radial-gradient(60% 55% at 88% 20%, rgba(58, 36, 122, .3), transparent 66%),
-    #070b12;
+    radial-gradient(64% 52% at 22% 6%, rgba(16, 84, 74, .34), transparent 64%),
+    radial-gradient(58% 48% at 84% 30%, rgba(58, 36, 122, .32), transparent 66%),
+    #080c14;
   color: #eaf4fb;
   --fg: #eaf4fb;
   --fg-muted: rgba(234, 244, 251, .68);
   --fg-faint: rgba(234, 244, 251, .42);
-  --line: rgba(234, 244, 251, .18);
+  --line: rgba(234, 244, 251, .2);
   --line-strong: rgba(5, 237, 255, .5);
   --accent: var(--cyan-400);
 }
-.roster--rail.is-live { min-height: 320svh; }
 
-.roster__frame { padding-block: var(--section-y); }
-.roster--rail.is-live .roster__frame {
-  position: sticky; top: 0;
-  height: 100svh;
-  display: grid; grid-template-rows: auto 1fr; align-content: center;
-  padding-block: calc(var(--header-h) + 1rem) 3rem;
-  overflow: hidden;
+.roster--gallery .carousel {
+  padding-block: clamp(1rem, 3vw, 2rem);
+  /* The row runs off both edges of the window rather than of a column, and
+     the feather is wider than the default so cards turn away into nothing
+     instead of being clipped mid-rotation. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
-/* Compact in the sticky frame: the head and the row share one screen, and
-   the row is the point of the section. */
-.roster__head { margin-bottom: clamp(1rem, 2.5vw, 2rem); }
-/* The head and the row share one screen here, so the head gives up the space
-   it would take on an ordinary section. */
-.roster--rail.is-live .roster__head .section-head { margin-bottom: 0; }
-.roster--rail.is-live .roster__head .section-head__intro { max-width: 32rem; }
-
-.roster-rail { position: relative; overflow: hidden; }
-/* Hand-scrollable until the script takes over, so the fallback is a strip the
-   visitor can push rather than a row with nine players off the right edge. */
-.roster--rail:not(.is-live) .roster-rail {
-  overflow-x: auto; scrollbar-width: thin;
-  padding-inline: var(--gutter);
-}
-.roster-rail__track {
-  display: flex; align-items: center;
-  gap: var(--plate-gap);
-  width: max-content;
-  padding-inline: var(--gutter);
-  transform: translate3d(var(--travel, 0px), 0, 0);
-  will-change: transform;
-}
-.roster--rail.is-live .roster-rail { height: 100%; display: flex; align-items: center; }
-.roster--rail:not(.is-live) .roster-rail__track { padding-inline: 0; }
-
-/* --- one card ------------------------------------------------------------ */
-
-.plate {
-  position: relative;
-  /* Both axes stated, and the basis stated with them. `aspect-ratio` plus a
-     width leaves a flex item free to take its size from the cross axis
-     instead, which is what it did here: the row came out at half the size
-     asked for, with the height driving the width rather than the other way
-     round. Two lengths cannot be read backwards. */
-  flex: 0 0 auto;
-  /* Size and light, no rotation. A gradient panel survives being turned forty
-     degrees; a photograph of a person just looks like a photograph of a person
-     that has been turned forty degrees. */
-  scale: calc(.9 + var(--f, 1) * .1);
-  opacity: calc(.55 + var(--f, 1) * .45);
-  /* Staggered up and down the row so it reads as a wall of work rather than a
-     shelf, and only once a card has fallen back -- the one in front always
-     sits on the centre line. --s is +1 or -1, written by the template: parity
-     is a thing the markup already knows and CSS only learned to compute in a
-     spec too new to rely on here. */
-  translate: 0 calc((1 - var(--f, 1)) * var(--s, 1) * 2.4rem);
-}
-/* Sized from the row rather than from `.plate` alone. A bare single-class
-   selector lost the width to something else in the cascade and the whole row
-   came out at half size with the card's height driving its width; scoping it
-   to the track settles it and says where these belong at the same time. */
-.roster-rail__track .plate {
-  flex: 0 0 clamp(260px, 34vw, 460px);
-  width: clamp(260px, 34vw, 460px);
-  height: clamp(195px, 25.5vw, 345px);
-}
-@media (max-width: 760px) {
-  .roster-rail__track .plate {
-    flex-basis: clamp(230px, 76vw, 320px);
-    width: clamp(230px, 76vw, 320px);
-    height: clamp(184px, 61vw, 256px);
-  }
+/* A shorter focal length than the default 1000px. The reference turns its
+   outer cards until they are nearly edge-on and lets them recede hard, which
+   a long lens flattens back out. */
+.roster--gallery .carousel.is-dimensional { perspective: 820px; perspective-origin: 50% 50%; }
+.roster--gallery .carousel__lap {
+  grid-auto-columns: clamp(232px, 26vw, 348px);
+  gap: clamp(1rem, 2.2vw, 1.85rem);
 }
 
-.plate__link {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  height: 100%;
-  position: relative; overflow: hidden;
-  padding: clamp(.85rem, 1.6vw, 1.2rem);
-  border: 1px solid rgba(234, 244, 251, .12);
-  border-radius: 16px;
-  background:
-    radial-gradient(80% 70% at 68% 34%, rgba(92, 156, 255, .22), transparent 68%),
-    linear-gradient(160deg, rgba(18, 26, 40, .95), rgba(8, 11, 18, .95));
-  text-decoration: none; color: inherit;
-  transition: border-color .4s var(--ease-out);
+/* No frame of ours. The portraits are cutouts that already carry a card
+   outline, their own position mark and the club crest, on transparency -- put
+   a bordered panel behind one and it is a card inside a card. The image is the
+   card; this only holds it and lays the name over it. The ratio is the
+   artwork's own, so nothing is cropped. */
+.roster--gallery .player-card__link {
+  display: block; position: relative;
+  aspect-ratio: 529 / 760;
+  padding: 0; overflow: hidden;
+  border: 0; border-radius: 20px; background: none; box-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
 }
-.plate.is-front .plate__link { border-color: rgba(5, 237, 255, .38); }
+/* No transform here. The dimensional rule above owns this element's transform
+   and squares the card up on hover through the custom properties; setting
+   `none` alongside it is a tie on specificity, and this block comes later, so
+   it silently cancelled the whole rotation. */
+.roster--gallery .player-card__link:hover {
+  box-shadow: none; border-color: transparent;
+}
+/* The glass recipe's bright top edge. It is what sells a pane; on a card with
+   no pane it is a hairline hanging above the player's head. */
+.roster--gallery .player-card__link::after { display: none; }
 
-/* The header rule: index, the name in lower case, and the position code the
-   player art already prints in its own corner. */
-.plate__head {
-  position: relative; z-index: 2;
-  display: flex; align-items: center; gap: .6rem;
-  font-family: var(--font-hud, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: .62rem; letter-spacing: .16em;
-  color: rgba(234, 244, 251, .5);
+/* aspect-ratio has to go, not just be overridden by the insets: an absolutely
+   positioned box with top and bottom both zero is over-constrained against a
+   ratio, and the ratio is what wins -- which left the artwork ending well short
+   of the card's foot and the name lying across the player's chest. */
+.roster--gallery .player-card__media {
+  position: absolute; inset: 0; margin: 0;
+  aspect-ratio: auto; height: 100%;
+  border-radius: inherit; background: none;
 }
-.plate__index {
-  padding: .2rem .45rem; border-radius: 5px;
-  border: 1px solid rgba(234, 244, 251, .16);
-  color: rgba(234, 244, 251, .75);
+.roster--gallery .player-card__media picture,
+.roster--gallery .player-card__media img {
+  width: 100%; height: 100%;
+  object-fit: contain; object-position: center;
+  filter: none;
 }
-.plate__slug { text-transform: lowercase; letter-spacing: .1em; }
-.plate__code { margin-left: auto; }
+.roster--gallery .player-card__link:hover .player-card__media img { transform: none; }
 
-/* The figure sits to the right and runs off the bottom edge, so the card is a
-   plate with someone standing on it rather than a photograph in a box. */
-.plate__figure {
-  position: absolute; z-index: 1;
-  right: -2%; bottom: 0; top: 6%;
-  width: 58%;
-  display: block;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%);
-  mask-image: linear-gradient(90deg, transparent, #000 24%);
-}
-.plate__figure picture, .plate__figure img {
-  display: block; width: 100%; height: 100%;
-  object-fit: contain; object-position: bottom right;
-}
+/* The artwork already prints the position at the top of every card. */
+.roster--gallery .player-card__badge { display: none; }
 
-/* Held clear of the figure on the right, so a long surname does not run
-   across the player's chest. */
-.plate__foot { position: relative; z-index: 2; align-self: end; width: 64%; }
-.plate__name {
-  display: block;
-  font-size: clamp(1.5rem, 3vw, 2.3rem); font-weight: 500;
-  line-height: 1.02; letter-spacing: -.025em; color: #fff;
+/* The name block, over a scrim rather than over the picture itself: white type
+   straight onto a photograph is legible until the one photograph with a pale
+   shirt behind the text, and then it is not. */
+.roster--gallery .player-card__body {
+  position: absolute; inset: auto 0 0 0; z-index: 2;
+  display: grid; gap: .5rem;
+  padding: clamp(1.1rem, 2.2vw, 1.6rem);
+  background: linear-gradient(to top,
+    rgba(4, 6, 10, .94) 8%, rgba(4, 6, 10, .72) 46%, rgba(4, 6, 10, 0) 100%);
 }
-.plate__meta {
-  display: block; margin-top: .35rem;
-  font-size: .76rem; color: rgba(234, 244, 251, .55);
+.roster--gallery .player-card__name em {
+  font-size: .68rem; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .55);
+  margin-bottom: .3rem;
 }
+.roster--gallery .player-card__name strong {
+  font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+  font-weight: 500; letter-spacing: -.025em; line-height: 1;
+  color: #fff;
+}
+.roster--gallery .player-card__meta {
+  font-size: .78rem; color: rgba(255, 255, 255, .62);
+}
+.roster--gallery .player-card__role { color: rgba(255, 255, 255, .62); }
+.roster--gallery .player-card__club { color: rgba(255, 255, 255, .45); }
+/* The whole card is the link. A "Profile →" line under the name costs a third
+   of the artwork on a phone-sized card and says what the card already is. */
+.roster--gallery .player-card__cta { display: none; }
 
-/* Only the card in front offers its link, the way the reference does. */
-.plate__cta {
-  position: absolute; z-index: 3; right: clamp(.85rem, 1.6vw, 1.2rem); bottom: clamp(.85rem, 1.6vw, 1.2rem);
-  display: inline-flex; align-items: center; gap: .4rem;
-  font-size: .74rem; color: var(--accent);
-  opacity: 0; translate: -.4rem 0;
-  transition: opacity .45s var(--ease-out), translate .45s var(--ease-out);
-}
-.plate.is-front .plate__cta,
-.roster--rail:not(.is-live) .plate__cta { opacity: 1; translate: none; }
-.plate__cta svg { width: 1em; height: 1em; }
-
-/* The card the row arrives at. No figure, so the name can be the whole face
-   of it. */
-.plate--archive .plate__link {
-  background:
-    radial-gradient(90% 80% at 30% 20%, rgba(5, 237, 255, .16), transparent 70%),
-    linear-gradient(160deg, rgba(10, 30, 44, .95), rgba(6, 10, 16, .95));
-  border-color: rgba(5, 237, 255, .24);
-}
-.plate--archive .plate__name { font-size: clamp(1.6rem, 3.4vw, 2.6rem); }
-
-@media (max-width: 760px) {
-  .roster--rail.is-live { min-height: 280svh; }
-}
-
-/* Nothing moves, so nothing needs to be lit differently. */
-@media (prefers-reduced-motion: reduce) {
-  .plate { scale: none; opacity: 1; translate: none; }
-}
+/* The glow was a hover wash over a card that was mostly slab. Over a
+   full-bleed portrait it just fogs the player. */
+.roster--gallery .player-card__glow { display: none; }
 
 
 /* ===== pages.css ===== */
