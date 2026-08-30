@@ -1096,34 +1096,70 @@ a.office__row:hover { color: var(--white); }
 .spot__fact dt::after { content: ":"; }
 .spot__fact dd { margin: 0; color: #fff; }
 
+/* The word the fan stands in front of.
+ *
+ * Straight out of the reference, where a display line runs across the frame
+ * behind the cards and is cut into pieces by them. It is what turns a row of
+ * cards into a composition: without something passing behind them there is no
+ * depth to read them against, only their own shading.
+ *
+ * It drifts as the section runs, so the cards are moving across it rather than
+ * sitting on it. Set in the display face at a size no heading would ever be,
+ * because it is a texture and not a title -- the real one is in the panel. */
+.spot__word {
+  position: absolute; z-index: 1; left: 50%; top: 48%;
+  margin: 0; white-space: nowrap;
+  font-size: clamp(4.5rem, 17vw, 15rem);
+  font-weight: 400; letter-spacing: -.04em; line-height: .8;
+  text-transform: uppercase;
+  color: rgba(234, 244, 251, .085);
+  translate: calc(-50% + (.5 - var(--p)) * 16vw) -50%;
+  opacity: clamp(0, calc((var(--p) - .34) / .28), 1);
+  pointer-events: none; user-select: none;
+}
+
 /* --- the field ---------------------------------------------------------- */
 
+/* A shorter focal length than the field had. The reference stands its cards up
+   and turns them until the near edge of a side card is plainly closer than its
+   far edge; a long lens flattens that back into a row of rectangles at angles.
+   The origin sits above centre so the fan is read slightly from above, which
+   is what stops it looking like a shop display. */
 .spot__stage {
   position: absolute; inset: 0; z-index: 2;
-  perspective: 1100px; perspective-origin: 50% 48%;
+  perspective: 900px; perspective-origin: 50% 44%;
   transform-style: preserve-3d;
   pointer-events: none;
+  /* The fan's own clock, not the section's. The panel has to be read before
+     anything moves across it, so the cards stay put for the first quarter of
+     the section and then have the rest of it to open in. Every card geometry
+     below is a calc() off this rather than off --p, so the delay is stated
+     once. */
+  --fan: clamp(0, calc((var(--p) - .26) / .6), 1);
 }
 
 .spot-card {
   position: absolute;
   /* Percentages on left/top resolve against the stage, which is what makes a
      slot a fraction of the frame. A percentage inside translate() would
-     resolve against the card itself and put every one of them in the middle. */
-  left: calc(50% + var(--x, 0) * 100%);
-  top: calc(50% + var(--y, 0) * 100%);
-  width: clamp(104px, 14vw, 196px);
+     resolve against the card itself and put every one of them in the middle.
+
+     They start stacked behind the lead card and fan outward with --p, so the
+     move is one card becoming a row rather than a cloud assembling. */
+  left: calc(50% + var(--x, 0) * var(--fan) * 100%);
+  top: calc(50% + var(--y, 0) * var(--fan) * 100%);
+  width: clamp(128px, 18vw, 262px);
   aspect-ratio: 529 / 760;
   transform-style: preserve-3d;
-  /* Depth arrives with --p: the cards start a long way further back than they
-     end, so they come toward the viewer rather than fading in on the spot.
-     A stagger off --i lets them arrive as a flock instead of a wall. */
   transform:
     translate(-50%, -50%)
-    translateZ(calc(var(--z, 0px) - (1 - var(--p)) * 900px))
-    rotateY(var(--r, 0deg));
-  opacity: clamp(0, calc((var(--p) - var(--i, 0) * .035) / .34), 1);
-  filter: blur(calc((1 - var(--p)) * 6px));
+    translateZ(calc(var(--z, 0px) * var(--fan) - (1 - var(--fan)) * 420px))
+    rotateY(calc(var(--r, 0deg) * var(--fan)))
+    rotateZ(calc(var(--rz, 0deg) * var(--fan)));
+  /* A stagger off --i lets them arrive as a hand being spread rather than all
+     at once. */
+  opacity: clamp(0, calc((var(--fan) - var(--i, 0) * .06) / .38), 1);
+  filter: brightness(calc(.62 + var(--fan) * .38));
 }
 
 .spot-card__link { display: block; width: 100%; height: 100%; position: relative; }
@@ -1136,17 +1172,19 @@ a.office__row:hover { color: var(--white); }
   color: rgba(234, 244, 251, .6);
 }
 
-/* The one card the panel is about. It is held up at the right at rest and
-   travels into the middle of the field as the section runs -- the same
-   journey the others make, arrived at from the front instead of from behind. */
+/* The card the panel is about: held up at the right at rest, and walking into
+   the middle of the fan as the section runs, where it stays the one nearly
+   square to the viewer. It does not go back with the others -- the whole point
+   of the move is that the rest arrive around it. */
 .spot-card--lead {
-  left: calc(50% + (.28 - .3 * var(--p)) * 100%);
-  top: calc(50% + (-.02 - .04 * var(--p)) * 100%);
-  width: clamp(168px, 24vw, 330px);
+  left: calc(50% + (.28 - .28 * var(--fan)) * 100%);
+  top: calc(50% + (-.02 - .02 * var(--fan)) * 100%);
+  width: clamp(168px, 23vw, 316px);
   transform:
     translate(-50%, -50%)
-    translateZ(calc(var(--p) * -520px))
-    rotateY(calc(var(--p) * -15deg));
+    translateZ(calc(var(--fan) * 60px))
+    rotateY(calc(var(--fan) * -7deg))
+    rotateZ(calc(var(--fan) * -1.2deg));
   opacity: 1;
   filter: none;
   pointer-events: auto;
@@ -1181,8 +1219,8 @@ a.office__row:hover { color: var(--white); }
   .spot__pin { align-items: start; padding-top: calc(var(--header-h) + 2rem); }
   .spot-card { width: clamp(96px, 31vw, 152px); }
   .spot-card--lead {
-    left: calc(50% + (.18 - .2 * var(--p)) * 100%);
-    top: calc(50% + (.22 - .2 * var(--p)) * 100%);
+    left: calc(50% + (.18 - .2 * var(--fan)) * 100%);
+    top: calc(50% + (.22 - .2 * var(--fan)) * 100%);
     width: clamp(140px, 46vw, 210px);
   }
   .spot__stage { perspective: 760px; }
@@ -1205,13 +1243,12 @@ a.office__row:hover { color: var(--white); }
 .spot:not(.is-live) .spot__wash { opacity: .72; }
 .spot:not(.is-live) .spot__outro { opacity: 1; pointer-events: auto; }
 .spot:not(.is-live) .spot-card { filter: none; }
-/* And the lead card stays where the panel expects it, on the right, rather
-   than travelling to the middle of the frame and landing on the copy. */
-.spot:not(.is-live) .spot-card--lead {
-  left: calc(50% + 28%);
-  top: calc(50% - 2%);
-  transform: translate(-50%, -50%);
-}
+.spot:not(.is-live) .spot__word { opacity: 1; }
+/* The fan is open in the still, so it goes where the copy is not: pushed into
+   the right of the frame rather than centred on top of it. Holding the lead
+   card at its resting place instead would fan the others around an empty
+   middle, which reads as a card having been removed. */
+.spot:not(.is-live) .spot__stage { translate: 15% 0; }
 @media (max-width: 760px) {
-  .spot:not(.is-live) .spot-card--lead { left: calc(50% + 18%); top: calc(50% + 22%); }
+  .spot:not(.is-live) .spot__stage { translate: 0 22%; }
 }

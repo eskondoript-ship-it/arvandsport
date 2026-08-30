@@ -24,25 +24,36 @@ import { esc, attr, ICONS } from './layout.mjs';
 import { picture, PORTRAIT_WIDTHS } from './partials.mjs';
 
 /**
- * Where each card sits once the field has opened, as a fraction of the stage.
+ * Where each card stands once the row has fanned out.
  *
- * Written down rather than generated. A random scatter re-rolls on every build
- * and puts two cards on top of each other about a third of the time; these are
- * placed to leave the middle clear for the one card that stays there, and to
- * read as depth rather than as a grid that has been jostled.
+ * A fan, not a scatter. The reference stands its cards up in a shared
+ * perspective and turns them steeply away from the middle -- the one in front
+ * nearly square to you, its neighbours edge-on enough to show their thickness
+ * -- with the display line running behind them. A random cloud of cards reads
+ * as debris; this reads as a row of things being held up.
+ *
+ * Generated rather than typed, because a fan is a rule and not a set of
+ * opinions: alternate sides, each rank further out, further back and turned
+ * harder than the last. `rz` is a degree or two of roll so the row is not
+ * mechanical.
  */
-const SLOTS = [
-  { x: -0.36, y: -0.24, z: -420, r: -13 },
-  { x: 0.34, y: -0.28, z: -520, r: 11 },
-  { x: -0.44, y: 0.2, z: -300, r: 9 },
-  { x: 0.42, y: 0.16, z: -360, r: -8 },
-  { x: -0.22, y: 0.34, z: -640, r: 14 },
-  { x: 0.2, y: -0.38, z: -700, r: -12 },
-  { x: -0.5, y: -0.04, z: -820, r: 7 },
-  { x: 0.48, y: -0.02, z: -880, r: -6 },
-  { x: -0.12, y: -0.42, z: -980, r: 10 },
-  { x: 0.1, y: 0.42, z: -1040, r: -9 },
-];
+const SLOTS = Array.from({ length: 4 }, (_, i) => {
+  const side = i % 2 ? 1 : -1;
+  const rank = Math.floor(i / 2) + 1;
+  return {
+    /* Two ranks a side, and the outer one at 0.385 of the stage from the
+       middle. Further out than that and a card's own width carries it off the
+       frame -- a first pass fanned ten and rendered four of them entirely off
+       screen. Fewer also reads better: the reference holds up three cards, not
+       a hand of them, and every player here is visible rather than half
+       behind his neighbour. The rest of the roster is a link away. */
+    x: side * (0.155 + rank * 0.115),
+    y: (rank % 2 ? -1 : 1) * 0.03 * rank,
+    z: -170 * rank,
+    r: -side * (28 + rank * 8),
+    rz: side * (1.8 + rank * 1.1),
+  };
+});
 
 /** The player's age today, from the date of birth and nothing else. */
 function ageFrom(birthDate, today = new Date()) {
@@ -71,7 +82,7 @@ function facts(player) {
 
 function fieldCard(player, slot, index) {
   return `<article class="spot-card" data-spot-card
-    style="--x:${slot.x};--y:${slot.y};--z:${slot.z}px;--r:${slot.r}deg;--i:${index}">
+    style="--x:${slot.x};--y:${slot.y};--z:${slot.z}px;--r:${slot.r}deg;--rz:${slot.rz}deg;--i:${index}">
     <a class="spot-card__link" href="${attr(player.url)}" tabindex="-1">
       ${picture(player.image, {
         widths: PORTRAIT_WIDTHS,
@@ -104,6 +115,11 @@ export function spotlight(site, players = []) {
   return `<section class="spot" id="spotlight" data-spotlight aria-labelledby="spot-title">
   <div class="spot__pin" data-spotlight-pin>
     <span class="spot__wash" aria-hidden="true"></span>
+
+    <!-- The display line the fan stands in front of. Aria-hidden and duplicated
+         from the heading below on purpose: it is scenery, and a screen reader
+         should hear the player's name once. -->
+    <p class="spot__word" aria-hidden="true">${esc(lead.lastName)}</p>
 
     <div class="spot__stage" data-spotlight-stage>
       ${others.map((p, i) => fieldCard(p, SLOTS[i], i)).join('\n      ')}
