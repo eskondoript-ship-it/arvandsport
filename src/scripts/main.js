@@ -11,6 +11,7 @@ import { initEmbeds } from './embed.js';
 import { initWire } from './wire.js';
 import { initDossier } from './dossier.js';
 import { initApex } from './apex.js';
+import { initSpotlight } from './spotlight.js';
 import { initCursor, destroyCursor } from './cursor.js';
 import { initTransitions } from './transitions.js';
 
@@ -23,6 +24,7 @@ function initPage(container = document) {
   initWire(container);
   initDossier(container);
   initApex(container);
+  initSpotlight(container);
   initMotion(container);
 }
 

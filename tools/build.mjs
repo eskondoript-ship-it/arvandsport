@@ -30,6 +30,10 @@ for (const player of players) {
   const previous = player.club;
   player.club = update.club;
   player.clubSource = update.source;
+  /* Named explicitly rather than inferred from what was replaced: the scraped
+     club can be two moves behind, so the club being overwritten is not
+     reliably the one he came from. Only what the correction states. */
+  if (update.previous) player.previousClub = update.previous;
   for (const row of player.bio || []) {
     if (row.label === 'Current club' && row.value === previous) row.value = update.club;
   }

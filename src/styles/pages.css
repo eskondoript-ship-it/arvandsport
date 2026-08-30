@@ -1015,3 +1015,203 @@ a.office__row:hover { color: var(--white); }
 @media (prefers-reduced-motion: reduce) {
   .apex__facet { opacity: 1 !important; transform: none !important; }
 }
+
+/* ============================================================ spotlight ===
+ *
+ * The client panel under the hero, and the field of cards it opens into.
+ *
+ * One custom property drives the whole thing. src/scripts/spotlight.js writes
+ * --p on the stage once a frame and every position, fade and rotation below is
+ * a calc() off it. That keeps the scrub to a single property write instead of
+ * twelve elements' worth, and it means the finished frame is what the
+ * stylesheet renders when --p never arrives -- no JavaScript, reduced motion,
+ * or a bundle that failed: the field is simply already open.
+ *
+ * Dark in both themes, with its own tokens, for the same reason the hero and
+ * the roster carry theirs: the ground here is a deep blue whichever way the
+ * page is set, and anything reading --fg on a light page would come out
+ * near-black on it.
+ */
+.spot {
+  --p: 1;
+  position: relative;
+  min-height: 340svh;
+  background: #04060d;
+  color: #eaf4fb;
+  --fg: #eaf4fb;
+  --fg-muted: rgba(234, 244, 251, .68);
+  --fg-faint: rgba(234, 244, 251, .42);
+  --line: rgba(234, 244, 251, .2);
+  --line-strong: rgba(92, 156, 255, .55);
+  --accent: #7aa8ff;
+}
+.spot__pin {
+  position: sticky; top: 0; height: 100svh; overflow: hidden;
+  display: grid; align-items: center;
+}
+
+/* The mock's ground: a blue lit from the lower left, falling to almost black
+   at the far corner. A single radial does the whole thing. */
+.spot__wash {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(130% 120% at 6% 108%, #1b4fe0 0%, #12309a 26%, #0a1852 52%, #05091c 78%, #04060d 100%);
+  /* Fades out as the field takes over, so the cards end up in space rather
+     than on a poster. */
+  opacity: calc(1 - .55 * var(--p));
+}
+
+/* --- the panel ---------------------------------------------------------- */
+
+/* Left in the shell, not centred in it. The panel is narrower than the shell
+   so the card has the right-hand half of the frame, and `margin-inline: auto`
+   on a narrower box centres the copy under the middle of the page instead of
+   starting it at the gutter. The shell centres; the panel sits at its start. */
+.spot__panel {
+  position: relative; z-index: 3;
+  width: min(100% - (var(--gutter) * 2), var(--shell));
+  margin-inline: auto;
+  padding-right: min(38%, 26rem);
+  opacity: clamp(0, calc((.5 - var(--p)) / .28), 1);
+  translate: 0 calc(var(--p) * -2rem);
+  pointer-events: none;
+}
+.spot__kicker {
+  margin: 0 0 .9rem; font-size: .7rem; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .55);
+}
+.spot__title {
+  margin: 0 0 clamp(1.6rem, 4vw, 2.6rem);
+  font-size: clamp(2.2rem, 6.4vw, 4.4rem);
+  font-weight: 400; line-height: 1.02; letter-spacing: -.03em;
+}
+.spot__title-soft { color: #6f9bff; }
+
+.spot__facts { margin: 0; display: grid; gap: clamp(.35rem, 1vw, .7rem); }
+.spot__fact {
+  display: flex; gap: .5ch; align-items: baseline;
+  font-size: clamp(1rem, 2.1vw, 1.45rem); line-height: 1.35;
+}
+.spot__fact dt { margin: 0; color: rgba(234, 244, 251, .82); }
+.spot__fact dt::after { content: ":"; }
+.spot__fact dd { margin: 0; color: #fff; }
+
+/* --- the field ---------------------------------------------------------- */
+
+.spot__stage {
+  position: absolute; inset: 0; z-index: 2;
+  perspective: 1100px; perspective-origin: 50% 48%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.spot-card {
+  position: absolute;
+  /* Percentages on left/top resolve against the stage, which is what makes a
+     slot a fraction of the frame. A percentage inside translate() would
+     resolve against the card itself and put every one of them in the middle. */
+  left: calc(50% + var(--x, 0) * 100%);
+  top: calc(50% + var(--y, 0) * 100%);
+  width: clamp(104px, 14vw, 196px);
+  aspect-ratio: 529 / 760;
+  transform-style: preserve-3d;
+  /* Depth arrives with --p: the cards start a long way further back than they
+     end, so they come toward the viewer rather than fading in on the spot.
+     A stagger off --i lets them arrive as a flock instead of a wall. */
+  transform:
+    translate(-50%, -50%)
+    translateZ(calc(var(--z, 0px) - (1 - var(--p)) * 900px))
+    rotateY(var(--r, 0deg));
+  opacity: clamp(0, calc((var(--p) - var(--i, 0) * .035) / .34), 1);
+  filter: blur(calc((1 - var(--p)) * 6px));
+}
+
+.spot-card__link { display: block; width: 100%; height: 100%; position: relative; }
+.spot-card picture, .spot-card img {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+}
+.spot-card__name {
+  position: absolute; inset: auto 0 4%; text-align: center;
+  font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .6);
+}
+
+/* The one card the panel is about. It is held up at the right at rest and
+   travels into the middle of the field as the section runs -- the same
+   journey the others make, arrived at from the front instead of from behind. */
+.spot-card--lead {
+  left: calc(50% + (.28 - .3 * var(--p)) * 100%);
+  top: calc(50% + (-.02 - .04 * var(--p)) * 100%);
+  width: clamp(168px, 24vw, 330px);
+  transform:
+    translate(-50%, -50%)
+    translateZ(calc(var(--p) * -520px))
+    rotateY(calc(var(--p) * -15deg));
+  opacity: 1;
+  filter: none;
+  pointer-events: auto;
+}
+.spot-card--lead .spot-card__name {
+  font-size: .8rem; color: rgba(234, 244, 251, .8);
+}
+
+/* --- what the field leaves you with ------------------------------------- */
+
+.spot__outro {
+  position: absolute; z-index: 4; left: 50%; bottom: clamp(2.5rem, 8vh, 5rem);
+  translate: -50% 0; text-align: center;
+  display: grid; justify-items: center; gap: 1rem;
+  opacity: clamp(0, calc((var(--p) - .74) / .2), 1);
+  pointer-events: none;
+}
+.spot__outro[aria-hidden="true"] { pointer-events: none; }
+.spot__outro-line {
+  margin: 0; font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .5);
+}
+/* The link has to be clickable once it is there, and unreachable before. */
+.spot__pin.is-open .spot__outro { pointer-events: auto; }
+
+/* Phones ----------------------------------------------------------------- */
+@media (max-width: 760px) {
+  .spot { min-height: 300svh; }
+  .spot__panel { padding-right: 0; }
+  /* The panel owns the top half and the field the bottom, rather than the two
+     of them fighting over the middle of a narrow frame. */
+  .spot__pin { align-items: start; padding-top: calc(var(--header-h) + 2rem); }
+  .spot-card { width: clamp(96px, 31vw, 152px); }
+  .spot-card--lead {
+    left: calc(50% + (.18 - .2 * var(--p)) * 100%);
+    top: calc(50% + (.22 - .2 * var(--p)) * 100%);
+    width: clamp(140px, 46vw, 210px);
+  }
+  .spot__stage { perspective: 760px; }
+}
+
+/* The composed still, and it is the default rather than a fallback.
+ *
+ * Everything above reads --p, which sits at 1 until something moves it, so the
+ * stylesheet on its own renders the end of the move: field open, cards in
+ * place. What it must not also do is hide the panel, which at --p of 1 is
+ * faded to nothing -- a visitor with no JavaScript would get a screen of
+ * floating cards and no idea who any of it is about.
+ *
+ * So the panel, the ground and the closing line are pinned visible until
+ * src/scripts/spotlight.js adds `is-live`, which it does only when it is
+ * actually going to drive the scrub. Reduced motion never gets the class, and
+ * therefore never gets the move; it gets this, which says the same thing
+ * standing still. */
+.spot:not(.is-live) .spot__panel { opacity: 1; translate: none; }
+.spot:not(.is-live) .spot__wash { opacity: .72; }
+.spot:not(.is-live) .spot__outro { opacity: 1; pointer-events: auto; }
+.spot:not(.is-live) .spot-card { filter: none; }
+/* And the lead card stays where the panel expects it, on the right, rather
+   than travelling to the middle of the frame and landing on the copy. */
+.spot:not(.is-live) .spot-card--lead {
+  left: calc(50% + 28%);
+  top: calc(50% - 2%);
+  transform: translate(-50%, -50%);
+}
+@media (max-width: 760px) {
+  .spot:not(.is-live) .spot-card--lead { left: calc(50% + 18%); top: calc(50% + 22%); }
+}

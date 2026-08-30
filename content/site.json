@@ -168,6 +168,30 @@
     "title": "Players",
     "intro": "We have signed some highly skilled professional football players who contribute to our strong and successful team. Their commitment and passion for the sport make us proud to have them as part of our family."
   },
+  "spotlight": {
+    "_note": "The panel under the hero, and the card field it opens into. Every figure is read from the player's own record in content/players.json at build time -- age from birthDate rather than written down, so it does not go stale -- and nothing here may state a number that record does not carry. `rows` names which of them to show and in what order; the labels are the only prose. fieldCaption states no number on purpose: the field holds whichever players content/players.json carries, and the agency's own figure for players under contract is in stats and is far larger.",
+    "playerSlug": "mehdi-taremi",
+    "kicker": "Our client",
+    "title": "spotlight",
+    "lead": "Represented since 2020",
+    "rows": [
+      "age",
+      "height",
+      "caps",
+      "goals",
+      "club",
+      "previousClub"
+    ],
+    "labels": {
+      "age": "Age",
+      "height": "Height",
+      "caps": "Caps",
+      "goals": "INT. goals",
+      "club": "Current club",
+      "previousClub": "Previous club"
+    },
+    "fieldCaption": "and the rest of the roster"
+  },
   "formerClients": {
     "title": "Former Clients",
     "items": [

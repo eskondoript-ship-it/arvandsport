@@ -1,6 +1,7 @@
 import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
 import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG, KICKER_SVG } from './partials.mjs';
 import { apex } from './apex.mjs';
+import { spotlight } from './spotlight.mjs';
 
 
 export function about(site) {
@@ -340,6 +341,7 @@ export function renderHome({ site, players, news, taremiModel = false }) {
     },
     content: [
       apex(site, players, { taremiModel }),
+      spotlight(site, players),
       about(site),
       servicesTeaser(site),
       roster(site, players),

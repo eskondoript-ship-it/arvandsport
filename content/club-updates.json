@@ -6,17 +6,19 @@
       "since": "YYYY-MM the move completed, as published",
       "source": "URL the club was read from",
       "checked": "YYYY-MM-DD this entry was last verified",
-      "confidence": "high | medium — medium means one source, or sources that disagree"
+      "confidence": "high | medium — medium means one source, or sources that disagree",
+      "previous": "the club this move was from, when it is worth naming on the site"
     }
   },
   "players": {
     "mehdi-taremi": {
-      "club": "Olympiacos",
-      "since": "2025-08",
-      "source": "https://www.espn.com/soccer/player/_/id/219611/mehdi-taremi",
-      "checked": "2026-08-28",
+      "club": "Al Wasl",
+      "since": "",
+      "source": "Arvand Sport",
+      "checked": "2026-08-30",
       "confidence": "high",
-      "note": "Porto to Inter on a free in 2024, Inter to Olympiacos in August 2025. The site was two moves behind."
+      "note": "Porto to Inter on a free in 2024, Inter to Olympiacos in August 2025, Olympiacos to Al Wasl. The agency supplied the current and previous club directly on 30 Aug 2026, which outranks the published sources this file otherwise cites; no month was given for the move, so `since` is empty. The agency wrote Olympiakos and the rest of this file says Olympiacos, which is the spelling ESPN uses -- kept as Olympiacos so the site says one thing.",
+      "previous": "Olympiacos"
     },
     "ali-alipour": {
       "club": "Persepolis FC",
