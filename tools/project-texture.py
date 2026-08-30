@@ -118,7 +118,32 @@ def project(V, axis):
     return np.stack([uu, 1.0 - vv], axis=1)
 
 
-def write_glb(V, N, UV, F, image_bytes, out_path, name):
+def confidence(N, axis, floor=0.1, gamma=0.75):
+    """How much of the photograph a surface is entitled to, per vertex.
+
+    A planar projection gives every vertex a coordinate, including the ones
+    facing away from the camera that took the picture. Those get the colour of
+    whatever was in front of them, smeared along the surface -- the sides of a
+    head wear the ear that was nearest them, and the whole back wears a mirror
+    of the front. It is the one thing that always gives a projected photograph
+    away.
+
+    Nothing can put real colour there; there is no picture of it. What can be
+    done is stop pretending: written as a vertex colour, this darkens a surface
+    as it turns from the camera, so the stretch reads as a figure falling into
+    shadow rather than as a texture coming apart. glTF multiplies COLOR_0 into
+    the base colour, and three.js picks it up with no material work at all.
+
+    The floor is not zero. A silhouette with a completely black edge reads as a
+    hole punched in the figure.
+    """
+    depth = {"+z": (2, 1.0), "-z": (2, -1.0), "+x": (0, 1.0), "-x": (0, -1.0)}[axis]
+    facing = np.clip(N[:, depth[0]] * depth[1], 0.0, 1.0)
+    shade = floor + (1.0 - floor) * np.power(facing, gamma)
+    return np.repeat(shade[:, None], 3, axis=1)
+
+
+def write_glb(V, N, UV, F, image_bytes, out_path, name, shade=None):
     buf = bytearray()
     views, accessors = [], []
 
@@ -145,6 +170,23 @@ def write_glb(V, N, UV, F, image_bytes, out_path, name):
         {"bufferView": vt, "componentType": 5126, "count": len(uv), "type": "VEC2"},
         {"bufferView": vi, "componentType": 5125, "count": idx.size, "type": "SCALAR"},
     ]
+    attributes = {"POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2}
+    if shade is not None:
+        # Normalised bytes, not floats. This is one number per vertex repeated
+        # three times and it does not need 24 bits of it: floats cost 116KB on
+        # this mesh against 29, for a shading ramp nobody can see the steps in.
+        # VEC4, not VEC3: glTF wants each vertex attribute element aligned to
+        # four bytes, and three unsigned bytes is three. The alpha is a
+        # constant 255 and costs nothing that the padding would not.
+        rgb = np.clip(np.rint(shade * 255), 0, 255).astype(np.uint8)
+        rgba = np.concatenate([rgb, np.full((len(rgb), 1), 255, np.uint8)], axis=1)
+        vc = push(rgba.tobytes(), 34962)
+        accessors.append({
+            "bufferView": vc, "componentType": 5121, "count": len(shade),
+            "type": "VEC4", "normalized": True,
+        })
+        attributes["COLOR_0"] = len(accessors) - 1
+
     img_view = push(image_bytes)
 
     gltf = {
@@ -153,8 +195,7 @@ def write_glb(V, N, UV, F, image_bytes, out_path, name):
         "scenes": [{"nodes": [0]}],
         "nodes": [{"name": name, "mesh": 0}],
         "meshes": [{"name": name, "primitives": [{
-            "attributes": {"POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2},
-            "indices": 3, "material": 0}]}],
+            "attributes": attributes, "indices": 3, "material": 0}]}],
         "materials": [{"name": name, "pbrMetallicRoughness": {
             "baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 0.85}}],
         "textures": [{"source": 0, "sampler": 0}],
@@ -184,6 +225,8 @@ def main():
     ap.add_argument("--preview", action="store_true")
     ap.add_argument("--size", type=int, default=1024)
     ap.add_argument("--name", default="owner")
+    ap.add_argument("--no-shade", action="store_true",
+                    help="keep the smear on surfaces facing away from the camera")
     args = ap.parse_args()
 
     _gltf, V, N, F = load_mesh(args.mesh)
@@ -204,7 +247,8 @@ def main():
     picture.save(blob, "JPEG", quality=88, optimize=True, progressive=True)
 
     UV = project(V, args.axis)
-    write_glb(V, N, UV, F, blob.getvalue(), args.out, args.name)
+    shade = None if args.no_shade else confidence(N, args.axis)
+    write_glb(V, N, UV, F, blob.getvalue(), args.out, args.name, shade)
 
     import os
     print(f"projected along {args.axis}; wrote {args.out} "

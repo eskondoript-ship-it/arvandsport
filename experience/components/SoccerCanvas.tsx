@@ -155,10 +155,12 @@ function Owner() {
       -2.1,
       THREE.MathUtils.lerp(-2.8, 0.6, eased),
     );
-    /* Turned toward the camera as he comes in. The photograph is projected
-     * front-on, so the further he turns the more it smears -- this stops
-     * short of anywhere that shows. */
-    holder.current.rotation.y = THREE.MathUtils.lerp(0.42, 0.16, eased);
+    /* Nearly square to the camera throughout. The photograph is projected
+     * front-on, so every degree he turns is a degree of it stretching along
+     * a surface it was never taken of -- the vertex shading baked in by
+     * tools/project-texture.py darkens that rather than hiding it, and the
+     * cheapest way to have less of it is to turn him less. */
+    holder.current.rotation.y = THREE.MathUtils.lerp(0.2, 0.05, eased);
     holder.current.scale.setScalar(3.1 + eased * 0.5);
   });
 
