@@ -1,5 +1,5 @@
 import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
-import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG, KICKER_SVG } from './partials.mjs';
+import { sectionHead, playerCard, articleCard, personCard, statBlock, picture, PORTRAIT_WIDTHS, BALL_SVG, KICKER_SVG } from './partials.mjs';
 import { apex } from './apex.mjs';
 import { spotlight } from './spotlight.mjs';
 
@@ -73,41 +73,83 @@ export function services(site) {
 }
 
 /**
- * The roster, as a carousel that never reaches an end.
+ * The roster, walked past rather than scrolled through.
  *
- * The track carries the players twice and slides by exactly half its width, so
- * the moment it would show the join it is back where it started -- there is no
- * jump to hide because the frame at 100% and the frame at 0% are the same
- * picture. It is a CSS animation on a transform, which means it runs on the
- * compositor and keeps running while the main thread is busy; a JS loop here
- * would stutter every time something else on the page did.
+ * A row of wide cards that travels sideways as the page is scrolled down: the
+ * section is tall, the frame inside it is held by `position: sticky`, and the
+ * scroll turns into horizontal distance. One card at a time is in front --
+ * bigger, brighter, with the link to the profile on it -- and the rest fall
+ * back either side. Nothing rotates. Depth here is size and light, which is
+ * what the reference does and what a photograph of a person survives; turning
+ * a portrait forty degrees only makes it a turned portrait.
  *
- * The second copy is aria-hidden. It is the same eleven players said twice, and
- * a screen reader should hear the roster once.
+ * The row ends on a card rather than trailing off, so the last thing the
+ * travel arrives at is the way through to the rest of them.
+ *
+ * These are not playerCard(): that card is a portrait tile for a grid, and
+ * this one is a landscape plate with the figure at its right and a header rule
+ * across the top. Trying to be both is what made the earlier version a card
+ * inside a card.
  */
+function rosterCard(player, index) {
+  const meta = [player.position.detail, player.club].filter(Boolean).join(' · ');
+  return `<article class="plate" data-plate style="--i:${index};--s:${index % 2 ? -1 : 1}">
+    <a class="plate__link" href="${attr(player.url)}">
+      <span class="plate__head">
+        <span class="plate__index">${String(index + 1).padStart(2, '0')}</span>
+        <span class="plate__slug">${esc(player.name.toLowerCase())}</span>
+        <span class="plate__code">${esc(positionCode(player))}</span>
+      </span>
+      <span class="plate__figure">
+        ${picture(player.image, {
+          widths: PORTRAIT_WIDTHS,
+          sizes: '(max-width: 760px) 42vw, 300px',
+          alt: player.name,
+          width: 529,
+          height: 760,
+        })}
+      </span>
+      <span class="plate__foot">
+        <span class="plate__name">${esc(player.lastName)}</span>
+        ${meta ? `<span class="plate__meta">${esc(meta)}</span>` : ''}
+      </span>
+      <span class="plate__cta">Profile ${ICONS.arrow}</span>
+    </a>
+  </article>`;
+}
+
+/* The two or three letters the player art already prints in its own corner —
+ * taken from the same position string so the two can never disagree. */
+function positionCode(player) {
+  const detail = player.position.detail || player.position.raw || '';
+  const words = detail.split(/[\s-]+/).filter(Boolean);
+  if (!words.length) return '';
+  return words.map((w) => w[0]).join('').toUpperCase().slice(0, 3);
+}
+
 function roster(site, players) {
-  /* Gallery cards are 348px at their widest, so the browser needs to be told
-     to fetch the 529 rather than the 265 it would pick from the grid's hint. */
-  const lap = players
-    .map((p, i) => playerCard(p, i, { sizes: '(max-width: 640px) 62vw, (max-width: 1024px) 34vw, 348px' }))
-    .join('');
-  const speed = Math.max(28, players.length * 4.5);
+  const plates = players.map((p, i) => rosterCard(p, i)).join('\n      ');
 
-  return `<section class="roster roster--gallery section" id="players">
-  <div class="shell">
-    ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro), n: '04' })}
-  </div>
-
-  <div class="carousel" data-carousel style="--carousel-speed:${speed}s">
-    <div class="carousel__track" data-carousel-track>
-      <div class="carousel__lap">${lap}</div>
-      <div class="carousel__lap" aria-hidden="true">${lap}</div>
+  return `<section class="roster roster--rail section" id="players" data-roster-rail>
+  <div class="roster__frame" data-roster-frame>
+    <div class="shell roster__head">
+      ${sectionHead({ kicker: 'Our roster', title: site.playersSection.title, intro: esc(site.playersSection.intro), n: '04' })}
     </div>
-  </div>
 
-  <div class="shell">
-    <div class="roster__more" data-reveal>
-      <a class="btn btn--line" href="/player/" data-magnetic><span>All players</span>${ICONS.arrow}</a>
+    <div class="roster-rail" data-roster-viewport>
+      <div class="roster-rail__track" data-roster-track>
+        ${plates}
+        <article class="plate plate--archive" data-plate style="--i:${players.length};--s:${players.length % 2 ? -1 : 1}">
+          <a class="plate__link" href="/player/">
+            <span class="plate__head"><span class="plate__slug">the whole roster</span></span>
+            <span class="plate__foot">
+              <span class="plate__name">Every<br>player</span>
+              <span class="plate__meta">${esc(site.playersSection.intro ? 'Profiles, positions and clubs' : '')}</span>
+            </span>
+            <span class="plate__cta">All players ${ICONS.arrow}</span>
+          </a>
+        </article>
+      </div>
     </div>
   </div>
 </section>`;
