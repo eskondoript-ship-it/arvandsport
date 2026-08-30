@@ -12,7 +12,8 @@
     "model": "python3 ../tools/obj-to-glb.py ../assets-src/soccer-ball.obj public/models/soccer-ball.glb",
     "build:hero": "node scripts/build-hero.mjs",
     "owner": "python3 ../tools/decimate-glb.py ../assets-src/owner.glb public/models/owner.glb --target 22000 --name owner",
-    "owner:paint": "python3 ../tools/project-texture.py public/models/owner.glb ../assets-src/owner-photo.jpg public/models/owner.glb --axis +z --name owner"
+    "owner:paint": "python3 ../tools/project-texture.py public/models/owner.glb ../assets-src/owner-photo.jpg public/models/owner.glb --axis +z --name owner",
+    "owner:relief": "python3 ../tools/relief-from-photo.py ../assets-src/owner-cutout.png public/models/owner.glb --step 5 --texture 896"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.6",

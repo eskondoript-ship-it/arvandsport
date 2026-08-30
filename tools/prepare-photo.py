@@ -118,8 +118,16 @@ def foreground(rgb, seed=None):
     # Anything this over-catches elsewhere in the frame is discarded by the
     # flood fill, which only keeps what is joined to the figure.
     skin = (r > 88) & (r > g + 8) & (g > b - 6)
+    # Anything dark, whatever colour it leans. The navy test asks for blue and
+    # hair is warm -- a value like (94, 64, 64) fails it outright, so the top
+    # of the head fell outside the figure and the bleed flooded sky down over
+    # it. On a relief that is worse than a texture fault: the mask is the
+    # silhouette the mesh is built from, so it took the shape of his head off
+    # as well. The flood fill is what makes this safe to be so loose; dark
+    # things elsewhere in the frame are simply not joined to him.
+    dark = lum < 95
     grass = (g > r + 18) & (g > b + 18)
-    candidate = (navy | skin) & ~grass
+    candidate = (navy | skin | dark) & ~grass
     # A highlight on the neck is enough to cut the head off the body, and the
     # fill has no way back across a one-pixel gap -- it returned a headless
     # figure until this closed the join. Grow the region, fill, shrink back:

@@ -68,12 +68,19 @@ function ProceduralBall() {
 /**
  * The agency's founder, standing on the grid.
  *
- * His mesh is the client's own -- a Tripo scan, decimated from 192,296
- * triangles to 19,512 by tools/decimate-glb.py, which is what makes a
- * 4.6MB figure a 456KB one. He is here from the opening and walks in for the
- * last chapter, which is the agency's -- so the scene starts with a person on a
- * field rather than an object in a void, and ends on the person whose agency it
- * is.
+ * His mesh is built from one photograph of him -- tools/relief-from-photo.py
+ * cuts him out, inflates the silhouette into a solid and lays the photograph
+ * back over it, which is `npm run owner:relief` in experience/. He is here from
+ * the opening and walks in for the last chapter, which is the agency's -- so
+ * the scene starts with a person on a field rather than an object in a void,
+ * and ends on the person whose agency it is.
+ *
+ * The other way to get him is still in the repo: `npm run owner` decimates the
+ * Tripo scan at assets-src/owner.glb and `npm run owner:paint` projects the
+ * photograph onto it. That version is genuinely round and is the one to go
+ * back to if he is ever turned far from the camera. The relief wins here
+ * because the scene keeps him nearly square to it, and its outline is the
+ * photograph's own rather than a reconstruction that has to be warped to fit.
  *
  * He is matte grey until his photograph is baked in. The Tripo mesh has no UVs
  * at all, so there is no coordinate for an image to be read at;
@@ -116,7 +123,12 @@ function Owner() {
              * was taken at, and the scene's shading still plays over the top. */
             existing.emissiveMap = existing.map;
             existing.emissive = new THREE.Color('#ffffff');
-            existing.emissiveIntensity = 0.42;
+            /* 0.62, up from 0.42, since the figure became a relief built from
+             * the photograph rather than a scan. Its front is a dome, so the
+             * surface turns away from the key light -- which is off to the
+             * right of this scene -- far sooner, and by the last chapter he
+             * had gone to a silhouette again. */
+            existing.emissiveIntensity = 0.62;
             return;
           }
           mesh.material = new THREE.MeshStandardMaterial({
@@ -167,6 +179,20 @@ function Owner() {
   if (!figure) return null;
   return (
     <group ref={holder}>
+      {/* His own light, travelling with him.
+          The scene's key sits off to the right and the figure is a relief --
+          its front is a shallow dome, so a light coming across it grazes the
+          whole surface and by the last chapter he had gone back to being a
+          silhouette. A point light with a short reach in front of him fixes
+          that where it is wrong without relighting the ball, and the little it
+          spills on the grid reads as a pool of light he is standing in. */}
+      {/* The position is in the holder's units and gets multiplied by its
+          scale of about three and a half; `distance` is in world units and
+          does not. Written as though it were world-space, the light ended up
+          five and a half units in front of him with a reach of five, so he was
+          lit in the first chapter, where the holder is smallest, and unlit by
+          the last. */}
+      <pointLight position={[0.05, 0.4, 0.5]} intensity={8} distance={7} decay={2} color="#fff4e8" />
       <primitive object={figure} />
     </group>
   );
