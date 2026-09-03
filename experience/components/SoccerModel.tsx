@@ -154,15 +154,20 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     );
     camera.position.lerp(tmp, 1 - Math.pow(0.0015, delta));
 
-    /* Landscape puts the copy in a left column and the ball to its right, so
-     * the camera aims left of the subject; on the last chapter it comes back
-     * towards centre, because the stat column arrives down the right and a
-     * ball still pushed into that half sits under it.
+    /* The opening chapter is the brand line with the ball in the gap between
+     * ARVAND and SPORT, so it belongs dead centre and the bias starts at zero.
+     * A constant term here put it a third of a frame right of that, sitting in
+     * the middle of the second word rather than between the two.
+     *
+     * From there the bias grows with the approach, because the story chapters
+     * put their copy in a left column and the ball has to clear it; on the last
+     * one it eases back towards centre, since the stat column arrives down the
+     * right and a ball still pushed into that half sits under it.
      *
      * Portrait has no room for a column at all. The copy still sits at the
      * top there, so the ball drops below it instead -- aiming above the ball
      * pushes it down the frame. */
-    const bias = portrait ? 0 : 0.55 + a.dolly * 0.5 - a.detail * 0.45;
+    const bias = portrait ? 0 : a.dolly * 0.85 - a.detail * 0.45;
     lookAt.set(a.kick * 0.55 - bias, a.kick * 0.4 + (portrait ? 1.15 : 0), 0);
     camera.lookAt(lookAt);
   });

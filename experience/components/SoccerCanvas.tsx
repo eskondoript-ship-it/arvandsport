@@ -1,15 +1,13 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Environment, Lightformer, Grid, AdaptiveDpr, Preload } from '@react-three/drei';
 import { EffectComposer, SelectiveBloom, Selection, Select, Vignette } from '@react-three/postprocessing';
-import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Component, Suspense, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 
 import SoccerModel from '@/components/SoccerModel';
 import { buildProceduralPanels } from '@/lib/ball';
-import { asset, scrollState } from '@/lib/scroll';
 
 /* ------------------------------------------------------------------ *
  * GLB fallback
@@ -57,143 +55,6 @@ function ProceduralBall() {
           />
         </mesh>
       ))}
-    </group>
-  );
-}
-
-/* ------------------------------------------------------------------ *
- * The owner
- * ------------------------------------------------------------------ */
-
-/**
- * The agency's founder, standing on the grid.
- *
- * His mesh is built from one photograph of him -- tools/relief-from-photo.py
- * cuts him out, inflates the silhouette into a solid and lays the photograph
- * back over it, which is `npm run owner:relief` in experience/. He is here from
- * the opening and walks in for the last chapter, which is the agency's -- so
- * the scene starts with a person on a field rather than an object in a void,
- * and ends on the person whose agency it is.
- *
- * The other way to get him is still in the repo: `npm run owner` decimates the
- * Tripo scan at assets-src/owner.glb and `npm run owner:paint` projects the
- * photograph onto it. That version is genuinely round and is the one to go
- * back to if he is ever turned far from the camera. The relief wins here
- * because the scene keeps him nearly square to it, and its outline is the
- * photograph's own rather than a reconstruction that has to be warped to fit.
- *
- * He is matte grey until his photograph is baked in. The Tripo mesh has no UVs
- * at all, so there is no coordinate for an image to be read at;
- * tools/project-texture.py makes them by projecting the photograph along +z,
- * which is the direction the scan faces, and writes the picture into the file.
- * The moment a model with a base colour map is dropped in, this uses it.
- *
- * The projection is front-on, so he should not be turned far from that axis --
- * the texture smears on anything facing away from where the camera was.
- */
-function Owner() {
-  const holder = useRef<THREE.Group>(null);
-  const [figure, setFigure] = useState<THREE.Object3D | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    new GLTFLoader().load(
-      asset('/models/owner.glb'),
-      (gltf) => {
-        if (cancelled) return;
-        gltf.scene.traverse((child) => {
-          const mesh = child as THREE.Mesh;
-          if (!mesh.isMesh) return;
-          const existing = (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as
-            | THREE.MeshStandardMaterial
-            | undefined;
-          /* Once tools/project-texture.py has given him his own photograph, the
-           * file arrives with a base colour map and that is the whole point of
-           * it -- so it is kept, and only the finish is nudged to sit in this
-           * scene's light. Without one he falls back to matte grey, which is
-           * honest about being a form rather than a likeness. */
-          if (existing?.map) {
-            existing.roughness = 0.82;
-            existing.metalness = 0.02;
-            existing.envMapIntensity = 0.8;
-            /* The photograph was taken in daylight and already carries its own
-             * light; this scene is a dark room with one key off to the right,
-             * which shades a daylight photograph down to a silhouette. Feeding
-             * the same map back as emission restores roughly the exposure it
-             * was taken at, and the scene's shading still plays over the top. */
-            existing.emissiveMap = existing.map;
-            existing.emissive = new THREE.Color('#ffffff');
-            /* 0.62, up from 0.42, since the figure became a relief built from
-             * the photograph rather than a scan. Its front is a dome, so the
-             * surface turns away from the key light -- which is off to the
-             * right of this scene -- far sooner, and by the last chapter he
-             * had gone to a silhouette again. */
-            existing.emissiveIntensity = 0.62;
-            return;
-          }
-          mesh.material = new THREE.MeshStandardMaterial({
-            color: '#8e9bab',
-            roughness: 0.72,
-            metalness: 0.08,
-          });
-        });
-        setFigure(gltf.scene);
-      },
-      undefined,
-      () => {
-        /* No figure is better than a broken one; the scene stands without him. */
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useFrame(() => {
-    if (!holder.current) return;
-    const p = scrollState.progress;
-    /* He is the last chapter's subject, so he stays for all of it and comes
-     * forward as it arrives -- closer, squarer to the camera, clear of the
-     * opened ball. Earlier he stepped aside at this point, which was right
-     * when the chapter belonged to a player and is not any more. */
-    const near = THREE.MathUtils.clamp((p - 0.66) / 0.24, 0, 1);
-    const eased = 1 - Math.pow(1 - near, 3);
-    holder.current.visible = true;
-    /* He starts well left and well back -- far enough that he is not standing
-     * behind the first chapter's copy, which is where he was and which made
-     * both of them harder to read. */
-    holder.current.position.set(
-      THREE.MathUtils.lerp(-4.3, -2.35, eased),
-      -2.1,
-      THREE.MathUtils.lerp(-2.8, 0.6, eased),
-    );
-    /* Nearly square to the camera throughout. The photograph is projected
-     * front-on, so every degree he turns is a degree of it stretching along
-     * a surface it was never taken of -- the vertex shading baked in by
-     * tools/project-texture.py darkens that rather than hiding it, and the
-     * cheapest way to have less of it is to turn him less. */
-    holder.current.rotation.y = THREE.MathUtils.lerp(0.2, 0.05, eased);
-    holder.current.scale.setScalar(3.1 + eased * 0.5);
-  });
-
-  if (!figure) return null;
-  return (
-    <group ref={holder}>
-      {/* His own light, travelling with him.
-          The scene's key sits off to the right and the figure is a relief --
-          its front is a shallow dome, so a light coming across it grazes the
-          whole surface and by the last chapter he had gone back to being a
-          silhouette. A point light with a short reach in front of him fixes
-          that where it is wrong without relighting the ball, and the little it
-          spills on the grid reads as a pool of light he is standing in. */}
-      {/* The position is in the holder's units and gets multiplied by its
-          scale of about three and a half; `distance` is in world units and
-          does not. Written as though it were world-space, the light ended up
-          five and a half units in front of him with a reach of five, so he was
-          lit in the first chapter, where the holder is smallest, and unlit by
-          the last. */}
-      <pointLight position={[0.05, 0.4, 0.5]} intensity={8} distance={7} decay={2} color="#fff4e8" />
-      <primitive object={figure} />
     </group>
   );
 }
@@ -257,8 +118,6 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
         fadeStrength={1.4}
         infiniteGrid
       />
-
-      <Owner />
 
       <Selection>
         {/* autoClear off: the composer draws over the transparent canvas rather

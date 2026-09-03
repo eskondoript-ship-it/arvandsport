@@ -15,13 +15,18 @@ to run — and this is the map of which to reach for.
 | Ships as | From | Command |
 |---|---|---|
 | `experience/public/models/soccer-ball.glb` | `assets-src/trionda.glb` | `python3 tools/glb-panels.py` |
-| `experience/public/models/owner.glb` | `assets-src/owner-cutout.png` | `npm run owner:relief` in `experience/` |
 | `static/assets/img/ui/ball-sheet.webp` and `ball-still.webp` | the ball GLB above | `node tools/render-sprite.mjs` |
 
 After any of them: rebuild. `npm run build` at the root copies
 `experience/public/` into `dist/assets/scene/`, and `dist/` is committed.
 
-## The owner
+## The owner, who is not currently in the scene
+
+He was taken out of the hero, so nothing renders `owner.glb` and the file is
+not in `experience/public/models/`. The pipeline is intact and the source is
+still `assets-src/owner-cutout.png`, so putting him back is `npm run
+owner:relief` plus restoring the `Owner` component in
+`experience/components/SoccerCanvas.tsx` — the model on its own does nothing.
 
 `npm run owner:relief` (in `experience/`) builds a solid from one photograph:
 it cuts him out, inflates the silhouette into a shell and lays the photograph
