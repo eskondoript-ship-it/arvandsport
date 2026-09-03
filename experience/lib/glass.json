@@ -1,0 +1,14 @@
+{
+  "_note": "The ball's glass, in one place because two renderers use it. lib/ball.ts builds the material for the live scene from these; tools/render-sprite.mjs reads the same file and applies them to the GLB it renders the sprite sheet from. They were separate before, so the sprite was the matte textured ball and the scene was glass -- the same object rendered two ways, and swapping between them at the top of a visit looked like the ball had been replaced.",
+  "color": "#dfe9f5",
+  "metalness": 0,
+  "roughness": 0.16,
+  "transmission": 0.92,
+  "thickness": 0.55,
+  "ior": 1.42,
+  "attenuationColor": "#cfeef6",
+  "attenuationDistance": 7.5,
+  "clearcoat": 0.6,
+  "clearcoatRoughness": 0.18,
+  "envMapIntensity": 1.4
+}

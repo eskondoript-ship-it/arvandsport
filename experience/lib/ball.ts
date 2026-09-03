@@ -10,6 +10,10 @@
  */
 import * as THREE from 'three';
 
+/* The glass, shared with tools/render-sprite.mjs so the sprite and the scene
+ * are the same object. See the note in the file itself. */
+import GLASS from '@/lib/glass.json';
+
 
 export type Panel = {
   name: string;
@@ -278,22 +282,22 @@ function toGlass(source: THREE.MeshStandardMaterial): THREE.MeshPhysicalMaterial
     normalMap: source.normalMap,
     roughnessMap: source.roughnessMap,
     metalnessMap: source.metalnessMap,
-    color: new THREE.Color('#dfe9f5'),
-    metalness: 0,
-    roughness: 0.16,
-    transmission: 0.92,
-    thickness: 0.55,
-    ior: 1.42,
+    color: new THREE.Color(GLASS.color),
+    metalness: GLASS.metalness,
+    roughness: GLASS.roughness,
+    transmission: GLASS.transmission,
+    thickness: GLASS.thickness,
+    ior: GLASS.ior,
     /* What the light picks up on its way through. A neutral pane over a dark
      * scene looks grey, so there is a tint -- but only just. At #7fd8e8 over
      * 2.4 units it swamped the Trionda's own print and the ball came out a
      * single cyan; pale, and over a much longer distance, the tint reads as
      * glass while the panel still reads as the panel. */
-    attenuationColor: new THREE.Color('#cfeef6'),
-    attenuationDistance: 7.5,
-    clearcoat: 0.6,
-    clearcoatRoughness: 0.18,
-    envMapIntensity: 1.4,
+    attenuationColor: new THREE.Color(GLASS.attenuationColor),
+    attenuationDistance: GLASS.attenuationDistance,
+    clearcoat: GLASS.clearcoat,
+    clearcoatRoughness: GLASS.clearcoatRoughness,
+    envMapIntensity: GLASS.envMapIntensity,
     transparent: false,
     side: THREE.DoubleSide,
   });

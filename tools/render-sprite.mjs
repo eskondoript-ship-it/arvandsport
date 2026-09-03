@@ -29,6 +29,10 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MODEL = path.join(ROOT, 'experience/public/models/soccer-ball.glb');
+/* The same numbers experience/lib/ball.ts builds the live scene's material
+   from. Read here rather than restated, because the whole point of this file
+   is that the sprite and the scene are the same ball. */
+const GLASS = JSON.parse(fs.readFileSync(path.join(ROOT, 'experience/lib/glass.json'), 'utf8'));
 const OUT_DIR = path.join(ROOT, 'static/assets/img/ui');
 
 const args = process.argv.slice(2);
@@ -58,6 +62,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 const SIZE = ${SIZE}, FRAMES = ${FRAMES}, COLS = ${COLS}, ROWS = ${ROWS}, TILT = ${TILT};
+const GLASS = ${JSON.stringify(GLASS)};
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
 renderer.setSize(SIZE * 2, SIZE * 2, false);
@@ -99,6 +104,36 @@ scene.add(tilt);
 
 new GLTFLoader().load('./ball.glb', (gltf) => {
   const ball = gltf.scene;
+  /* The glass the scene wears. Without this the sprite is the matte textured
+     ball and the scene is a pane of glass with the print behind it -- the same
+     object rendered two ways, so handing over between them read as the ball
+     being swapped for a different one. Transmission needs an environment to
+     refract; the room above is it. */
+  ball.traverse((child) => {
+    const mesh = child;
+    if (!mesh.isMesh) return;
+    const source = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+    mesh.material = new THREE.MeshPhysicalMaterial({
+      map: source.map,
+      normalMap: source.normalMap,
+      roughnessMap: source.roughnessMap,
+      metalnessMap: source.metalnessMap,
+      color: new THREE.Color(GLASS.color),
+      metalness: GLASS.metalness,
+      roughness: GLASS.roughness,
+      transmission: GLASS.transmission,
+      thickness: GLASS.thickness,
+      ior: GLASS.ior,
+      attenuationColor: new THREE.Color(GLASS.attenuationColor),
+      attenuationDistance: GLASS.attenuationDistance,
+      clearcoat: GLASS.clearcoat,
+      clearcoatRoughness: GLASS.clearcoatRoughness,
+      envMapIntensity: GLASS.envMapIntensity,
+      transparent: false,
+      side: THREE.DoubleSide,
+    });
+  });
+
   /* Centre it and give it a known radius, so the framing does not depend on
      how the model happens to be authored. */
   const box = new THREE.Box3().setFromObject(ball);
@@ -186,9 +221,13 @@ fs.writeFileSync(png, Buffer.from(data.split(',')[1], 'base64'));
 const convert = spawnSync('python3', ['-c', `
 from PIL import Image
 sheet = Image.open(${JSON.stringify(png)}).convert('RGBA')
-# 68, not the 82 this started at. The Trionda is a busy, saturated texture and
-# the sheet is thirty copies of it: 82 costs 479KB against 343, for a difference
-# nobody can see at the 430px the sprite is ever drawn at.
+# The glass costs more to encode than the matte ball did -- refraction puts
+# detail everywhere the flat print did not -- so this sheet is about 950KB
+# where the old one was 340. Dropping the quality is not the lever it looks
+# like: at 50 it still came to 925KB, because most of the weight is the alpha
+# channel, which WebP stores losslessly either way. The sheet is desktop-only
+# and is now the fallback for a scene that almost always arrives, so it is
+# rarely fetched at all; the still that phones actually get is 72KB.
 sheet.save(${JSON.stringify(path.join(OUT_DIR, 'ball-sheet.webp'))}, 'WEBP', quality=68, method=6)
 still = sheet.crop((0, 0, ${SIZE}, ${SIZE})).resize((420, 420), Image.LANCZOS)
 still.save(${JSON.stringify(path.join(OUT_DIR, 'ball-still.webp'))}, 'WEBP', quality=88, method=6)
