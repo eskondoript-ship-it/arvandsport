@@ -49,7 +49,12 @@
 /* ------------------------------------------------------------ page hero */
 .page-hero {
   position: relative; overflow: hidden;
-  padding-block: calc(var(--header-h) + clamp(3rem, 9vw, 6.5rem)) clamp(2.5rem, 6vw, 4.5rem);
+  /* The header is fixed, so its height has to be cleared before anything else
+     is added. What was added on top of it was another 6.5rem at this width,
+     which put a hundred pixels of nothing above the kicker and made every
+     inner page open on a band of empty ground. Half that is enough to read as
+     air rather than as a mistake. */
+  padding-block: calc(var(--header-h) + clamp(2rem, 5vw, 3.25rem)) clamp(1.75rem, 3.5vw, 2.5rem);
   border-bottom: 1px solid var(--line);
   background: linear-gradient(160deg, rgba(0, 52, 88, .55), transparent 60%);
 }
@@ -61,6 +66,11 @@
 .page-hero__title { font-size: var(--step-4); }
 .page-hero__intro { margin-top: 1.1rem; max-width: 62ch; color: var(--fg-muted); }
 .page-hero--404 { min-height: 70svh; display: grid; align-content: center; }
+/* A hero's own bottom padding and the following section's top padding stack,
+   so the two together were 152px of nothing between the page's intro and its
+   first real content. The section gives up its half; it keeps its full spacing
+   everywhere it is not directly under a hero. */
+.page-hero + .section { padding-top: clamp(1.5rem, 3vw, 2.25rem); }
 
 /* ---------------------------------------------------------------- about */
 .about { position: relative; }
@@ -314,10 +324,6 @@ a.office__row:hover { color: var(--white); }
 }
 
 /* ------------------------------------------------------- horizontal rail */
-.rail { position: relative; overflow: hidden; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
-.rail__track { display: flex; gap: clamp(.9rem, 2vw, 1.5rem); width: max-content; }
-.rail__track > * { width: clamp(160px, 20vw, 230px); flex: none; }
-@media (max-width: 720px) { .rail { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
 
 /* ------------------------------------------------------- the kick figure
  * Original stroke figure, posed by src/scripts/kicker.js. It replaces the
@@ -1010,6 +1016,28 @@ a.office__row:hover { color: var(--white); }
   .apex__pin.is-story .apex__object { opacity: .12; }
 }
 .apex__object { transition: opacity .5s ease; }
+/* Held back before the first paint, for the visitors who are about to get the
+ * WebGL ball instead.
+ *
+ * The sprite and the scene are two renderings of the same Trionda and they do
+ * not look the same -- one is a lit photograph of it, the other is glass -- so
+ * painting the sprite and swapping a second later is a visible change of
+ * object at the top of every visit. src/scripts/apex.js can decide who gets
+ * which, but only once its module has loaded, and the sprite is on screen
+ * before then. These are the parts of that decision a stylesheet can make, so
+ * they are made here, at the same moment the ball would otherwise appear.
+ *
+ * Scoped to :root.js because the rest of the decision, and the undo when the
+ * scene turns out to be unavailable, are both JavaScript's -- with none
+ * running, the sprite is all there is and it must not be hidden. The remaining
+ * two conditions in apex.js (a working WebGL2 context, and Save-Data) cannot be
+ * asked in CSS; those visitors get the sprite back a frame or two later, which
+ * is a far better failure than the swap this exists to remove.
+ */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :root.js .apex__object { opacity: 0; }
+}
+
 
 /* Composed still when nothing is allowed to move. */
 @media (prefers-reduced-motion: reduce) {

@@ -34,26 +34,40 @@ import { $, $$, gsap, ScrollTrigger, canAnimate } from './env.js';
  * Every way this can fail ends the same way: the sprite stays, and nothing on
  * the page notices.
  */
-async function mountWebglBall(section, stage) {
-  const mount = $('[data-apex-webgl]', section);
-  if (!mount || !stage) return null;
-
+/**
+ * Whether this visitor is getting the scene, decided before anything is
+ * fetched.
+ *
+ * Split out from the mount so the answer is available at once. It has to be:
+ * the sprite and the scene are two renderings of the same ball and they do not
+ * look identical -- one is a lit photograph of it, the other is glass -- so
+ * showing the sprite and then swapping is a visible change of object a second
+ * into the visit. Knowing up front means the sprite is simply never painted
+ * for anyone who is about to get the real thing.
+ */
+function wantsWebgl() {
   /* Wide, mouse-driven, and not asking for less motion. */
-  if (!window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches) return null;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  if (!window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches) return false;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
   /* Save-Data is an explicit request not to be sent a third of a megabyte. */
-  if (navigator.connection?.saveData) return null;
+  if (navigator.connection?.saveData) return false;
 
   /* Ask for a context rather than sniffing for support: software renderers and
    * blocklisted drivers both answer this honestly, and a lost context here is
    * far cheaper than a dead canvas where the hero used to be. */
   try {
     const probe = document.createElement('canvas').getContext('webgl2');
-    if (!probe) return null;
+    if (!probe) return false;
     probe.getExtension('WEBGL_lose_context')?.loseContext();
   } catch {
-    return null;
+    return false;
   }
+  return true;
+}
+
+async function mountWebglBall(section, stage) {
+  const mount = $('[data-apex-webgl]', section);
+  if (!mount || !stage) return null;
 
   try {
     /* Both paths are resolved against this module's own URL, so they hold at
@@ -121,8 +135,24 @@ export function initApex(root = document) {
    * them. */
   let setSceneProgress = null;
 
-  mountWebglBall(section, pin).then((handle) => {
-    if (!handle) return;
+  /* Decided before the bundle is even asked for, so the sprite can be held
+   * back rather than shown and then replaced. */
+  const expectsScene = wantsWebgl();
+  /* The stylesheet has already hidden it for the media half of this decision,
+     before the first paint. This settles the half CSS cannot ask about: a
+     desktop with no WebGL2, or with Save-Data on, gets the sprite back. */
+  if (object) object.style.opacity = expectsScene ? '0' : '1';
+
+  /* The gate is asked once, above, and decides both things: whether the sprite
+     is held back, and whether the bundle is fetched at all. Reading it in only
+     one of those places is how a phone ended up downloading the scene. */
+  (expectsScene ? mountWebglBall(section, pin) : Promise.resolve(null)).then((handle) => {
+    if (!handle) {
+      /* It was going to work and did not. Give the sprite back -- a turning
+       * ball is a great deal better than the empty stage this was holding. */
+      if (expectsScene && object) gsap.to(object, { opacity: 1, duration: 0.4 });
+      return;
+    }
     setSceneProgress = handle.setProgress;
     /* The scene owns its own rotation from here, so the sprite's frame writes
      * stop rather than fighting it. */
@@ -139,7 +169,11 @@ export function initApex(root = document) {
   /* Spins up and settles, rather than appearing already turning. */
   const spin = { f: -14 };
   intro
-    .from(object, { opacity: 0, scale: 0.82, duration: 1.1, ease: 'power2.out' }, 0)
+    /* Scale only when the scene is coming: `from` on opacity would tween the
+       held-back sprite straight back to visible. */
+    .from(object, expectsScene
+      ? { scale: 0.82, duration: 1.1, ease: 'power2.out' }
+      : { opacity: 0, scale: 0.82, duration: 1.1, ease: 'power2.out' }, 0)
     .to(spin, { f: 0, duration: 1.5, ease: 'power3.out', onUpdate: () => showFrame(spin.f) }, 0)
     .to(fades, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.3);
 

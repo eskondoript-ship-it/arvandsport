@@ -224,34 +224,6 @@ function heroExit(root) {
   );
 }
 
-/* ------------------------------------------------- horizontal pinned rail */
-
-/** A row that scrolls sideways while the section is pinned. */
-function horizontalRail(root) {
-  for (const wrap of $$('[data-rail]', root)) {
-    const track = $('[data-rail-track]', wrap);
-    if (!track) continue;
-
-    const distance = () => Math.max(0, track.scrollWidth - wrap.offsetWidth);
-    if (distance() < 40) continue; /* already fits — nothing to scroll */
-
-    scene(
-      gsap.to(track, {
-        x: () => -distance(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: wrap,
-          start: 'center center',
-          end: () => `+=${distance() + wrap.offsetHeight}`,
-          pin: true,
-          scrub: 0.45,
-          invalidateOnRefresh: true,
-        },
-      }).scrollTrigger,
-    );
-  }
-}
-
 /* ------------------------------------------------------ stacking services */
 
 /* The service cards used to be dealt in from depth here, with a scrubbed
@@ -350,7 +322,6 @@ function watermarkDrift(root) {
 export function initScenes(root = document) {
   strikeScene(root);
   heroExit(root);
-  horizontalRail(root);
   velocityEffects(root);
   clipReveals(root);
   watermarkDrift(root);

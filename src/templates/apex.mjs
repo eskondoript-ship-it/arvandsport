@@ -101,7 +101,7 @@ function blueprint(site) {
       ${CROSSHAIR.replace('apex__crosshair', 'apex__crosshair apex__crosshair--tl')}
       ${CROSSHAIR.replace('apex__crosshair', 'apex__crosshair apex__crosshair--br')}
 
-      <p class="apex__stamp apex__stamp--left">Match ball · structural study</p>
+      <p class="apex__stamp apex__stamp--left">${esc(site.brand.shortName)} · football &amp; match agency</p>
       <p class="apex__stamp apex__stamp--right">FIFA licensed</p>
 
       <div class="apex__rail">

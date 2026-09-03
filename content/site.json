@@ -37,10 +37,6 @@
       "href": "/about/"
     },
     {
-      "label": "Taremi",
-      "href": "/experience/"
-    },
-    {
       "label": "News",
       "href": "/news/"
     },
@@ -471,25 +467,25 @@
     }
   },
   "story": {
-    "_note": "The homepage story and the study at /experience/ are one scene told once. Both read these three chapters — the site templates render them into HTML, and experience/lib/taremi.ts imports this file — so the copy cannot say two different things in two places. Every figure quoted here must match content/site.json stats or content/players.json; nothing in this block is rounded up or written for the rhythm.",
+    "_note": "The homepage's three chapters, read by src/templates/apex.mjs. They are about the agency, not about the ball turning behind them -- the ball is the set piece and these are what the visitor is meant to come away knowing. Every figure quoted here must match content/site.json stats or content/players.json, and every claim must be one content/site.json already makes in about or serviceGroups. Nothing is rounded up or written for the rhythm.",
     "chapters": [
       {
         "index": "01",
-        "kicker": "The ball",
-        "title": "Four panels,\none moulded shell",
-        "body": "The FIFA Trionda, read straight from the model the agency supplied. Four curved panels wrap the whole ball, and the scene comes apart along the seams where they actually meet — found in the mesh rather than drawn on it."
+        "kicker": "Who we are",
+        "title": "A FIFA-licensed\nfootball agency",
+        "body": "Arvand Sport represents players and arranges matches, licensed by FIFA in both seats. Twenty-five years of it, at the top level of the game."
       },
       {
         "index": "02",
-        "kicker": "The strike",
-        "title": "Contact,\nand everything opens",
-        "body": "The shell comes apart at the moment of contact. Each panel carries its own share of the construction outward, and what was one object is four."
+        "kicker": "What we do",
+        "title": "Representation,\nand everything under it",
+        "body": "Career planning, contracts and transfers, legal and financial advice, and the technical, physical and psychological support behind them. For clubs and managers as well as players."
       },
       {
         "index": "03",
-        "kicker": "The agency",
+        "kicker": "The record",
         "title": "Twenty-five years,\nforty-six countries",
-        "body": "A FIFA-licensed football and match agency. Two hundred and thirty players placed across eighty clubs, and the licences to do it in either seat — for the player, and for the match."
+        "body": "Two hundred and thirty players placed across eighty clubs, and the licences to do it in either seat — for the player, and for the match."
       }
     ]
   }

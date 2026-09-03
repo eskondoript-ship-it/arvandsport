@@ -203,10 +203,8 @@ export function clients(site) {
   return `<section class="clients section" id="clients">
   <div class="shell">
     ${sectionHead({ kicker: 'Track record', title: site.formerClients.title, n: '05' })}
-    <div class="rail" data-rail>
-      <div class="rail__track" data-rail-track>
-        ${site.formerClients.items.map((c, i) => personCard(c, i)).join('')}
-      </div>
+    <div class="clients__grid">
+      ${site.formerClients.items.map((c, i) => personCard(c, i)).join('')}
     </div>
     ${sectionHead({ kicker: 'Arvand Talent', title: site.coaches.title })}
     <div class="clients__grid clients__grid--coaches">

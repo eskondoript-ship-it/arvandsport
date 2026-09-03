@@ -25,11 +25,6 @@ function isInternalNav(link, event) {
   if (!sameOrigin(url)) return false;
   if (url.pathname === location.pathname && url.hash) return false;
   if (/\.(pdf|zip|jpe?g|png|webp|svg|xml|txt)$/i.test(url.pathname)) return false;
-  /* The WebGL experience is a separate Next.js app living under the same
-   * origin. Swapping its document into this one's container would hand React
-   * a page that never mounted and leave the scene dead, so it gets a full
-   * navigation — and so does anything else that ends up under /experience/. */
-  if (/(^|\/)experience\//.test(url.pathname)) return false;
   return true;
 }
 
