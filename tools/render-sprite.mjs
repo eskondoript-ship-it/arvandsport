@@ -42,6 +42,14 @@ const flag = (name, fallback) => {
 };
 const FRAMES = flag('frames', 30);
 const SIZE = flag('size', 300);
+/* A suffix lets the same 6x5 layout be rendered at a second, smaller scale for
+   phones -- `--suffix -sm --size 150`. Keeping the layout identical means the
+   frame arithmetic in src/scripts/apex.js and the background-size in the
+   stylesheet are the same for both, and only the URL changes. */
+const SUFFIX = (() => {
+  const at = args.indexOf('--suffix');
+  return at === -1 ? '' : args[at + 1];
+})();
 const COLS = 6;
 const ROWS = Math.ceil(FRAMES / COLS);
 
@@ -228,9 +236,9 @@ sheet = Image.open(${JSON.stringify(png)}).convert('RGBA')
 # channel, which WebP stores losslessly either way. The sheet is desktop-only
 # and is now the fallback for a scene that almost always arrives, so it is
 # rarely fetched at all; the still that phones actually get is 72KB.
-sheet.save(${JSON.stringify(path.join(OUT_DIR, 'ball-sheet.webp'))}, 'WEBP', quality=68, method=6)
+sheet.save(${JSON.stringify(path.join(OUT_DIR, 'ball-sheet.webp')).replace('.webp', '')}${JSON.stringify(SUFFIX)} + '.webp', 'WEBP', quality=68, method=6)
 still = sheet.crop((0, 0, ${SIZE}, ${SIZE})).resize((420, 420), Image.LANCZOS)
-still.save(${JSON.stringify(path.join(OUT_DIR, 'ball-still.webp'))}, 'WEBP', quality=88, method=6)
+still.save(${JSON.stringify(path.join(OUT_DIR, 'ball-still.webp')).replace('.webp', '')}${JSON.stringify(SUFFIX)} + '.webp', 'WEBP', quality=88, method=6)
 print('sheet', sheet.size)
 `], { encoding: 'utf8' });
 if (convert.status !== 0) {
@@ -239,7 +247,8 @@ if (convert.status !== 0) {
 }
 
 const kb = (p) => `${Math.round(fs.statSync(p).size / 1024)}KB`;
+const sheetOut = path.join(OUT_DIR, `ball-sheet${SUFFIX}.webp`);
+const stillOut = path.join(OUT_DIR, `ball-still${SUFFIX}.webp`);
 console.log(convert.stdout.trim());
-console.log(`ball-sheet.webp ${kb(path.join(OUT_DIR, 'ball-sheet.webp'))}, `
-  + `ball-still.webp ${kb(path.join(OUT_DIR, 'ball-still.webp'))}`);
+console.log(`${path.basename(sheetOut)} ${kb(sheetOut)}, ${path.basename(stillOut)} ${kb(stillOut)}`);
 fs.rmSync(tmp, { recursive: true, force: true });

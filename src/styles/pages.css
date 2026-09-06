@@ -712,19 +712,27 @@ a.office__row:hover { color: var(--white); }
 }
 /* The ball is a 30-frame rotation of the client's own model, laid out 6x5 and
    rendered from the very GLB the WebGL scene loads by tools/render-sprite.mjs.
-   Phones get the single still instead: the sheet is 347 KB against the still's
-   38, and behind the stacked type at half opacity the rotation is not visible
-   enough to be worth the download. */
+   It turns on every screen: phones never get the WebGL scene, so the sprite is
+   the whole of the hero for them and a still is a poor version of it.
+
+   They get their own sheet at half the frame size -- 291KB against 987 -- and
+   the layout is identical, so the frame arithmetic in src/scripts/apex.js and
+   the background-size here are the same for both and only the URL differs.
+   The single still is what is left for anyone who asked for less motion. */
 .apex__ball {
   display: block; width: 100%; height: 100%;
-  background-image: url("../img/ui/ball-still.webp");
-  background-size: contain; background-repeat: no-repeat; background-position: center;
+  background-image: url("../img/ui/ball-sheet-sm.webp");
+  background-size: 600% 500%;
+  background-repeat: no-repeat;
+  background-position: 0% 0%;
 }
 @media (min-width: 761px) {
+  .apex__ball { background-image: url("../img/ui/ball-sheet.webp"); }
+}
+@media (prefers-reduced-motion: reduce) {
   .apex__ball {
-    background-image: url("../img/ui/ball-sheet.webp");
-    background-size: 600% 500%;
-    background-position: 0% 0%;
+    background-image: url("../img/ui/ball-still.webp");
+    background-size: contain; background-position: center;
   }
 }
 /* The WebGL ball, for the visitors who get one. It sits over the sprite

@@ -110,7 +110,11 @@ export function initApex(root = document) {
   const COLS = 6;
   const ROWS = 5;
   const FRAMES = COLS * ROWS;
-  const spriteActive = () => window.matchMedia('(min-width: 761px)').matches;
+  /* Every screen now, not just wide ones. Phones never get the WebGL scene, so
+     the sprite is the whole of their hero and it should turn like everyone
+     else's; they are served a smaller sheet with the same 6x5 layout, so
+     nothing below has to know which one is loaded. */
+  const spriteActive = () => true;
 
   const spriteFrame = (n) => {
     if (!ball || !spriteActive()) return;
