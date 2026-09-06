@@ -371,6 +371,6 @@ console.log(`files:  ${files.length}`);
 console.log(`size:   ${(bytes / 1024 / 1024).toFixed(2)} MB`);
 console.log(
   heroBundle
-    ? `hero:   ${(heroBundle.gzipped / 1024).toFixed(0)}KB gzipped, desktop only`
+    ? `hero:   ${(heroBundle.gzipped / 1024).toFixed(0)}KB gzipped, every device that can render it`
     : 'hero:   not built — run `npm run build:hero` in experience/ (sprite is used)',
 );

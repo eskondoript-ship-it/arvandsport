@@ -54,13 +54,24 @@ turning with the scroll, in place of the sprite. `npm run build:hero` bundles
 `hero/index.tsx` with esbuild into `dist-hero/hero.js`, and the site build
 copies it to `assets/hero/hero.js`.
 
-It is **319KB gzipped** — React, react-dom and three, which is what R3F costs
-and there is no cheap version of it. So it is not sent to everyone. `apex.js`
-loads it only on a wide screen with a fine pointer, a live WebGL2 context, no
-reduced-motion preference and no Save-Data header, and only after the page has
-painted over a sprite that is already turning. Phones keep the sprite: it is
-where the weight hurts most and where the ball is smallest and half-faded
-behind the type.
+It is **359KB gzipped** — React, react-dom and three, which is what R3F costs
+and there is no cheap version of it. It still goes to everyone who can render
+it, phones included: the ball is what the hero is, and a picture of it is not
+the same thing.
+
+The gate is `SCENE_BOOT` in `src/templates/layout.mjs`, an inline snippet in
+the head that leaves its answer on `<html>` as `wants-scene`. It asks three
+questions, none of them about screen size: reduced motion, Save-Data, and
+whether a WebGL2 context can be had. It runs there rather than in `apex.js`
+because the sprite sheet is a CSS background and the browser starts fetching it
+long before a deferred module runs — 987KB on desktop, 291KB on a phone, spent
+on a picture of the ball by people who were about to be shown the ball. The
+stylesheet clears the background for `wants-scene`; `apex.js` reads the same
+class, and puts it back if the scene fails to mount.
+
+Phones pay for it in two ways the desktop does not have to: the canvas renders
+at a 1.5 pixel-ratio ceiling instead of 2, and the composer drops its
+multisampling, both keyed off `pointer: coarse` in `SoccerCanvas`.
 
 The two share one seam. Every timeline in `apex.js` turns the ball by calling
 `showFrame(n)` with a frame number; the sprite rounds it and moves a background

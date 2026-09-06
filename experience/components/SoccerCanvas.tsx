@@ -68,16 +68,40 @@ export type SoccerCanvasProps = {
   onReady?: () => void;
 };
 
+/**
+ * Whether this is a touch device, answered once.
+ *
+ * The scene now runs on phones as well as desktops, and the two cannot be
+ * asked for the same amount of work: a phone GPU rendering a transmissive
+ * material at 3x device pixels through a multisampled full-screen composer is
+ * the frame budget spent several times over. `pointer: coarse` is the honest
+ * question -- it asks what the input is, not how wide the window happens to
+ * be, so a laptop with a touchscreen answers no and a tablet answers yes.
+ *
+ * Guarded for the server, where this module is still evaluated during the
+ * typecheck even though nothing renders it there.
+ */
+const isTouch = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
   const keyLight = useRef<THREE.DirectionalLight>(null);
   const fillLight = useRef<THREE.DirectionalLight>(null);
   const [lightsReady, setLightsReady] = useState(false);
+  /* Read once on mount rather than on every render: it cannot change without
+     the page being reloaded, and a Canvas that re-reads it would tear down its
+     renderer to apply the new value. */
+  const touch = useMemo(isTouch, []);
 
   return (
     <Canvas
       /* Fixed behind the copy, so it must never eat the scroll. */
       className="!pointer-events-none"
-      dpr={[1, 2]}
+      /* A phone's 3x panel is the single most expensive thing about this scene
+         and the least visible: the ball is soft-edged glass behind type, and
+         1.5x is already past the point where its silhouette reads as aliased.
+         AdaptiveDpr below drops it further if frames are still being missed. */
+      dpr={touch ? [1, 1.5] : [1, 2]}
       gl={{
         antialias: true,
         alpha: true,
@@ -122,7 +146,11 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
       <Selection>
         {/* autoClear off: the composer draws over the transparent canvas rather
             than wiping the alpha the page background shows through. */}
-        <EffectComposer autoClear={false} multisampling={4}>
+        {/* MSAA on the composer's own buffers, which is a full-screen cost and
+            not a cheap one on a mobile GPU. The context is already antialiased,
+            so dropping this on touch loses the extra smoothing on the bloom's
+            edges and nothing else. */}
+        <EffectComposer autoClear={false} multisampling={touch ? 0 : 4}>
           <SelectiveBloom
             lights={lightsReady ? [keyLight, fillLight] : []}
             luminanceThreshold={0.72}

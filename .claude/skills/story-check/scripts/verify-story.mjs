@@ -167,10 +167,13 @@ async function run(label, context, expectWebgl) {
 }
 
 const desktop = await run('desktop', { viewport: { width: 1440, height: 900 } }, true);
+/* Phones get the scene too now. It was desktop-only, and this argument was
+   `false` to hold that line -- so if it ever needs to be false again, the gate
+   in SCENE_BOOT (src/templates/layout.mjs) is what changed, not this. */
 const phone = await run(
   'phone',
   { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
-  false,
+  true,
 );
 
 console.log(`\n${[desktop, phone].filter(Boolean).length}/2 passed`);

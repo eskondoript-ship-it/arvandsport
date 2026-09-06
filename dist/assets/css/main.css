@@ -1907,10 +1907,11 @@ a.office__row:hover { color: var(--white); }
 }
 /* The ball is a 30-frame rotation of the client's own model, laid out 6x5 and
    rendered from the very GLB the WebGL scene loads by tools/render-sprite.mjs.
-   It turns on every screen: phones never get the WebGL scene, so the sprite is
-   the whole of the hero for them and a still is a poor version of it.
+   It turns on every screen, because it is what holds the hero for anyone the
+   scene does not reach -- no WebGL2, Save-Data, a bundle that never arrives --
+   and on any of those a still is a poor version of it.
 
-   They get their own sheet at half the frame size -- 291KB against 987 -- and
+   Phones get their own sheet at half the frame size -- 291KB against 987 --
    the layout is identical, so the frame arithmetic in src/scripts/apex.js and
    the background-size here are the same for both and only the URL differs.
    The single still is what is left for anyone who asked for less motion. */
@@ -1924,6 +1925,13 @@ a.office__row:hover { color: var(--white); }
 @media (min-width: 761px) {
   .apex__ball { background-image: url("../img/ui/ball-sheet.webp"); }
 }
+/* The visitor is getting the WebGL ball, so the sheet is never going to be
+   looked at -- and a background on a live element is fetched whether or not it
+   is visible. The class is set in the head, before this stylesheet's first
+   paint, which is the only moment early enough to stop the request; see
+   SCENE_BOOT in src/templates/layout.mjs. If the scene then fails to mount,
+   apex.js takes the class back off and the sheet loads after all. */
+:root.wants-scene .apex__ball { background-image: none; }
 @media (prefers-reduced-motion: reduce) {
   .apex__ball {
     background-image: url("../img/ui/ball-still.webp");

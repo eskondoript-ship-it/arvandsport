@@ -137,14 +137,32 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     let range = 6.4 - a.dolly * 2.1 + a.explode * 5.4 - a.detail * 1.1;
 
     /* A perspective camera's field of view is vertical, so a portrait viewport
-     * keeps all of the height and loses the width: the ball goes from
-     * comfortably framed on a laptop to overflowing both edges of a phone
-     * without a single number changing. Pull back by however far the aspect
-     * has fallen short, capped so a very tall window does not leave it a
-     * speck. */
+     * keeps all of the height and loses the width: the ball is comfortably
+     * framed on a laptop and overflowing both edges of a phone without a single
+     * number changing.
+     *
+     * Scaling the desktop distance by how far the aspect has fallen short is
+     * the obvious correction and it is the wrong one. It preserves the ball's
+     * size relative to the *width*, and on desktop the ball is about a third of
+     * a wide frame -- so a phone was handed a speck in the middle of a tall
+     * one. Capping the scale stopped it being a speck and left it arbitrary.
+     *
+     * Portrait is framed from the geometry instead: the distance at which the
+     * content spans FILL of the narrow axis, used when it is further out than
+     * the chapter already asked for. The content is a unit ball until the shell
+     * opens and then grows by exactly how far the panels travel, so the
+     * exploded diagram frames itself rather than needing a second number kept
+     * in step with EXPLODE_DISTANCE. */
     const aspect = state.size.width / Math.max(1, state.size.height);
     const portrait = aspect < 1;
-    range *= THREE.MathUtils.clamp(1.5 / aspect, 1, 2.1);
+    if (portrait) {
+      const FILL = 0.78;
+      const contentRadius = 1 + a.explode * EXPLODE_DISTANCE;
+      const halfFov = THREE.MathUtils.degToRad((camera as THREE.PerspectiveCamera).fov / 2);
+      range = Math.max(range, contentRadius / (Math.tan(halfFov) * aspect * FILL));
+    } else {
+      range *= THREE.MathUtils.clamp(1.5 / aspect, 1, 2.1);
+    }
 
     const orbit = a.detail * 0.8;
     tmp.set(
@@ -164,11 +182,12 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
      * one it eases back towards centre, since the stat column arrives down the
      * right and a ball still pushed into that half sits under it.
      *
-     * Portrait has no room for a column at all. The copy still sits at the
-     * top there, so the ball drops below it instead -- aiming above the ball
-     * pushes it down the frame. */
+     * Portrait has no room for a column at all, so it keeps the opening
+     * framing all the way through: the ball dead centre, with the chapters
+     * reading over it. It was dropped below the copy instead, which on a phone
+     * put it in the bottom third under the brand line rather than behind it. */
     const bias = portrait ? 0 : a.dolly * 0.85 - a.detail * 0.45;
-    lookAt.set(a.kick * 0.55 - bias, a.kick * 0.4 + (portrait ? 1.15 : 0), 0);
+    lookAt.set(a.kick * 0.55 - bias, a.kick * 0.4, 0);
     camera.lookAt(lookAt);
   });
 

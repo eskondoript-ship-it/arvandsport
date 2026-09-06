@@ -15,53 +15,33 @@
 import { $, $$, gsap, ScrollTrigger, canAnimate } from './env.js';
 
 /**
- * Decide whether this visitor gets the real thing, and if so, fetch it.
+ * Whether this visitor is getting the real ball.
  *
- * The scene is 364KB gzipped of JavaScript — React, react-dom and three, which
- * is what React Three Fiber costs and there is no version of it that is cheap —
- * plus a 939KB Trionda with its textures. That is far more than the rest of this
- * site put together, so it is not something every visitor is handed. It goes to
- * wide screens with a mouse and a working WebGL2 context, and it is fetched
- * after the page has already painted, over the top of a sprite that is already
- * turning.
+ * The scene is the glass Trionda itself -- an actual model under actual lights,
+ * turning as the page is scrolled -- and it is what the hero is. Everyone who
+ * can render it gets it, phones included.
  *
- * Phones keep the sprite and read the same three chapters over it. A phone is
- * where the weight hurts most and where the ball is smallest and half-faded
- * behind the type — it would be paying the whole cost for the least of the
- * benefit.
+ * It is not free: 364KB gzipped of JavaScript, which is what React Three Fiber
+ * costs and there is no cheap version of it, plus a 939KB model with its
+ * textures. It was desktop-only for exactly that reason. Serving it to phones
+ * is a deliberate trade of bytes for the thing the page is about, and it is
+ * hedged rather than blind -- the bundle is fetched after the page has painted,
+ * the sprite sheet is not fetched at all when the scene is coming, and the
+ * canvas renders at a lower pixel ratio and without full-screen multisampling
+ * on a touch device.
  *
- * Every way this can fail ends the same way: the sprite stays, and nothing on
- * the page notices.
- */
-/**
- * Whether this visitor is getting the scene, decided before anything is
- * fetched.
+ * The decision itself is not made here. It is made in the head, before the
+ * first paint, and left on <html> as `wants-scene` -- early enough to stop the
+ * browser fetching a sprite sheet nobody will see. This reads that answer; the
+ * reasoning, and the three questions it asks, are with SCENE_BOOT in
+ * src/templates/layout.mjs. Deciding it twice is how a phone once ended up
+ * downloading a scene it had been excluded from.
  *
- * Split out from the mount so the answer is available at once. It has to be:
- * the sprite and the scene are two renderings of the same ball and they do not
- * look identical -- one is a lit photograph of it, the other is glass -- so
- * showing the sprite and then swapping is a visible change of object a second
- * into the visit. Knowing up front means the sprite is simply never painted
- * for anyone who is about to get the real thing.
+ * Every way this can fail ends the same way: the sprite comes back, and nothing
+ * else on the page notices.
  */
 function wantsWebgl() {
-  /* Wide, mouse-driven, and not asking for less motion. */
-  if (!window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches) return false;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  /* Save-Data is an explicit request not to be sent a third of a megabyte. */
-  if (navigator.connection?.saveData) return false;
-
-  /* Ask for a context rather than sniffing for support: software renderers and
-   * blocklisted drivers both answer this honestly, and a lost context here is
-   * far cheaper than a dead canvas where the hero used to be. */
-  try {
-    const probe = document.createElement('canvas').getContext('webgl2');
-    if (!probe) return false;
-    probe.getExtension('WEBGL_lose_context')?.loseContext();
-  } catch {
-    return false;
-  }
-  return true;
+  return document.documentElement.classList.contains('wants-scene');
 }
 
 async function mountWebglBall(section, stage) {
@@ -109,10 +89,10 @@ export function initApex(root = document) {
   const COLS = 6;
   const ROWS = 5;
   const FRAMES = COLS * ROWS;
-  /* Every screen now, not just wide ones. Phones never get the WebGL scene, so
-     the sprite is the whole of their hero and it should turn like everyone
-     else's; they are served a smaller sheet with the same 6x5 layout, so
-     nothing below has to know which one is loaded. */
+  /* Every screen. The sprite is the fallback everywhere now rather than the
+     hero of one device class, and a fallback that turns is worth having on a
+     phone as much as on a laptop; phones are served a smaller sheet with the
+     same 6x5 layout, so nothing below has to know which one is loaded. */
   const spriteActive = () => true;
 
   const spriteFrame = (n) => {
@@ -141,9 +121,6 @@ export function initApex(root = document) {
   /* Decided before the bundle is even asked for, so the sprite can be held
    * back rather than shown and then replaced. */
   const expectsScene = wantsWebgl();
-  /* The stylesheet has already hidden it for the media half of this decision,
-     before the first paint. This settles the half CSS cannot ask about: a
-     desktop with no WebGL2, or with Save-Data on, gets the sprite back. */
   if (object) object.style.opacity = expectsScene ? '0' : '1';
 
   /* The gate is asked once, above, and decides both things: whether the sprite
@@ -152,8 +129,15 @@ export function initApex(root = document) {
   (expectsScene ? mountWebglBall(section, pin) : Promise.resolve(null)).then((handle) => {
     if (!handle) {
       /* It was going to work and did not. Give the sprite back -- a turning
-       * ball is a great deal better than the empty stage this was holding. */
-      if (expectsScene && object) gsap.to(object, { opacity: 1, duration: 0.4 });
+       * ball is a great deal better than the empty stage this was holding.
+       *
+       * Dropping the class is what starts the sheet downloading, and that is
+       * the whole trade: the common path never pays for it, and this one waits
+       * a moment longer for a fallback it was not going to need. */
+      if (expectsScene) {
+        document.documentElement.classList.remove('wants-scene');
+        if (object) gsap.to(object, { opacity: 1, duration: 0.4 });
+      }
       return;
     }
     setSceneProgress = handle.setProgress;

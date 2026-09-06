@@ -40,6 +40,37 @@ export const ICONS = {
 export const THEME_BOOT =
   `try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}`;
 
+/**
+ * Decide, before the first paint, whether this visitor is getting the WebGL
+ * ball -- and record the answer on <html> as `wants-scene`.
+ *
+ * It is here and not in apex.js because of what the answer is used for. The
+ * hero's sprite sheet is a CSS background, and the browser starts fetching a
+ * background the moment the element is styled, which is long before a deferred
+ * module gets to run. Measured: 987KB on desktop, 291KB on a phone, downloaded
+ * by every visitor who was about to be shown the real ball instead. Hiding the
+ * sprite from JavaScript came far too late to stop it; a class set in the head
+ * is early enough, and the stylesheet clears the background for it.
+ *
+ * It is also the only copy of the decision. src/scripts/apex.js reads this
+ * class rather than asking the same three questions again -- two copies of one
+ * gate is how a phone once ended up downloading a scene it had been excluded
+ * from.
+ *
+ * The three questions are the ones that are not ours to have an opinion about:
+ * reduced motion (a request for less of exactly this), Save-Data (a request
+ * not to be sent a megabyte), and whether a WebGL2 context can be had at all.
+ * Screen size and pointer type are deliberately not among them: the scene runs
+ * on phones as well as desktops. Anything thrown here leaves the class off,
+ * which is the safe answer -- the sprite loads and the page is as it was.
+ */
+export const SCENE_BOOT =
+  `try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&` +
+  `!(navigator.connection&&navigator.connection.saveData)){` +
+  `var g=document.createElement('canvas').getContext('webgl2');if(g){` +
+  `var x=g.getExtension('WEBGL_lose_context');if(x)x.loseContext();` +
+  `document.documentElement.classList.add('wants-scene')}}}catch(e){}`;
+
 export function themeToggle() {
   return `<button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
   <span class="theme-toggle__icons" aria-hidden="true">
@@ -76,7 +107,7 @@ function head({ site, title, description, canonicalPath, image, jsonLd, bodyClas
 <link rel="preload" href="/assets/fonts/roboto-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/main.css">
 ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ''}
-<script>document.documentElement.classList.replace('no-js','js');${THEME_BOOT}</script>
+<script>document.documentElement.classList.replace('no-js','js');${THEME_BOOT}${SCENE_BOOT}</script>
 </head>
 <body class="${attr(bodyClass || '')}" data-barba="wrapper">`;
 }
