@@ -77,10 +77,15 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
       ball.current.rotation.x = a.kick * Math.PI * 1.4 - 0.12;
       ball.current.rotation.z = a.kick * 0.5;
 
-      // The strike: a short compression at contact, then an arc away and up.
-      const contact = Math.min(1, a.kick / 0.12);
-      const flight = Math.max(0, (a.kick - 0.12) / 0.88);
-      const squash = 1 - Math.sin(contact * Math.PI) * 0.16 * (1 - flight);
+      /* The strike: a compression at contact, then an arc away and up.
+       *
+       * `contact` is its own windowed pulse now rather than a slice off the
+       * front of the flight -- it is already nought at both ends, so the squash
+       * needs no envelope of its own, and it is deep enough (0.24) to be seen
+       * at the size the ball is by then. */
+      const contact = a.contact;
+      const flight = a.kick;
+      const squash = 1 - contact * 0.24;
       ball.current.scale.set(1 / squash, squash, 1 / squash);
 
       /* The flight carries it away, and the descent brings it back to the
@@ -90,10 +95,13 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
        * time the sphere is forming the ball is back at the origin it forms
        * around. */
       const settle = (1 - a.arrive * 0.85) * (1 - a.globe);
+      /* Twice as far as it went before. The camera is pulling in across the
+       * same stretch, so a metre of travel read as almost none -- the ball
+       * looked like it was being nudged rather than struck. */
       ball.current.position.set(
-        (flight * 1.15 - contact * 0.14) * settle,
-        Math.sin(flight * Math.PI * 0.85) * 0.85 * settle,
-        flight * -0.6 * settle,
+        (flight * 2.3 - contact * 0.3) * settle,
+        Math.sin(flight * Math.PI * 0.85) * 1.5 * settle,
+        flight * -1.1 * settle,
       );
     }
 
@@ -137,17 +145,21 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
      * which is well inside the window and left it hanging in frame on the
      * opening chapter. */
     if (shock.current) {
-      const life = a.kick <= 0 ? 0 : Math.max(0, 1 - a.kick / 0.25) * Math.min(1, a.kick / 0.02);
-      shock.current.visible = life > 0.01;
+      /* Expanding and fading on one ramp. `struck` runs nought to one across
+       * the contact window and stays at one after, so the ring is alive only
+       * while that ramp is in flight -- it cannot hang around on the opening
+       * chapter, which is what the old windowing on `kick` was written
+       * carefully to avoid. */
+      const life = a.struck;
+      shock.current.visible = life > 0.001 && life < 0.999;
       // Billboarded. Lying flat it reads as a wide ellipse cutting across the
       // whole frame rather than as a ring coming off the contact.
       shock.current.quaternion.copy(camera.quaternion);
       if (ball.current) shock.current.position.copy(ball.current.position);
-      shock.current.scale.setScalar(0.45 + (1 - life) * 2.6);
+      shock.current.scale.setScalar(0.5 + life * 3.4);
       const ringMaterial = shock.current.material as THREE.MeshBasicMaterial;
-      // Squared, so it is a flash rather than a teal hoop hanging around the
-      // ball for the first fifth of the strike.
-      ringMaterial.opacity = life * life * 0.55;
+      /* Squared, so it is a flash that goes rather than a hoop that dims. */
+      ringMaterial.opacity = (1 - life) ** 2 * 0.85;
     }
 
     /* --- camera ---

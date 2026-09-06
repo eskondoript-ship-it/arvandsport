@@ -120,7 +120,27 @@ export function initApex(root = document) {
    * one reassignment, and no timeline knows which is on the other side — so
    * the choreography cannot drift between the two, because there is only one
    * copy of it. */
-  let driver = spriteFrame;
+  /* Decided before anything below reads it, and before the bundle is asked
+   * for. It was declared further down and `driver` referred to it from up
+   * here -- a const in its temporal dead zone, which throws on the first line
+   * of the hero and which `node --check` cannot see because it is not a syntax
+   * error. */
+  const expectsScene = wantsWebgl();
+
+  /* Shown from the first paint either way now. It used to be held at zero for
+     anyone about to get the scene, on the reasoning that the sprite and the
+     scene are two renderings of the same ball and swapping between them would
+     read as the ball being replaced. That was written when they genuinely
+     differed -- the sprite was the matte textured ball, the scene was glass.
+     They have been rendered from the same GLB with the same material since, so
+     there is nothing to give away, and holding it back meant the page opened
+     on an empty stage for as long as the bundle took to arrive and compile. */
+  if (object) object.style.opacity = '1';
+
+  /* The scene path is handed the single still, not the sheet, so there are no
+     frames to step through -- writing a background-position on a `contain`
+     background would slide one picture around inside the box. */
+  let driver = expectsScene ? () => {} : spriteFrame;
   const showFrame = (n) => driver(n);
 
   /* The scene's own progress. Null until the island is up, and null forever on
@@ -128,11 +148,6 @@ export function initApex(root = document) {
    * visitors get the same six chapters with the ball simply turning behind
    * them. */
   let setSceneProgress = null;
-
-  /* Decided before the bundle is even asked for, so the sprite can be held
-   * back rather than shown and then replaced. */
-  const expectsScene = wantsWebgl();
-  if (object) object.style.opacity = expectsScene ? '0' : '1';
 
   /* The gate is asked once, above, and decides both things: whether the sprite
      is held back, and whether the bundle is fetched at all. Reading it in only
@@ -146,8 +161,11 @@ export function initApex(root = document) {
        * the whole trade: the common path never pays for it, and this one waits
        * a moment longer for a fallback it was not going to need. */
       if (expectsScene) {
+        /* Dropping the class swaps the still for the turning sheet, and hands
+           the frame writes back to it. The still was never wrong, only
+           motionless. */
         document.documentElement.classList.remove('wants-scene');
-        if (object) gsap.to(object, { opacity: 1, duration: 0.4 });
+        driver = spriteFrame;
       }
       return;
     }
@@ -175,9 +193,7 @@ export function initApex(root = document) {
   intro
     /* Scale only when the scene is coming: `from` on opacity would tween the
        held-back sprite straight back to visible. */
-    .from(object, expectsScene
-      ? { scale: 0.82, duration: 1.4, ease: 'power2.out' }
-      : { opacity: 0, scale: 0.82, duration: 1.4, ease: 'power2.out' }, 0)
+    .from(object, { opacity: 0, scale: 0.82, duration: 1.4, ease: 'power2.out' }, 0)
     .to(spin, { f: 0, duration: 2.2, ease: 'power3.out', onUpdate: () => showFrame(spin.f) }, 0)
     .to(fades, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.3);
 

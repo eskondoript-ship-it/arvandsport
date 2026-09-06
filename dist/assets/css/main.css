@@ -1927,13 +1927,24 @@ a.office__row:hover { color: var(--white); }
 @media (min-width: 761px) {
   .apex__ball { background-image: url("../img/ui/ball-sheet.webp"); }
 }
-/* The visitor is getting the WebGL ball, so the sheet is never going to be
-   looked at -- and a background on a live element is fetched whether or not it
-   is visible. The class is set in the head, before this stylesheet's first
+/* The visitor is getting the WebGL ball, so the turning sheet is never going to
+   be looked at -- and a background on a live element is fetched whether or not
+   it is visible. The class is set in the head, before this stylesheet's first
    paint, which is the only moment early enough to stop the request; see
    SCENE_BOOT in src/templates/layout.mjs. If the scene then fails to mount,
-   apex.js takes the class back off and the sheet loads after all. */
-:root.wants-scene .apex__ball { background-image: none; }
+   apex.js takes the class back off and the sheet loads after all.
+
+   What they get instead is the single still -- 68KB against 1078 for the
+   sheet, on screen in the first couple of hundred milliseconds. The scene
+   takes seconds to fetch, parse and compile, and the stage used to be empty
+   for all of it: the page opened on nothing and a ball appeared later. The
+   still is rendered from the same GLB in the same opening pose, so when the
+   canvas fades in over the top there is nothing to see happen. */
+:root.wants-scene .apex__ball {
+  background-image: url("../img/ui/ball-still.webp");
+  background-size: contain;
+  background-position: center;
+}
 @media (prefers-reduced-motion: reduce) {
   .apex__ball {
     background-image: url("../img/ui/ball-still.webp");
@@ -2743,16 +2754,19 @@ a.office__row:hover { color: var(--white); }
   text-align: center; gap: .3rem;
 }
 .apex__mark {
-  width: clamp(84px, 11vw, 148px); height: auto;
-  filter: drop-shadow(0 0 34px rgba(5, 237, 255, .45));
+  width: clamp(132px, 16vw, 224px); height: auto;
+  filter: drop-shadow(0 0 44px rgba(5, 237, 255, .5));
 }
+/* This is the last thing on the page's opening and it was set at about the
+   size of a caption -- the globe closed onto something smaller than the
+   heading two beats earlier. It reads as the end of the sequence now. */
 .apex__mark-line {
-  margin: 1.1rem 0 0;
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem); letter-spacing: .3em; text-transform: uppercase;
-  color: #fff;
+  margin: 1.5rem 0 .2rem;
+  font-size: clamp(1.9rem, 4.6vw, 3.4rem); letter-spacing: .26em; text-transform: uppercase;
+  line-height: 1.05; color: #fff;
 }
 .apex__mark-sub {
   margin: 0;
-  font-size: .68rem; letter-spacing: .26em; text-transform: uppercase;
-  color: rgba(234, 244, 251, .45);
+  font-size: clamp(.78rem, 1.5vw, 1rem); letter-spacing: .3em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .55);
 }

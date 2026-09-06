@@ -16,7 +16,8 @@
  * The six beats, over one scroll:
  *
  *   0 → 16%    the ball turns and the camera closes in
- *   16 → 32%   the strike: contact, and the ball away on an arc
+ *   16 → 32%   the strike: the ball compresses, the ring goes, and it leaves
+ *              on an arc
  *   32 → 50%   the camera follows it down into a stadium, which builds itself
  *              out of the ground around it
  *   50 → 66%   the shell opens along its seams and the ball crosses to a
@@ -35,7 +36,18 @@ export type SceneState = {
   spin: number;
   /** Camera closing in. Kept separate from spin: the camera eases, the ball does not. */
   dolly: number;
-  /** Contact and flight. */
+  /** The moment of contact: rises and falls across its own short window. */
+  contact: number;
+  /**
+   * The same moment, but running one way only.
+   *
+   * The impact ring needs to expand and fade, and both of those are monotonic.
+   * Driven off the `contact` pulse it was brightest at its smallest -- which is
+   * inside the ball -- and largest once it had already faded out, so it was
+   * never actually seen.
+   */
+  struck: number;
+  /** The flight away from the boot. */
   kick: number;
   /** The descent into the bowl -- the camera following the ball down. */
   arrive: number;
@@ -62,6 +74,17 @@ const span = (progress: number, start: number, length: number) =>
 /** GSAP's power2.out, which is what the kick was authored with. */
 const power2Out = (t: number) => 1 - (1 - t) ** 2;
 
+/**
+ * A pulse: nought, up to one, back to nought across the window.
+ *
+ * The strike used to be derived from the first twelve percent of `kick`, which
+ * over the whole page was about ninety pixels of scroll out of five thousand.
+ * The compression, the flash and the impact ring all lived in there, so unless
+ * a visitor happened to stop on exactly those ninety pixels the ball was
+ * simply already in flight and nothing had visibly hit it.
+ */
+const pulse = (t: number) => Math.sin(clamp01(t) * Math.PI);
+
 /** GSAP's power3.inOut, for the camera moves that have to settle. */
 const power3InOut = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
@@ -71,7 +94,11 @@ export function sceneState(progress: number): SceneState {
   return {
     spin: approach,
     dolly: approach,
-    kick: power2Out(span(p, 0.16, 0.14)),
+    /* Contact opens beat two and lasts a twentieth of the page -- long enough
+       to be scrolled through rather than past. */
+    contact: pulse(span(p, 0.185, 0.05)),
+    struck: span(p, 0.185, 0.075),
+    kick: power2Out(span(p, 0.2, 0.14)),
     /* Eased at both ends: the camera is chasing something, and a chase that
        starts and stops at a constant rate reads as a slide. */
     arrive: power3InOut(span(p, 0.3, 0.2)),

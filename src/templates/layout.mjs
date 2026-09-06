@@ -69,7 +69,34 @@ export const SCENE_BOOT =
   `!(navigator.connection&&navigator.connection.saveData)){` +
   `var g=document.createElement('canvas').getContext('webgl2');if(g){` +
   `var x=g.getExtension('WEBGL_lose_context');if(x)x.loseContext();` +
-  `document.documentElement.classList.add('wants-scene')}}}catch(e){}`;
+  `document.documentElement.classList.add('wants-scene');` +
+  /* And start fetching the two files the ball is made of, now.
+   *
+   * They were requested by src/scripts/apex.js, which is a deferred module
+   * that imports the bundle, which then asks for the model -- three round
+   * trips in series, each waiting on the last to be parsed. The visitor spends
+   * that whole time looking at an empty stage. Announced here they are in
+   * flight while the stylesheet and the fonts are still coming down, and by
+   * the time apex.js asks for them they are in the cache.
+   *
+   * The base is read off the stylesheet's resolved href rather than written
+   * as a path, because the site is built with relative URLs so it works under
+   * a Pages prefix and from file:// alike, and a "/assets/..." written here
+   * would be a 404 on the deployed site. */
+  `var c=document.querySelector('link[rel=stylesheet]');` +
+  `if(c){var b=c.href.replace(/assets\\/css\\/[^/]*$/,'');` +
+  `[['modulepreload','assets/hero/hero.js',''],` +
+  `['preload','assets/scene/models/soccer-ball.glb','fetch']]` +
+  `.forEach(function(p){var l=document.createElement('link');` +
+  `l.rel=p[0];l.href=b+p[1];` +
+  /* crossOrigin on the fetch preload is not optional and not about origins.
+     three's FileLoader asks for the model in CORS mode; a preload without the
+     attribute is made in no-CORS mode, the two do not match, and the browser
+     quietly downloads the model a second time -- measured, 939KB paid twice.
+     The warning it prints says "credentials mode does not match". */
+  `if(p[2]){l.as=p[2];l.crossOrigin='anonymous'}` +
+  `document.head.appendChild(l)})}` +
+  `}}}catch(e){}`;
 
 export function themeToggle() {
   return `<button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
