@@ -18,6 +18,7 @@ to run — and this is the map of which to reach for.
 | `static/assets/img/ui/ball-sheet.webp` and `ball-still.webp` | the ball GLB above | `node tools/render-sprite.mjs --size 240` |
 | `static/assets/img/ui/ball-sheet-sm.webp` and `ball-still-sm.webp` | the same GLB | `node tools/render-sprite.mjs --suffix -sm --size 120` |
 | `experience/public/models/stadium.glb` | `assets-src/stadium.3ds` | `node tools/convert-model.mjs assets-src/stadium.3ds experience/public/models/stadium.glb --up z --no-normals --max-tris 100000` |
+| `experience/public/models/boot.glb` | `assets-src/boot.glb` | `node tools/convert-model.mjs assets-src/boot.glb experience/public/models/boot.glb --up y --keep-material --texture 1024 --simplify 24000 --max-tris 30000` |
 | `static/assets/video/pitch.{webm,mp4}` and `img/ui/pitch-poster.webp` | a supplied clip | see **The clip** below |
 
 After any of them: rebuild. `npm run build` at the root copies
@@ -100,9 +101,29 @@ a wireframe or with a basic material, which was a third of the stadium's file.
 is Y-up. A model that comes out lying on its side has this wrong.
 
 It prints the triangle count. Anything over about 40,000 wants a reason: the
-stadium is 95,682 and 781KB over the wire, which is why `Stadium.tsx` is only
-mounted once the scroll is within reach of its chapter rather than loaded with
-the hero.
+stadium is 95,682 and 781KB over the wire, which is why neither it nor the boot
+is loaded with the hero — `SoccerCanvas` mounts each only once the scroll is
+within reach of its beat, and mounting is the fetch.
+
+### A scanned model
+
+A photogrammetry capture needs three flags the stadium does not.
+`--keep-material` keeps its own texture, because the photograph baked into the
+scan is the whole value of it and flattening to grey leaves a lump.
+`--texture 1024` redraws the atlas: scanners write 4096 square, which was five
+megabytes of JPEG for something a few hundred pixels across on screen. It is
+re-encoded as JPEG, not the exporter's default PNG — the same 1024 square came
+back at 1668KB as PNG against 175KB as JPEG, on an image that was a JPEG to
+begin with.
+
+`--simplify` is the big one and it is slow — minutes, not seconds, which is
+exactly why it lives in a tool whose output is committed. It uses three's
+`SimplifyModifier`, which in this version carries uv, normal and colour through
+each edge collapse; older versions kept position only and would have thrown the
+scan's texture mapping away with its UVs. **Check that before trusting it after
+a three upgrade.**
+
+The boot went 11MB and 200,000 triangles in, 902KB and 21,607 out.
 
 ## The clip
 

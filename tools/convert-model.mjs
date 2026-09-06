@@ -60,6 +60,26 @@ const MAX_TRIS = Number(flag('max-tris', 40000));
    never shaded -- and a normal is twelve bytes a vertex that nothing reads. On
    the stadium that is a third of the file. */
 const DROP_NORMALS = args.includes('--no-normals');
+/* Keep the model's own materials and textures instead of flattening to one
+   grey standard material. Right for a scanned object whose whole point is the
+   photograph baked into it; wrong for an archive model whose materials name
+   texture files the archive never contained. */
+const KEEP_MATERIAL = args.includes('--keep-material');
+/* Resize embedded textures to this many pixels on the long edge. A
+   photogrammetry capture arrives at 4096 square because that is what the
+   scanner wrote, not because anything needs it: the boot is a few hundred
+   pixels across on screen and 4096 is five megabytes of JPEG. 0 leaves them
+   alone. */
+const TEXTURE = Number(flag('texture', 0));
+/* Decimate to roughly this many triangles. A photogrammetry capture is a
+   couple of hundred thousand because that is what the scanner produced, and
+   most of that detail is below one screen pixel on anything this page draws.
+   0 leaves the mesh alone.
+
+   This is slow -- an edge-collapse pass over two hundred thousand triangles is
+   minutes, not seconds -- which is exactly why it belongs in a tool that is
+   run once and its output committed, rather than anywhere near the browser. */
+const SIMPLIFY = Number(flag('simplify', 0));
 
 const ext = path.extname(INPUT).toLowerCase();
 const LOADERS = {
@@ -83,9 +103,45 @@ import * as THREE from 'three';
 import { ${loaderName} } from 'three/examples/jsm/loaders/${loaderFile}';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { SimplifyModifier } from 'three/examples/jsm/modifiers/SimplifyModifier.js';
 
 const SCALE = ${SCALE}, UP = ${JSON.stringify(UP)}, MAX_TRIS = ${MAX_TRIS};
 const DROP_NORMALS = ${DROP_NORMALS};
+const KEEP_MATERIAL = ${KEEP_MATERIAL}, TEXTURE = ${TEXTURE}, SIMPLIFY = ${SIMPLIFY};
+
+/**
+ * Redraw a texture at a smaller size, through a canvas.
+ *
+ * The browser is already holding the decoded image, so this is a drawImage and
+ * a toDataURL rather than an image library. High-quality smoothing, because
+ * the default nearest-ish downsample of a 4096 atlas to 1024 throws away three
+ * quarters of every texel and looks it.
+ */
+function shrink(texture, size) {
+  const image = texture.image;
+  if (!image || !image.width) return texture;
+  const longest = Math.max(image.width, image.height);
+  if (longest <= size) return texture;
+  const k = size / longest;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(image.width * k);
+  canvas.height = Math.round(image.height * k);
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const out = new THREE.Texture(canvas);
+  out.colorSpace = texture.colorSpace;
+  out.wrapS = texture.wrapS;
+  out.wrapT = texture.wrapT;
+  out.flipY = texture.flipY;
+  /* JPEG, not the exporter's default PNG. A photograph re-encoded losslessly is
+     the worst of both: 1668KB for the same 1024 square that JPEG writes in
+     about a tenth of that, on an image that was a JPEG to begin with. */
+  out.userData.mimeType = 'image/jpeg';
+  out.needsUpdate = true;
+  return out;
+}
 
 new ${loaderName}().load('./model${ext}', (loaded) => {
   const model = loaded.scene || loaded;
@@ -98,7 +154,7 @@ new ${loaderName}().load('./model${ext}', (loaded) => {
     if (!child.isMesh) return;
     report.meshes++;
     let geometry = child.geometry;
-    geometry.deleteAttribute('uv');
+    if (!KEEP_MATERIAL) geometry.deleteAttribute('uv');
     geometry.deleteAttribute('uv1');
     geometry.deleteAttribute('color');
     const before = (geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3;
@@ -110,19 +166,40 @@ new ${loaderName}().load('./model${ext}', (loaded) => {
     try {
       geometry = mergeVertices(geometry, 1e-4);
     } catch { /* a geometry that cannot be welded is used as it came */ }
+    if (SIMPLIFY && report.trisIn > SIMPLIFY) {
+      /* Melax edge-collapse, which in this version of three carries uv, normal
+         and colour through the collapse -- older ones kept position only, and
+         would have thrown the boot's photograph away with its UVs.
+         modify() is told how many vertices to REMOVE, not how many to keep --
+         and a backtick in a comment inside this template string ends the
+         template, which is how this file first failed to parse at all. */
+      const verts = geometry.attributes.position.count;
+      const keep = Math.max(4, Math.round(verts * (SIMPLIFY / report.trisIn)));
+      geometry = new SimplifyModifier().modify(geometry, verts - keep);
+    }
     if (DROP_NORMALS) geometry.deleteAttribute('normal');
     else geometry.computeVertexNormals();
     child.geometry = geometry;
     report.attrs = Object.keys(geometry.attributes).join(',');
     report.trisOut += (geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3;
 
-    child.material = new THREE.MeshStandardMaterial({
-      color: 0xb9c6d4,
-      roughness: 0.85,
-      metalness: 0.05,
-      side: THREE.DoubleSide,
-      flatShading: false,
-    });
+    if (KEEP_MATERIAL) {
+      const source = Array.isArray(child.material) ? child.material[0] : child.material;
+      if (TEXTURE && source && source.map) {
+        report.texture = [source.map.image.width, source.map.image.height];
+        source.map = shrink(source.map, TEXTURE);
+        report.textureOut = [source.map.image.width, source.map.image.height];
+      }
+      child.material = source;
+    } else {
+      child.material = new THREE.MeshStandardMaterial({
+        color: 0xb9c6d4,
+        roughness: 0.85,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+        flatShading: false,
+      });
+    }
   });
 
   /* Z-up to Y-up, applied to the geometry rather than left as a rotation on a
@@ -196,7 +273,7 @@ const browser = await chromium.launch();
 const tab = await browser.newPage();
 tab.on('pageerror', (e) => console.error('[page]', e.message));
 await tab.goto('http://localhost:8198/', { waitUntil: 'networkidle' });
-await tab.waitForFunction(() => window.__glb || window.__error, null, { timeout: 180000 });
+await tab.waitForFunction(() => window.__glb || window.__error, null, { timeout: 1500000 });
 
 const failed = await tab.evaluate(() => window.__error || null);
 if (failed) {
@@ -219,3 +296,6 @@ console.log(`${path.basename(OUTPUT)}  ${kb}KB`);
 console.log(`  meshes ${report.meshes}, triangles ${report.trisIn} -> ${report.trisOut}` +
   (report.overBudget ? `  OVER the ${MAX_TRIS} budget` : ''));
 console.log(`  source size ${report.sizeIn.join(' x ')} (radius ${report.radius}), written centred at unit radius`);
+if (report.texture) {
+  console.log(`  texture ${report.texture.join('x')} -> ${report.textureOut.join('x')}`);
+}

@@ -8,6 +8,7 @@ import * as THREE from 'three';
 
 import SoccerModel from '@/components/SoccerModel';
 import Stadium from '@/components/Stadium';
+import Boot from '@/components/Boot';
 import Globe from '@/components/Globe';
 import { buildProceduralPanels } from '@/lib/ball';
 import { scrollState } from '@/lib/scroll';
@@ -63,12 +64,13 @@ function ProceduralBall() {
 }
 
 /**
- * Mount the stadium only once the scroll is within reach of its beat.
+ * Mount a model only once the scroll is within reach of the beat that uses it.
  *
- * This is what makes the bowl affordable: 781KB over the wire, requested at the
- * moment it is nearly needed rather than alongside the ball. Mounting is the
- * fetch -- useGLTF asks for the file when the component first renders -- so
- * this component and the loading policy are the same thing.
+ * This is what makes the extra models affordable -- 789KB of boot and 781KB of
+ * stadium, each requested at the moment it is nearly needed rather than
+ * alongside the ball. Mounting is the fetch: useGLTF asks for the file when the
+ * component first renders, so this component and the loading policy are the
+ * same thing.
  *
  * It watches the scroll from inside the frame loop rather than subscribing,
  * because the scene is already reading scrollState every frame and one more
@@ -77,20 +79,20 @@ function ProceduralBall() {
  * unmounting would drop it and re-fetch it on the way back down.
  */
 const STADIUM_FROM = 0.26;
+/* Earlier than the stadium's, because the boot's beat is earlier -- contact
+   opens at 0.185, and a model that starts downloading then would arrive after
+   the strike was over. */
+const BOOT_FROM = 0.06;
 
-function StadiumWhenNeeded() {
+function WhenScrolledTo({ mark, children }: { mark: number; children: ReactNode }) {
   const [wanted, setWanted] = useState(false);
 
   useFrame(() => {
-    if (!wanted && scrollState.progress >= STADIUM_FROM) setWanted(true);
+    if (!wanted && scrollState.progress >= mark) setWanted(true);
   });
 
   if (!wanted) return null;
-  return (
-    <Suspense fallback={null}>
-      <Stadium />
-    </Suspense>
-  );
+  return <Suspense fallback={null}>{children}</Suspense>;
 }
 
 /* ------------------------------------------------------------------ *
@@ -221,7 +223,12 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
         {/* Both deliberately outside <Selection>: they are already self-lit
             line work, and letting the bloom find them turned a drawing into a
             smear of light. */}
-        <StadiumWhenNeeded />
+        <WhenScrolledTo mark={BOOT_FROM}>
+          <Boot />
+        </WhenScrolledTo>
+        <WhenScrolledTo mark={STADIUM_FROM}>
+          <Stadium />
+        </WhenScrolledTo>
         <Globe />
 
         <Selection>
