@@ -367,7 +367,10 @@ export function makePanelMaterial(panel: Pick<Panel, 'kind' | 'source'>): PanelM
          * far away the panel is or how unevenly the mesh is subdivided. */
         float meshFactor() {
           vec3 d = fwidth(vBary);
-          vec3 a = smoothstep(vec3(0.0), d * 0.9, vBary);
+          /* Two and a bit pixels rather than one. At one pixel the lattice is
+             there but invisible on a phone, where the shell is small and the
+             lines fall between samples. */
+          vec3 a = smoothstep(vec3(0.0), d * 2.2, vBary);
           return 1.0 - min(min(a.x, a.y), a.z);
         }`,
       )
@@ -383,13 +386,38 @@ export function makePanelMaterial(panel: Pick<Panel, 'kind' | 'source'>): PanelM
         float wire = max(outline, meshFactor() * 0.26);
         vec3 neon = uNeon * (0.45 + outline * 1.25);
 
-        /* The neon goes on the seams, not over the surface. On the flat
-         * black-and-white ball this was a full crossfade to a glowing cage,
-         * which was the whole point of it; with a textured ball the surface is
-         * the point, and washing a printed Trionda panel to cyan threw away the
-         * thing worth looking at. So the mix is weighted to the outline and the
-         * interior keeps most of itself. */
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, uProgress * mix(wire * 0.35, outline, 0.75));
+        /* Weighted to the seams, but the triangulation has to come through too.
+         *
+         * It was 0.35 on the mesh at a quarter weight, which works out at about
+         * nine percent neon across a panel's interior -- invisible. That was
+         * right when this crossfade only had to hint at a wireframe under a
+         * printed ball. It is wrong now that beat four *is* the wireframe: on a
+         * phone the opened shell read as four dark teal blobs, because the
+         * panels are far from the lights by then and nothing was lighting them.
+         *
+         * The interior still keeps most of itself at low uProgress, which is
+         * the whole of the first three beats, so the printed Trionda is not
+         * washed to cyan on the way past. */
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, neon, uProgress * mix(wire * 0.85, outline, 0.55));
+
+        /* A little self-light at full crossfade, so the opened shell is not a
+         * silhouette.
+         *
+         * By beat four the panels are a long way from every light in the scene
+         * and came out as dark shapes. This lifts them off the ground without
+         * washing them.
+         *
+         * It is deliberately NOT the triangle lattice. mesh is useless at this
+         * distance: the panels are about 1,670 triangles each and by the time
+         * the shell has opened they are a few pixels across, so fwidth(vBary)
+         * saturates, every pixel counts as "near an edge", and the lattice
+         * resolves to a flat fill over the whole panel. The silhouette outline
+         * above is measured from the panel border instead, which is a property
+         * of the shape rather than of the tessellation, and holds at any size.
+         *
+         * Squared on uProgress so it stays out of the first three beats -- the
+         * printed Trionda is the subject there. */
+        gl_FragColor.rgb += uNeon * uProgress * uProgress * 0.09;
         /* No alpha work. The glass path is drawn opaque -- see toGlass -- and
          * the see-through is transmission rather than blending. */`,
       );

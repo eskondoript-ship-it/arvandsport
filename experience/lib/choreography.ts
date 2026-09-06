@@ -104,7 +104,16 @@ export function sceneState(progress: number): SceneState {
        could be read. */
     contact: pulse(span(p, 0.185, 0.08)),
     struck: span(p, 0.185, 0.12),
-    kick: power2Out(span(p, 0.2, 0.19)),
+    /* Linear, not eased out.
+     *
+     * A struck ball takes its whole velocity at contact and then travels at
+     * very nearly constant speed -- the deceleration a power2Out describes is
+     * what a thrown ball does at the top of its arc, not what a kicked one does
+     * leaving the boot. Coming almost straight down the camera axis, constant
+     * world speed is also what makes it appear to accelerate: perspective does
+     * that on its own, and easing out cancelled it, so the ball drifted forward
+     * and stopped instead of arriving. */
+    kick: span(p, 0.2, 0.19),
     /* Eased at both ends: the camera is chasing something, and a chase that
        starts and stops at a constant rate reads as a slide. */
     arrive: power3InOut(span(p, 0.3, 0.2)),

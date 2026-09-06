@@ -136,7 +136,16 @@ export default function Stadium() {
        object still sorts and still costs a pass over 95,000 triangles. It is
        built during `build`, stands through the tactical read, and goes as the
        globe gathers. */
-    const present = a.build > 0.001 && a.globe < 0.85;
+    /* Gone entirely once the tactical read starts, rather than faded.
+     *
+     * Fading it did not work and the reason is worth writing down: 95,000
+     * triangles of wireframe is hundreds of overlapping lines per pixel, and
+     * they accumulate. At two percent opacity the bowl was still a legible
+     * bright band -- straight across the paragraph, on a phone. Opacity is the
+     * wrong control for a drawing this dense; the only number that removes it
+     * is zero. */
+    const fading = 1 - Math.min(1, a.detail / 0.3);
+    const present = a.build > 0.001 && a.globe < 0.85 && fading > 0.001;
     root.current.visible = present;
     if (!present) return;
 
@@ -177,8 +186,16 @@ export default function Stadium() {
        over -- the stadium is the place the ball was played in, not the place
        the story ends. */
     const alive = Math.min(1, build / 0.12) * (1 - Math.max(0, (a.globe - 0.2) / 0.65));
-    structure.opacity = 0.15 * alive;
-    edge.opacity = 0.6 * alive * (1 - after * 0.85);
+    /* And well back once the shell opens. The bowl's rim is a bright cyan band
+     * at about the height a phone puts the copy, so through beat four it was
+     * drawn straight across the paragraph -- the tactical read is the subject
+     * there and the stadium is the room it happens in. */
+    structure.opacity = 0.15 * alive * (1 - after * 0.75) * fading;
+    /* The construction line belongs to the build and nothing else. Left on
+       past it, the cut sits at the roof and draws the bowl's whole rim as one
+       bright band -- which on a phone lands exactly across the paragraph, and
+       was the brightest thing in the tactical beat. */
+    edge.opacity = 0.6 * alive * Math.min(1, (1 - build) * 4);
 
   });
 

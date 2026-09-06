@@ -93,7 +93,12 @@ export function apex(site, _players = [], { taremiModel = false } = {}) {
          a cut. Chapter-numbered like the rest, so the same crossfade drives
          it and apex.js needs no special case. -->
     <div class="apex__chapter apex__chapter--mark" data-apex-chapter="${chapters.length + 1}">
-      <img class="apex__mark" src="${attr(site.brand.logo)}" alt=""
+      <!-- The monogram, not the horizontal lockup that used to be here: the
+           lockup already contains the name and the tagline, so it was printing
+           both of them twice over the two lines below it. The globe closes to a
+           point and this is the shape left at that point, which is the one the
+           mark is for. -->
+      <img class="apex__mark" src="${attr(site.brand.markWhite || site.brand.mark)}" alt=""
            width="300" height="300" loading="lazy" decoding="async" aria-hidden="true">
       <p class="apex__mark-line">${esc(site.brand.name)}</p>
       <p class="apex__mark-sub">${esc(site.brand.tagline)}</p>

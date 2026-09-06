@@ -100,26 +100,24 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
        * time the sphere is forming the ball is back at the origin it forms
        * around. */
       const settle = (1 - a.arrive * 0.85) * (1 - a.globe);
-      /* Struck towards the viewer, not across the frame.
+      /* Struck at the viewer, almost straight down the camera axis.
        *
-       * Most of the travel is +z now, which is the camera's side of the scene:
-       * the ball leaves the boot and comes at whoever is reading, which is what
-       * a strike looks like from behind the striker and is the only angle where
-       * a kick reads as force rather than as an object sliding sideways. A
-       * little +x and +y keep it off dead centre so it does not simply grow.
+       * That is what a ball hit towards you does: it does not swing across the
+       * frame on its way, it grows. The sideways drift is a tenth of what it
+       * was and the arc a third of it -- what little is left keeps the ball off
+       * dead centre, which is the difference between a ball arriving and a
+       * texture being scaled up.
        *
-       * It cannot come all the way to the lens -- at z 2.6 against a camera
-       * about five out, a unit ball fills the frame and the next beat has to
-       * start from a wall of glass -- so 2.0 is as near as it gets. */
-      /* How far towards the camera, which is not the same number on a phone.
-       * A portrait frame is narrow and the camera is already close, so the
-       * same two units of approach put a unit ball across ninety percent of
-       * the screen -- it stopped reading as a ball coming at you and started
-       * reading as the scene being replaced by glass. */
-      const toward = portrait ? 1.05 : 2.0;
+       * How far it comes is not the same number on a phone. A portrait frame is
+       * narrow and the camera is already close, so the desktop approach put a
+       * unit ball across ninety percent of the screen: it stopped reading as a
+       * ball coming at you and started reading as the scene being replaced by
+       * glass. Neither number reaches the lens -- the next beat has to start
+       * from something other than a wall of glass. */
+      const toward = portrait ? 1.3 : 2.3;
       ball.current.position.set(
-        (flight * 0.55 - contact * 0.3) * settle,
-        Math.sin(flight * Math.PI * 0.85) * 1.1 * settle,
+        (flight * 0.12 - contact * 0.3) * settle,
+        Math.sin(flight * Math.PI * 0.7) * 0.35 * settle,
         flight * toward * settle,
       );
     }
