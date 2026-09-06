@@ -10,129 +10,186 @@ import { sceneState } from '@/lib/choreography';
 import { NEON } from '@/lib/ball';
 
 /**
- * The bowl the ball is played in, drawn as a blueprint.
+ * The stadium the ball is followed down into, building itself as it arrives.
  *
- * It arrives with the last chapter -- the one about the record -- and it is the
- * only thing in the scene that is not the ball. Rising out of the floor as the
- * figures come in, turning slowly under them, it is what the grid was standing
- * in for: the grid says "somewhere technical", the stadium says which sport
- * this agency is in, without a word of copy having to.
+ * Beat three of the story: the camera chases the struck ball down out of the
+ * dark, and the bowl comes up out of the ground to meet it -- floor first,
+ * terraces, roof last.
  *
- * Wireframe rather than shaded, for two reasons and not only the obvious one.
- * It matches the instrument language the rest of the page is drawn in -- the
- * hero's own ball crosses to wireframe two chapters earlier -- and the model is
- * an untextured archive mesh whose materials named texture files that were
- * never in the archive. Shaded, it is a grey lump. As a wireframe it is a
- * drawing, and a drawing is what an untextured mesh actually is.
+ * Drawn as a blueprint rather than shaded, for two reasons and not only the
+ * obvious one. It matches the instrument language the rest of the page is drawn
+ * in -- the hero's own ball crosses to wireframe partway through its story --
+ * and the model is an untextured archive mesh whose materials named texture
+ * files that were never in the archive. Shaded, it is a grey lump. As a
+ * wireframe it is a drawing, and a drawing is what an untextured mesh is.
  *
- * ## What this costs, and why it is loaded the way it is
+ * ## The build
  *
- * 1316KB, 781KB over the wire, 95,682 triangles. That is more than the ball
- * and its textures put together, and the hero had just been made affordable on
- * phones. So it is not part of the hero's cost: this component is only mounted
- * once the scroll is within reach of the chapter that uses it, which means the
- * GLB is requested at that moment and not before. A visitor who never scrolls
- * past the ball never pays for it.
+ * A clipping plane, not an animation baked into the geometry.
  *
- * Suspense above this handles the gap -- the stadium simply is not there until
- * it has arrived, which is the same thing it looks like before the chapter
- * starts anyway, so there is nothing to hide.
+ * The plane faces down and rises through the model as the scroll runs, so
+ * everything below it is drawn and everything above it is not: the bowl comes
+ * up out of the ground, terrace by terrace, and the roof arrives last. That is
+ * the shape of the object doing the work -- a stadium is built from the bottom
+ * up, and clipping it at a height is the same operation as building it to that
+ * height.
+ *
+ * The alternative was revealing triangles by index, which sounds equivalent and
+ * is not: a 3ds file's triangle order is whatever its 2008 exporter happened to
+ * emit, so the "build" would be a random scatter filling in. Height is a
+ * property of the thing; index is a property of the file.
+ *
+ * A second, brighter copy of the model is drawn clipped to a thin slice at the
+ * cut, which reads as the line the construction is happening on. It is the same
+ * geometry with a second material, so it costs a draw call and no memory.
+ *
+ * Clipping needs `localClippingEnabled` on the renderer -- SoccerCanvas sets
+ * it. Without that the planes are ignored and the stadium is simply there.
+ *
+ * ## What it costs
+ *
+ * 1316KB, 781KB over the wire, 95,682 triangles: more than the ball and its
+ * textures together. It is not fetched with the scene -- SoccerCanvas mounts
+ * this component only once the scroll is within reach of the beat that needs
+ * it, and mounting is the fetch. A visitor who never scrolls past the strike
+ * never pays for it.
  */
 
 const MODEL_URL = '/models/stadium.glb';
 
-/** How far into the story the bowl starts loading, and starts rising. */
-export const STADIUM_FROM = 0.62;
+/* The model comes out of tools/convert-model.mjs centred at unit radius, and
+   the bowl is about a sixth as tall as it is wide -- so its own height runs
+   roughly -0.17 to 0.17 around its centre. The sweep runs a little past both
+   ends so the first frame is empty and the last is whole. */
+const FLOOR = -0.2;
+const ROOF = 0.2;
 
 export default function Stadium() {
   const root = useRef<THREE.Group>(null);
   const gltf = useGLTF(asset(MODEL_URL), true) as unknown as { scene: THREE.Object3D };
 
-  /* One material for the whole bowl, made once. The mesh has no normals -- the
-   * converter drops them, because a basic material never reads one and they
-   * were a third of the file -- so nothing here may ask for lighting. */
-  const material = useMemo(
+  /* One plane, shared by both materials. Normal pointing down means "keep what
+     is below me"; the constant is the height it sits at. */
+  const cut = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
+  /* And its mirror, so the highlight material keeps only a slice: below the
+     cut (the first plane) and above the cut less a hair (this one). */
+  const cutBelow = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+
+  const structure = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
         color: NEON,
         wireframe: true,
         transparent: true,
-        opacity: 0,
+        opacity: 0.16,
         depthWrite: false,
         toneMapped: false,
+        clippingPlanes: [cut],
       }),
-    [],
+    [cut],
   );
 
-  const model = useMemo(() => {
-    const clone = gltf.scene.clone(true);
-    clone.traverse((child) => {
-      const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) mesh.material = material;
-    });
-    return clone;
-  }, [gltf, material]);
+  /* The working line. Brighter, and clipped to the slice between the two
+     planes, so it is only ever the few metres of structure at the top of the
+     build. */
+  const edge = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color('#ffffff'),
+        wireframe: true,
+        transparent: true,
+        opacity: 0.55,
+        depthWrite: false,
+        toneMapped: false,
+        clippingPlanes: [cut, cutBelow],
+      }),
+    [cut, cutBelow],
+  );
 
-  useLayoutEffect(() => () => material.dispose(), [material]);
+  const built = useMemo(() => {
+    const group = new THREE.Group();
+    for (const material of [structure, edge]) {
+      const copy = gltf.scene.clone(true);
+      copy.traverse((child) => {
+        const mesh = child as THREE.Mesh;
+        if (mesh.isMesh) mesh.material = material;
+      });
+      group.add(copy);
+    }
+    return group;
+  }, [gltf, structure, edge]);
+
+  useLayoutEffect(
+    () => () => {
+      structure.dispose();
+      edge.dispose();
+    },
+    [structure, edge],
+  );
 
   useFrame((state) => {
     if (!root.current) return;
     const a = sceneState(scrollState.progress);
     const t = state.clock.elapsedTime;
 
-    /* Its own eased entrance across the last chapter, rather than a straight
-     * read of `detail`: the camera is already swinging round on that number,
-     * and a bowl that rises at exactly the rate the camera turns reads as one
-     * move rather than two. Squared, so it is slow to start and arrives. */
-    const rise = a.detail * a.detail;
+    /* Gone either side of its beats rather than transparent: an invisible
+       object still sorts and still costs a pass over 95,000 triangles. It is
+       built during `build`, stands through the tactical read, and goes as the
+       globe gathers. */
+    const present = a.build > 0.001 && a.globe < 0.85;
+    root.current.visible = present;
+    if (!present) return;
 
-    /* Sized against the frame it is seen in rather than by eye.
-     *
-     * The last chapter parks the camera at about 8.6 units out on a 42 degree
-     * vertical field, so half the frame height is 8.6 * tan(21) = 3.3 world
-     * units and half its width, on a landscape window, about 5.3. The model
-     * comes out of the converter at unit radius, so a scale of 3.4 makes the
-     * bowl a little under two thirds of the frame across: wide enough to be
-     * the place the ball is in, not so wide that it stops being an object and
-     * becomes a background.
-     *
-     * A first pass had it at 4.6 and it overflowed both edges -- a stadium you
-     * are standing inside rather than looking at; the second, at 3.15, ran off
-     * the bottom of the frame. The camera sits at y 0.4 looking level, so with
-     * a half-height of 3.3 everything has to live above y = -2.9. The bowl is
-     * a sixth as tall as it is wide, which at this scale is 0.85 -- so its
-     * centre belongs at about -2.15 and no lower.
-     *
-     * It stays a fixed world size as the camera moves, because that is what
-     * being a real object means. Set behind the ball as well as below it, so
-     * the ball never has to compete with the wireframe for the same pixels. */
-    root.current.position.set(0, -2.15 + rise * 0.28, -2.0);
-    root.current.scale.setScalar(2.55 + rise * 0.2);
-    /* A slow turn on its own clock, in the same direction the ball drifts, so
-     * the two do not read as separate objects on separate timers. */
-    root.current.rotation.y = t * 0.035 + (1 - rise) * 0.35;
-    /* Tipped a little as it settles, so the bowl is read from slightly above
-     * rather than edge-on. */
-    root.current.rotation.x = (1 - rise) * -0.14;
+    const build = a.build;
+    /* Once the ball starts coming apart above it, the bowl has done its job
+       and steps back rather than competing for the frame. */
+    const after = a.explode;
 
-    /* Faint. It is a drawing behind the subject, not a light source: at 0.42
-     * with tone mapping off the wireframe read as a wall of cyan and the ball
-     * disappeared into it. 95,000 triangles of wireframe is a great many
-     * overlapping lines, and they accumulate: the drawing looks far more solid
-     * than any one line's alpha suggests. */
-    material.opacity = rise * 0.13;
-    root.current.visible = material.opacity > 0.004;
+    /* Where the cut is now, in the model's own space -- and the model is
+       scaled below, so this has to be scaled with it or the plane sweeps
+       through in the wrong place entirely. */
+    /* Sized to be seen whole, from above.
+     *
+     * Putting the camera inside the bowl was the obvious reading of "into the
+     * stadium" and it looked like a cyan wall: an untextured wireframe stand
+     * seen from the terrace is a grid, with nothing to say it is a stadium.
+     * Seen from high up with the ball coming down into it, the bowl's shape is
+     * the whole story, and the shape is what was recognisable in the model in
+     * the first place.
+     *
+     * Radius 3.5, and the camera pulls back to about 7.8 units during the
+     * descent -- a frame 9.6 wide, so the bowl sits comfortably inside it. */
+    const scale = 3.5;
+    const height = THREE.MathUtils.lerp(FLOOR, ROOF, build) * scale;
+    cut.constant = height;
+    /* The slice is a fixed fraction of the bowl's height rather than a fixed
+       number of units, so it stays the same visual thickness whatever the
+       model or the scale is. */
+    cutBelow.constant = -(height - (ROOF - FLOOR) * scale * 0.045);
+
+    root.current.scale.setScalar(scale);
+    /* Sits below the ball, which is where the pitch would be. The camera dives
+       towards this during `arrive`, so the bowl does not move to meet it. */
+    root.current.position.set(0, -3.2, 0);
+    root.current.rotation.y = t * 0.04 - 0.5;
+
+    /* Fades up as the first courses go in, and back down as the globe takes
+       over -- the stadium is the place the ball was played in, not the place
+       the story ends. */
+    const alive = Math.min(1, build / 0.12) * (1 - Math.max(0, (a.globe - 0.2) / 0.65));
+    structure.opacity = 0.15 * alive;
+    edge.opacity = 0.6 * alive * (1 - after * 0.85);
+
   });
 
   return (
     <group ref={root} name="stadium">
-      <primitive object={model} />
+      <primitive object={built} />
     </group>
   );
 }
 
-/* No useGLTF.preload() -- for the same reason SoccerModel has none, and one
- * more. A preload at module scope would run when the bundle is evaluated,
- * which is the moment the hero mounts, and would fetch the whole bowl for
- * every visitor before the ball itself had finished arriving. The entire point
- * of this file is that it is paid for late. */
+/* No useGLTF.preload(). It would run when the bundle is evaluated -- the moment
+ * the hero mounts -- and fetch the whole bowl for every visitor before the ball
+ * itself had finished arriving. The entire point of this file is that it is
+ * paid for late. */

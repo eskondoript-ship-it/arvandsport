@@ -1,9 +1,13 @@
 /**
- * The homepage's opening: the match-ball study, told over three chapters.
+ * The homepage's spine: one ball, told over six beats.
  *
- *   01  who we are — the ball turns, the camera closes in
- *   02  what we do — the shell opens along its seams and crosses to wireframe
- *   03  the record — the camera pulls round and the agency's figures arrive
+ *   01  who we are — the ball turns and the camera closes in
+ *   02  what we do — the strike, and the ball away on an arc
+ *   03  the match  — the camera follows it down into a stadium that builds
+ *                    itself out of the ground
+ *   04  the read   — the shell opens and the ball is measured rather than shown
+ *   05  the reach  — the pieces gather into a globe, lit from inside
+ *       the mark   — the globe closes to a point and the logo is what is left
  *
  * This is the same scene as the page at /experience/, not a version of it. The
  * WebGL half is literally that app's own components, bundled by
@@ -82,6 +86,18 @@ export function apex(site, _players = [], { taremiModel = false } = {}) {
     </div>
 
     ${chapters.map((chapter, i) => storyChapter(chapter, i)).join('\n')}
+
+    <!-- What the globe collapses into. It is the site's own mark, sitting in
+         the middle of the stage at the size the globe ends at, so the handover
+         is one thing shrinking as another grows in the same place rather than
+         a cut. Chapter-numbered like the rest, so the same crossfade drives
+         it and apex.js needs no special case. -->
+    <div class="apex__chapter apex__chapter--mark" data-apex-chapter="${chapters.length + 1}">
+      <img class="apex__mark" src="${attr(site.brand.logo)}" alt=""
+           width="300" height="300" loading="lazy" decoding="async" aria-hidden="true">
+      <p class="apex__mark-line">${esc(site.brand.name)}</p>
+      <p class="apex__mark-sub">${esc(site.brand.tagline)}</p>
+    </div>
   </div>
 </section>`;
 }

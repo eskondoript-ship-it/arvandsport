@@ -13,27 +13,44 @@
  * and the hosts just say how far along they are. It also takes GSAP out of the
  * homepage bundle, which it was otherwise being carried into for four tweens.
  *
- * The three acts, unchanged:
+ * The six beats, over one scroll:
  *
- *   0 → 30%    the camera closes in, one full turn of the ball
- *   30 → 70%   the strike: contact, flight, the shell opening along its seams,
- *              and the material crossing to a glowing neon wireframe
- *   70 → 100%  the camera comes round to the side, callouts active
+ *   0 → 16%    the ball turns and the camera closes in
+ *   16 → 32%   the strike: contact, and the ball away on an arc
+ *   32 → 50%   the camera follows it down into a stadium, which builds itself
+ *              out of the ground around it
+ *   50 → 66%   the shell opens along its seams and the ball crosses to a
+ *              tactical read of itself -- wireframe, panels apart, measured
+ *   66 → 84%   the pieces gather back into a globe, lit from inside
+ *   84 → 100%  the globe collapses to a point, and the mark is what is left
+ *
+ * The beats overlap on purpose. A scene that finished one move before starting
+ * the next would read as six animations played in a row; the strike is still
+ * settling as the stadium starts coming up, and the globe is already gathering
+ * before the tactical read has finished being taken apart.
  */
 
 export type SceneState = {
-  /** One full revolution over the approach. */
+  /** The opening turn, and the camera closing in with it. */
   spin: number;
-  /** Camera closing in. */
+  /** Camera closing in. Kept separate from spin: the camera eases, the ball does not. */
   dolly: number;
   /** Contact and flight. */
   kick: number;
+  /** The descent into the bowl -- the camera following the ball down. */
+  arrive: number;
+  /** How far the bowl has been built, floor to roof. */
+  build: number;
   /** How far the panels have travelled outward. */
   explode: number;
   /** Shaded surface at 0, glowing wireframe at 1. */
   wire: number;
-  /** The camera's swing round to the detail. */
+  /** The tactical read: callouts live, the ball measured rather than shown. */
   detail: number;
+  /** The pieces gathering back into a sphere, and the sphere lighting up. */
+  globe: number;
+  /** The globe closing to a point, and the mark taking its place. */
+  collapse: number;
 };
 
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -45,16 +62,27 @@ const span = (progress: number, start: number, length: number) =>
 /** GSAP's power2.out, which is what the kick was authored with. */
 const power2Out = (t: number) => 1 - (1 - t) ** 2;
 
+/** GSAP's power3.inOut, for the camera moves that have to settle. */
+const power3InOut = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+
 export function sceneState(progress: number): SceneState {
   const p = clamp01(progress);
-  const approach = span(p, 0, 0.3);
+  const approach = span(p, 0, 0.16);
   return {
     spin: approach,
     dolly: approach,
-    kick: power2Out(span(p, 0.3, 0.4)),
-    explode: span(p, 0.36, 0.34),
-    wire: span(p, 0.34, 0.3),
-    detail: span(p, 0.7, 0.3),
+    kick: power2Out(span(p, 0.16, 0.14)),
+    /* Eased at both ends: the camera is chasing something, and a chase that
+       starts and stops at a constant rate reads as a slide. */
+    arrive: power3InOut(span(p, 0.3, 0.2)),
+    build: span(p, 0.34, 0.16),
+    explode: span(p, 0.5, 0.14),
+    wire: span(p, 0.48, 0.12),
+    detail: span(p, 0.5, 0.16),
+    /* Starts before the tactical read is done, so the pieces are already being
+       drawn back together while the callouts are still up. */
+    globe: power3InOut(span(p, 0.63, 0.19)),
+    collapse: power3InOut(span(p, 0.84, 0.16)),
   };
 }
 

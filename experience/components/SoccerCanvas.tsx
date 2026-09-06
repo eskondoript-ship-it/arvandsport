@@ -7,7 +7,8 @@ import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNo
 import * as THREE from 'three';
 
 import SoccerModel from '@/components/SoccerModel';
-import Stadium, { STADIUM_FROM } from '@/components/Stadium';
+import Stadium from '@/components/Stadium';
+import Globe from '@/components/Globe';
 import { buildProceduralPanels } from '@/lib/ball';
 import { scrollState } from '@/lib/scroll';
 
@@ -62,19 +63,21 @@ function ProceduralBall() {
 }
 
 /**
- * Mount the stadium only once the scroll is within reach of its chapter.
+ * Mount the stadium only once the scroll is within reach of its beat.
  *
- * This is what makes the bowl affordable: 781KB over the wire, requested at
- * the moment it is nearly needed rather than alongside the ball. Mounting is
- * the fetch -- useGLTF asks for the file when the component first renders --
- * so this component and the loading policy are the same thing.
+ * This is what makes the bowl affordable: 781KB over the wire, requested at the
+ * moment it is nearly needed rather than alongside the ball. Mounting is the
+ * fetch -- useGLTF asks for the file when the component first renders -- so
+ * this component and the loading policy are the same thing.
  *
- * It watches the scroll from inside the frame loop instead of subscribing,
+ * It watches the scroll from inside the frame loop rather than subscribing,
  * because the scene is already reading scrollState every frame and one more
  * comparison there is free. The flag only ever goes from false to true: a
- * visitor who scrolls back up keeps the stadium they already paid for, and
- * unmounting it would drop the model and re-fetch it on the way back down.
+ * visitor scrolling back up keeps the model they already paid for, and
+ * unmounting would drop it and re-fetch it on the way back down.
  */
+const STADIUM_FROM = 0.26;
+
 function StadiumWhenNeeded() {
   const [wanted, setWanted] = useState(false);
 
@@ -174,6 +177,10 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
           antialias: true,
           alpha: true,
           powerPreference: 'high-performance',
+          /* The stadium builds by sweeping a clipping plane up through itself,
+             and a plane clips nothing unless the renderer is told to honour
+             the ones materials carry. Without this the bowl simply appears. */
+          localClippingEnabled: true,
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.05,
         }}
@@ -211,10 +218,11 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
           infiniteGrid
         />
 
-        {/* The bowl, deliberately outside <Selection> -- it is already a
-            self-lit wireframe and letting the bloom find it turned a drawing
-            into a smear of light. */}
+        {/* Both deliberately outside <Selection>: they are already self-lit
+            line work, and letting the bloom find them turned a drawing into a
+            smear of light. */}
         <StadiumWhenNeeded />
+        <Globe />
 
         <Selection>
           {/* autoClear off: the composer draws over the transparent canvas rather

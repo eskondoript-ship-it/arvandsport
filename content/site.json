@@ -470,7 +470,7 @@
     }
   },
   "story": {
-    "_note": "The homepage's three chapters, read by src/templates/apex.mjs. They are about the agency, not about the ball turning behind them -- the ball is the set piece and these are what the visitor is meant to come away knowing. Every figure quoted here must match content/site.json stats or content/players.json, and every claim must be one content/site.json already makes in about or serviceGroups. Nothing is rounded up or written for the rhythm.",
+    "_note": "The homepage's six beats, read by src/templates/apex.mjs and scrubbed by src/scripts/apex.js. They are about the agency, not about what the ball is doing behind them -- the ball is the set piece and these are what the visitor is meant to come away knowing. Every figure quoted here must match content/site.json stats or content/players.json, and every claim must be one this file already makes in about or serviceGroups. Nothing is rounded up or written for the rhythm. The count here has to match WINDOWS in src/scripts/apex.js and the beats in experience/lib/choreography.ts; a chapter with no beat behind it is copy over an empty scene.",
     "chapters": [
       {
         "index": "01",
@@ -486,7 +486,19 @@
       },
       {
         "index": "03",
-        "kicker": "The record",
+        "kicker": "The match",
+        "title": "Fixtures,\narranged",
+        "body": "The second licence is the one clubs call about: friendlies, tournaments and tours, put together between federations that have never met."
+      },
+      {
+        "index": "04",
+        "kicker": "The read",
+        "title": "A career,\ntaken apart",
+        "body": "A transfer is a decision made once and lived with for years. Ours are made against the whole picture — the contract, the minutes, the medical, the market."
+      },
+      {
+        "index": "05",
+        "kicker": "The reach",
         "title": "Twenty-five years,\nforty-six countries",
         "body": "Two hundred and thirty players placed across eighty clubs, and the licences to do it in either seat — for the player, and for the match."
       }

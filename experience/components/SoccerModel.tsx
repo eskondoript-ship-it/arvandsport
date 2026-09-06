@@ -83,10 +83,17 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
       const squash = 1 - Math.sin(contact * Math.PI) * 0.16 * (1 - flight);
       ball.current.scale.set(1 / squash, squash, 1 / squash);
 
+      /* The flight carries it away, and the descent brings it back to the
+       * middle: the camera is chasing it down into the bowl, and a chase ends
+       * with the thing being chased in the middle of the frame rather than
+       * still leaving it. Damped by `arrive` and then by `globe`, so by the
+       * time the sphere is forming the ball is back at the origin it forms
+       * around. */
+      const settle = (1 - a.arrive * 0.85) * (1 - a.globe);
       ball.current.position.set(
-        flight * 1.15 - contact * 0.14,
-        Math.sin(flight * Math.PI * 0.85) * 0.85,
-        flight * -0.6,
+        (flight * 1.15 - contact * 0.14) * settle,
+        Math.sin(flight * Math.PI * 0.85) * 0.85 * settle,
+        flight * -0.6 * settle,
       );
     }
 
@@ -109,6 +116,20 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     }
 
     for (const material of materials) material.userData.uProgress.value = a.wire;
+
+    /* The panels draw themselves back in and go as the globe forms -- the ball
+     * is not replaced by the globe so much as it becomes one, and two spheres
+     * overlapping for a beat would give that away. Scaled rather than faded:
+     * the panel material is a shader with its own alpha and reaching into it
+     * from here would put the crossfade in two places. */
+    if (ball.current) {
+      /* Cubed, so the ball holds its size while the globe is still faint and
+       * then goes quickly once the sphere is legible. Linear left a shrinking
+       * ball sitting beside a growing globe for most of the beat, which read
+       * as two objects rather than one becoming the other. */
+      if (a.globe > 0) ball.current.scale.multiplyScalar((1 - a.globe) ** 3);
+      ball.current.visible = a.globe < 0.92;
+    }
 
     /* --- impact ring, alive only across the moment of contact ---
      * Windowed on a rising kick rather than on distance from a midpoint: the
@@ -140,6 +161,13 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
      * reading as a ball coming apart and starts reading as one that vanished.
      */
     let range = 6.4 - a.dolly * 2.1 + a.explode * 5.4 - a.detail * 1.1;
+    /* The descent pulls back as well as down: the bowl is three and a half
+       units across and has to fit the frame whole, which at this field of view
+       needs about eight units of distance. */
+    range += a.arrive * 3.4;
+    /* The globe gathers at about the ball's own size, so the camera comes back
+       in from wherever the descent and the exploded diagram had pushed it. */
+    range -= a.globe * 3.2;
 
     /* A perspective camera's field of view is vertical, so a portrait viewport
      * keeps all of the height and loses the width: the ball is comfortably
@@ -162,7 +190,7 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     const portrait = aspect < 1;
     if (portrait) {
       const FILL = 0.78;
-      const contentRadius = 1 + a.explode * EXPLODE_DISTANCE;
+      const contentRadius = (1 + a.explode * EXPLODE_DISTANCE) * (1 - a.globe * 0.45);
       const halfFov = THREE.MathUtils.degToRad((camera as THREE.PerspectiveCamera).fov / 2);
       range = Math.max(range, contentRadius / (Math.tan(halfFov) * aspect * FILL));
     } else {
@@ -170,9 +198,24 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     }
 
     const orbit = a.detail * 0.8;
+    /* Height is the whole of beat three. The camera starts level with the ball,
+     * drops below it as the strike carries it away and the bowl comes up, and
+     * ends up looking along the pitch from inside the stand -- which is what
+     * "follows it into the stadium" has to mean if the stadium is a real object
+     * sitting at y -2.6 rather than a backdrop.
+     *
+     * It climbs back out for the globe: a globe read from below is a globe seen
+     * from underneath, and the point of that beat is the whole sphere. */
+    const height =
+      0.25 +
+      a.detail * 0.3 -
+      a.kick * 0.15 -
+      a.arrive * 1.2 +
+      a.globe * 1.1;
+
     tmp.set(
       Math.sin(orbit) * range,
-      0.25 + a.detail * 0.3 - a.kick * 0.15,
+      height,
       Math.cos(orbit) * range,
     );
     camera.position.lerp(tmp, 1 - Math.pow(0.0015, delta));
@@ -192,7 +235,14 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
      * reading over it. It was dropped below the copy instead, which on a phone
      * put it in the bottom third under the brand line rather than behind it. */
     const bias = portrait ? 0 : a.dolly * 0.85 - a.detail * 0.45;
-    lookAt.set(a.kick * 0.55 - bias, a.kick * 0.4, 0);
+    /* Aiming down into the bowl during the descent, and back level for the
+       globe. Without this the camera drops but keeps looking at where the ball
+       used to be, which reads as the floor rising rather than as a dive. */
+    lookAt.set(
+      a.kick * 0.55 - bias,
+      a.kick * 0.4 - a.arrive * 1.6 + a.globe * 1.5,
+      0,
+    );
     camera.lookAt(lookAt);
   });
 

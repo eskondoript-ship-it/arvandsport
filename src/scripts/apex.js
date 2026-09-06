@@ -1,10 +1,15 @@
 /**
  * The opening set piece's choreography.
  *
- * Three chapters over one sticky stage: the brand line, then who the agency
- * is, what it does and its record. This side owns the copy, the instrument
- * frame and the scrub; the ball itself is drawn by the React Three Fiber
- * island in experience/hero/.
+ * Six beats over one sticky stage: the brand line, the agency, the strike, the
+ * stadium, the tactical read, the globe, and the mark it collapses into. This
+ * side owns the copy, the instrument frame and the scrub; the ball itself is
+ * drawn by the React Three Fiber island in experience/hero/.
+ *
+ * The windows below and the beats in experience/lib/choreography.ts describe
+ * the same story from two sides, and they have to agree: a chapter whose
+ * window does not sit over its beat is copy about a stadium arriving while the
+ * ball is still being kicked.
  *
  * Budget matters here: this is the first thing a phone renders. Only transform
  * and opacity are touched, so the whole sequence stays on the compositor, and
@@ -120,7 +125,7 @@ export function initApex(root = document) {
 
   /* The scene's own progress. Null until the island is up, and null forever on
    * the sprite path — a background image cannot come apart or fly, so those
-   * visitors get the same three chapters with the ball simply turning behind
+   * visitors get the same six chapters with the ball simply turning behind
    * them. */
   let setSceneProgress = null;
 
@@ -260,10 +265,13 @@ export function initApex(root = document) {
    * there. The windows overlap by a fade's width on purpose: a hard cut between
    * two pieces of copy over a continuous scene reads as a glitch. */
   const WINDOWS = [
-    [0, 0.1],     // ARVAND / SPORT
-    [0.08, 0.3],  // 01 who we are
-    [0.3, 0.7],   // 02 what we do
-    [0.7, 1],     // 03 the record
+    [0, 0.08],       // ARVAND / SPORT
+    [0.06, 0.2],     // 01 who we are      -- the ball turns
+    [0.2, 0.34],     // 02 what we do      -- the strike
+    [0.34, 0.52],    // 03 the match       -- down into the stadium
+    [0.52, 0.68],    // 04 the read        -- the tactical take-apart
+    [0.68, 0.86],    // 05 the reach       -- the globe
+    [0.86, 1],       // the mark
   ];
   const FADE = 0.05;
 
