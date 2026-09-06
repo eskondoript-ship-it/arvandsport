@@ -64,7 +64,7 @@ the head that leaves its answer on `<html>` as `wants-scene`. It asks three
 questions, none of them about screen size: reduced motion, Save-Data, and
 whether a WebGL2 context can be had. It runs there rather than in `apex.js`
 because the sprite sheet is a CSS background and the browser starts fetching it
-long before a deferred module runs — 987KB on desktop, 291KB on a phone, spent
+long before a deferred module runs — 1.6MB on desktop, 472KB on a phone, spent
 on a picture of the ball by people who were about to be shown the ball. The
 stylesheet clears the background for `wants-scene`; `apex.js` reads the same
 class, and puts it back if the scene fails to mount.

@@ -67,8 +67,13 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
 
     /* --- the ball itself --- */
     if (ball.current) {
-      // An idle drift under the scrubbed rotation, so it is never dead still.
-      ball.current.rotation.y = a.spin * Math.PI * 2 + a.kick * Math.PI * 5 + t * 0.12;
+      /* An idle drift under the scrubbed rotation, so it is never dead still.
+       * Slow on purpose: this one runs on its own clock rather than on the
+       * scroll, so it is the only rotation a visitor who is not moving can
+       * see, and at 0.12 rad/s the ball read as spinning by itself. 0.07 is
+       * about a revolution and a half a minute -- movement you notice on
+       * second glance rather than motion. */
+      ball.current.rotation.y = a.spin * Math.PI * 1.6 + a.kick * Math.PI * 5 + t * 0.07;
       ball.current.rotation.x = a.kick * Math.PI * 1.4 - 0.12;
       ball.current.rotation.z = a.kick * 0.5;
 

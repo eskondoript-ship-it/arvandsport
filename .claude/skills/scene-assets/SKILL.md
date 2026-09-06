@@ -66,7 +66,7 @@ pieces. The panel count is the check: four, of roughly 1,670 triangles each.
 
 ## The sprite
 
-`tools/render-sprite.mjs` renders the 30-frame rotation sheet **from the same
+`tools/render-sprite.mjs` renders the 48-frame rotation sheet **from the same
 GLB the WebGL scene loads**, in a real browser with three.js. That is the point
 of it: when the sprite was a render of a different ball, the page opened on one
 ball and swapped it for another a second later, and phones — which never get

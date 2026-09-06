@@ -30,7 +30,7 @@ import { esc, attr, ICONS } from './layout.mjs';
  * screen with a working WebGL2 context it is the real mesh: its four panels are
  * recovered from the geometry by tools/glb-panels.py, which is what lets the
  * scene open it along its actual seams rather than along invented ones.
- * Everywhere else it is a 30-frame rotation sprite, which costs one
+ * Everywhere else it is a 48-frame rotation sprite, which costs one
  * background-position write per frame and stays on the compositor. The sprite
  * is rendered from that same file by tools/render-sprite.mjs -- it used to be a
  * render of a different ball, so the page opened on one ball and swapped it for

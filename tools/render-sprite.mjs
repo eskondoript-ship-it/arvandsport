@@ -1,11 +1,12 @@
 /**
  * Render the hero's rotation sprite from the ball that is actually in the scene.
  *
- * The sprite is what everyone sees first and what phones see for good: the
- * WebGL hero is desktop-only and takes a moment to mount even there, so for the
- * first second of every visit the sprite is the ball. When it was rendered from
- * a different model than the scene uses, the page opened on one ball and
- * swapped to another in front of the visitor.
+ * The sprite is the hero for everyone the WebGL scene cannot reach -- no WebGL2
+ * context, or a bundle that failed to load. It is not on the common path any
+ * more, but when it is shown it is shown for the whole visit, so it has to be
+ * the same object the scene would have drawn. When it was rendered from a
+ * different model, the page opened on one ball and swapped to another in front
+ * of the visitor.
  *
  * So it is rendered from the same file the scene loads, with three.js, in a
  * real browser. There is no offline path that would be honest here -- the
@@ -13,12 +14,13 @@
  * and reimplementing those in a rasteriser would produce a picture of a
  * different ball again.
  *
- * The browser also composes the sheet. Reading thirty PNGs back into Node and
- * tiling them needs an image library the root has no business depending on;
- * a canvas 6 by 5 tiles wide costs one drawImage per frame and comes back as
- * one file.
+ * The browser also composes the sheet. Reading the frames back into Node and
+ * tiling them needs an image library the root has no business depending on; a
+ * canvas COLS by ROWS tiles wide costs one drawImage per frame and comes back
+ * as one file.
  *
- * Usage:  node tools/render-sprite.mjs [--frames 30] [--size 300]
+ * Usage:  node tools/render-sprite.mjs [--frames 48] [--cols 8] [--size 300]
+ *                                      [--suffix -sm]
  * Needs:  experience/node_modules (three, esbuild) and playwright.
  */
 import { spawnSync } from 'node:child_process';
@@ -40,9 +42,9 @@ const flag = (name, fallback) => {
   const at = args.indexOf(`--${name}`);
   return at === -1 ? fallback : Number(args[at + 1]);
 };
-const FRAMES = flag('frames', 30);
+const FRAMES = flag('frames', 48);
 const SIZE = flag('size', 300);
-/* A suffix lets the same 6x5 layout be rendered at a second, smaller scale for
+/* A suffix lets the same layout be rendered at a second, smaller scale for
    phones -- `--suffix -sm --size 150`. Keeping the layout identical means the
    frame arithmetic in src/scripts/apex.js and the background-size in the
    stylesheet are the same for both, and only the URL changes. */
@@ -50,7 +52,17 @@ const SUFFIX = (() => {
   const at = args.indexOf('--suffix');
   return at === -1 ? '' : args[at + 1];
 })();
-const COLS = 6;
+/* The grid, and the only place it is decided.
+ *
+ * Three things have to agree on it or the sprite shows the wrong frame: this,
+ * COLS/ROWS in src/scripts/apex.js, and background-size in src/styles/pages.css
+ * -- which is (COLS * 100)% by (ROWS * 100)%. There is no check that will catch
+ * a disagreement, so the numbers are printed at the end of a render, ready to
+ * be copied into the other two.
+ *
+ * A near-square grid keeps the sheet's two dimensions close, which is what
+ * decoders like; 48 frames is 8 by 6. */
+const COLS = flag('cols', 8);
 const ROWS = Math.ceil(FRAMES / COLS);
 
 /* The scene's own opening pose, so the swap from sprite to canvas does not
@@ -229,13 +241,17 @@ fs.writeFileSync(png, Buffer.from(data.split(',')[1], 'base64'));
 const convert = spawnSync('python3', ['-c', `
 from PIL import Image
 sheet = Image.open(${JSON.stringify(png)}).convert('RGBA')
-# The glass costs more to encode than the matte ball did -- refraction puts
-# detail everywhere the flat print did not -- so this sheet is about 950KB
-# where the old one was 340. Dropping the quality is not the lever it looks
-# like: at 50 it still came to 925KB, because most of the weight is the alpha
-# channel, which WebP stores losslessly either way. The sheet is desktop-only
-# and is now the fallback for a scene that almost always arrives, so it is
-# rarely fetched at all; the still that phones actually get is 72KB.
+# 1.6MB at 48 frames, against 987KB at 30 and 340KB for the matte ball this
+# replaced. The glass costs more to encode -- refraction puts detail
+# everywhere the flat print did not -- and frames cost linearly on top.
+# Dropping the quality is not the lever it looks like: at 50 the 30-frame
+# sheet still came to 925KB, because most of the weight is the alpha channel,
+# which WebP stores losslessly either way.
+# What makes the size affordable is that the sheet is no longer on the common
+# path at all: the scene goes to everyone who can render it, and SCENE_BOOT
+# clears this background before it is ever requested. It is fetched only when
+# the scene cannot run -- no WebGL2, or a bundle that failed -- and the still
+# that reduced-motion visitors get is 72KB.
 sheet.save(${JSON.stringify(path.join(OUT_DIR, 'ball-sheet.webp')).replace('.webp', '')}${JSON.stringify(SUFFIX)} + '.webp', 'WEBP', quality=68, method=6)
 still = sheet.crop((0, 0, ${SIZE}, ${SIZE})).resize((420, 420), Image.LANCZOS)
 still.save(${JSON.stringify(path.join(OUT_DIR, 'ball-still.webp')).replace('.webp', '')}${JSON.stringify(SUFFIX)} + '.webp', 'WEBP', quality=88, method=6)
@@ -251,4 +267,9 @@ const sheetOut = path.join(OUT_DIR, `ball-sheet${SUFFIX}.webp`);
 const stillOut = path.join(OUT_DIR, `ball-still${SUFFIX}.webp`);
 console.log(convert.stdout.trim());
 console.log(`${path.basename(sheetOut)} ${kb(sheetOut)}, ${path.basename(stillOut)} ${kb(stillOut)}`);
+console.log(
+  `layout ${FRAMES} frames, ${COLS}x${ROWS}` +
+    `  ->  apex.js: COLS = ${COLS}, ROWS = ${ROWS}` +
+    `  |  pages.css: background-size: ${COLS * 100}% ${ROWS * 100}%`,
+);
 fs.rmSync(tmp, { recursive: true, force: true });

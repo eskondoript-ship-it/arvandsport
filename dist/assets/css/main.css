@@ -1905,20 +1905,22 @@ a.office__row:hover { color: var(--white); }
   translate: -50% -50%;
   pointer-events: none;
 }
-/* The ball is a 30-frame rotation of the client's own model, laid out 6x5 and
+/* The ball is a 48-frame rotation of the client's own model, laid out 8x6 and
    rendered from the very GLB the WebGL scene loads by tools/render-sprite.mjs.
    It turns on every screen, because it is what holds the hero for anyone the
    scene does not reach -- no WebGL2, Save-Data, a bundle that never arrives --
    and on any of those a still is a poor version of it.
 
-   Phones get their own sheet at half the frame size -- 291KB against 987 --
+   Phones get their own sheet at half the frame size -- 472KB against 1599 --
    the layout is identical, so the frame arithmetic in src/scripts/apex.js and
    the background-size here are the same for both and only the URL differs.
    The single still is what is left for anyone who asked for less motion. */
 .apex__ball {
   display: block; width: 100%; height: 100%;
   background-image: url("../img/ui/ball-sheet-sm.webp");
-  background-size: 600% 500%;
+  /* 8 columns by 6 rows. This has to match COLS/ROWS in src/scripts/apex.js
+     and the grid in tools/render-sprite.mjs; the render prints all three. */
+  background-size: 800% 600%;
   background-repeat: no-repeat;
   background-position: 0% 0%;
 }

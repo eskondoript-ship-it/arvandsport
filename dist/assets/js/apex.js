@@ -83,16 +83,22 @@ export function initApex(root = document) {
 
   if (!canAnimate() || !ScrollTrigger) return;
 
-  /* The sprite is 30 frames of a full rotation laid out 6 across, 5 down.
+  /* The sprite is 48 frames of a full rotation laid out 8 across, 6 down.
    * Setting a frame is one background-position write, which the compositor
-   * handles without a layout or a paint of anything else. */
-  const COLS = 6;
-  const ROWS = 5;
+   * handles without a layout or a paint of anything else.
+   *
+   * It was 30, and 12 degrees a step is visible as stepping on a ball this
+   * size -- the panels jump rather than travel. 48 is 7.5 degrees and reads as
+   * a turn. The grid is decided in tools/render-sprite.mjs, which prints these
+   * two numbers and the stylesheet's background-size at the end of a render;
+   * all three have to agree and nothing checks that they do. */
+  const COLS = 8;
+  const ROWS = 6;
   const FRAMES = COLS * ROWS;
   /* Every screen. The sprite is the fallback everywhere now rather than the
      hero of one device class, and a fallback that turns is worth having on a
      phone as much as on a laptop; phones are served a smaller sheet with the
-     same 6x5 layout, so nothing below has to know which one is loaded. */
+     same 8x6 layout, so nothing below has to know which one is loaded. */
   const spriteActive = () => true;
 
   const spriteFrame = (n) => {
@@ -153,15 +159,21 @@ export function initApex(root = document) {
   gsap.set(fades, { opacity: 0, y: 14 });
 
   const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
-  /* Spins up and settles, rather than appearing already turning. */
-  const spin = { f: -14 };
+  /* Spins up and settles, rather than appearing already turning.
+   *
+   * Written as a fraction of a revolution rather than as a frame count, so
+   * changing FRAMES does not silently change how far the ball turns. It was a
+   * bare -14, which at 30 frames was most of a half turn and at 48 would have
+   * become a third of one. */
+  const TURN = (fraction) => fraction * FRAMES;
+  const spin = { f: -TURN(0.47) };
   intro
     /* Scale only when the scene is coming: `from` on opacity would tween the
        held-back sprite straight back to visible. */
     .from(object, expectsScene
-      ? { scale: 0.82, duration: 1.1, ease: 'power2.out' }
-      : { opacity: 0, scale: 0.82, duration: 1.1, ease: 'power2.out' }, 0)
-    .to(spin, { f: 0, duration: 1.5, ease: 'power3.out', onUpdate: () => showFrame(spin.f) }, 0)
+      ? { scale: 0.82, duration: 1.4, ease: 'power2.out' }
+      : { opacity: 0, scale: 0.82, duration: 1.4, ease: 'power2.out' }, 0)
+    .to(spin, { f: 0, duration: 2.2, ease: 'power3.out', onUpdate: () => showFrame(spin.f) }, 0)
     .to(fades, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.3);
 
   /* Scroll drives both chapters from one timeline over the whole section.
@@ -270,11 +282,11 @@ export function initApex(root = document) {
   exit.to({ length: 0 }, { length: 1, duration: 1, ease: 'none' }, 0);
 
   /* The sprite's own rotation, for everyone who is not getting the scene: a
-   * little over half a revolution across the section, which reads as deliberate
-   * rather than as a loop. Once the island is up this is a no-op, because the
-   * mesh turns itself from the same progress. */
+   * little under half a revolution across the section, which reads as
+   * deliberate rather than as a loop. Once the island is up this is a no-op,
+   * because the mesh turns itself from the same progress. */
   const scrubbed = { f: 0 };
-  exit.to(scrubbed, { f: 17, duration: 1, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0);
+  exit.to(scrubbed, { f: TURN(0.45), duration: 1, ease: 'none', onUpdate: () => showFrame(scrubbed.f) }, 0);
 
   chapters.forEach((chapter, i) => {
     const [from, to] = WINDOWS[i] || [0, 1];
@@ -319,10 +331,12 @@ export function initApex(root = document) {
       .to(object, { x: dir * 190, y: -150, duration: 0.42, ease: 'power2.out' }, 0.06)
       .to(object, { y: 0, duration: 0.5, ease: 'power2.in' }, 0.48)
       .to(object, { x: 0, duration: 0.62, ease: 'power2.inOut' }, 0.48)
-      /* Two full turns while it is in the air. */
+      /* A turn and a half while it is in the air, over slightly longer than
+         the arc, so it is still slowing as it lands rather than stopping dead
+         at the top of the bounce. */
       .to(spinFrames, {
-        f: dir * FRAMES * 2,
-        duration: 1.05,
+        f: dir * TURN(1.5),
+        duration: 1.25,
         ease: 'power2.out',
         onUpdate: () => showFrame(spinFrames.f),
       }, 0.06)
