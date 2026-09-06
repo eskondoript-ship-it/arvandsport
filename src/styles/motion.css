@@ -70,6 +70,4 @@
   .marquee__track { animation: none; }
   .marquee { overflow-x: auto; }
   .cursor { display: none; }
-  /* Scrubbed scenes never initialise, so their finished frame is what shows. */
-  .strike__hint { display: none; }
 }

@@ -129,7 +129,7 @@ async function run(label, context, expectWebgl) {
      accidentally covers the rest of the page still passes every check above. */
   const missing = (
     await page.evaluate(() =>
-      ['#about', '#services', '#players', '[data-strike]', '#news', '#partners'].map((sel) => [
+      ['[data-spotlight]', '#about', '#services', '#players', '#news', '#partners'].map((sel) => [
         sel,
         Boolean(document.querySelector(sel)),
       ]),

@@ -144,6 +144,11 @@
 /* Shared across themes: type, rhythm, geometry, easing. */
 :root {
   --font: "Roboto", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  /* The display face, for the two places carrying the brand's editorial
+     contrast: the hero's ARVAND SPORT and the spotlight's figures. Named here
+     rather than restated in each, because a stack that drifts between them is
+     a different-looking site on two screens of the same page. */
+  --display: "Playfair Display", "Bodoni MT", Didot, "Times New Roman", Georgia, serif;
 
   /* Paper band. Sections can flip to this ground by redefining the colour
      tokens locally — see .section--paper. */

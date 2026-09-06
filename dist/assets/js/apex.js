@@ -1,11 +1,10 @@
 /**
  * The opening set piece's choreography.
  *
- * Three chapters over one sticky stage: the brand line, then the ball, the
- * strike and the player. This side owns the copy, the instrument frame and the
- * scrub; the ball itself is drawn by the React Three Fiber island in
- * experience/hero/, which is the same scene as the page at /experience/ rather
- * than a version of it.
+ * Three chapters over one sticky stage: the brand line, then who the agency
+ * is, what it does and its record. This side owns the copy, the instrument
+ * frame and the scrub; the ball itself is drawn by the React Three Fiber
+ * island in experience/hero/.
  *
  * Budget matters here: this is the first thing a phone renders. Only transform
  * and opacity are touched, so the whole sequence stays on the compositor, and
@@ -266,9 +265,9 @@ export function initApex(root = document) {
    * two pieces of copy over a continuous scene reads as a glitch. */
   const WINDOWS = [
     [0, 0.1],     // ARVAND / SPORT
-    [0.08, 0.3],  // 01 the ball
-    [0.3, 0.7],   // 02 the strike
-    [0.7, 1],     // 03 the player
+    [0.08, 0.3],  // 01 who we are
+    [0.3, 0.7],   // 02 what we do
+    [0.7, 1],     // 03 the record
   ];
   const FADE = 0.05;
 

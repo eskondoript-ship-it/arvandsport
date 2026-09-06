@@ -1,5 +1,5 @@
 import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
-import { sectionHead, playerCard, articleCard, personCard, statBlock, BALL_SVG, KICKER_SVG } from './partials.mjs';
+import { sectionHead, playerCard, articleCard, personCard, statBlock } from './partials.mjs';
 import { apex } from './apex.mjs';
 import { spotlight } from './spotlight.mjs';
 
@@ -114,90 +114,6 @@ function roster(site, players) {
 }
 
 
-
-/**
- * The scroll-scrubbed strike sequence.
- *
- * Everything here is real: the cutout is the site's own image of Mehdi Taremi,
- * and the payoff numbers are his caps and goals as published on his profile.
- * The kick is choreography — a run-up, a plant, a ball leaving the boot — not
- * a doctored photograph.
- *
- * The markup is authored as the finished frame: player planted, ball at the
- * net, copy visible. JS sets the start states and scrubs from there, so the
- * no-JS and reduced-motion renderings are a composed still.
- */
-function strike(site, players) {
-  const config = site.strike;
-  const player = players.find((p) => p.slug === config.playerSlug);
-  if (!player) return '';
-
-  const speedLines = Array.from({ length: 7 }, (_, i) => `<span style="--i:${i}"></span>`).join('');
-  /* Net mesh, drawn as two crossing line sets. */
-  const mesh = [
-    ...Array.from({ length: 13 }, (_, i) => `<line x1="${i * 20}" y1="0" x2="${i * 20}" y2="160" />`),
-    ...Array.from({ length: 9 }, (_, i) => `<line x1="0" y1="${i * 20}" x2="240" y2="${i * 20}" />`),
-  ].join('');
-
-  return `<section class="strike" data-strike aria-labelledby="strike-title">
-  <div class="strike__pin" data-strike-pin>
-    <svg class="strike__pitch" data-strike-pitch viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <line data-draw x1="0" y1="470" x2="1200" y2="470" />
-      <line data-draw x1="120" y1="300" x2="120" y2="600" />
-      <path data-draw d="M780 600 L780 360 L1140 360 L1140 600" />
-      <path data-draw d="M900 600 L900 460 L1140 460 L1140 600" />
-      <circle data-draw cx="420" cy="470" r="90" />
-    </svg>
-
-    <div class="strike__speed" data-strike-speed aria-hidden="true">${speedLines}</div>
-
-    <div class="strike__figure" data-strike-player>${KICKER_SVG}</div>
-
-    <span class="strike__flash" data-strike-flash aria-hidden="true"></span>
-    <div class="strike__ball" data-strike-ball aria-hidden="true">
-      <span class="strike__tail" data-strike-tail></span>
-      <span class="strike__ball-core" data-strike-spin>${BALL_SVG}</span>
-    </div>
-
-    <div class="strike__net-box" data-strike-netbox aria-hidden="true">
-      <svg class="strike__net" data-strike-net viewBox="0 0 240 160">
-        <g class="strike__mesh">${mesh}</g>
-        <rect class="strike__frame" x="1" y="1" width="238" height="158" />
-      </svg>
-    </div>
-    <span class="strike__shock" data-strike-shock aria-hidden="true"></span>
-
-    <div class="strike__copy" data-strike-copy>
-      <figure class="strike__portrait">
-        <img src="${attr(config.image)}" alt="${attr(player.name)}" width="529" height="760" loading="lazy" decoding="async">
-      </figure>
-      <p class="strike__kicker">${esc(config.kicker)}</p>
-      <h2 class="strike__title" id="strike-title" data-strike-title>${esc(player.name)}</h2>
-      <p class="strike__sub">${esc([player.position.detail, player.club].filter(Boolean).join(' · '))}</p>
-      <dl class="strike__stats" data-strike-stats>
-        <div><dt>Caps</dt><dd><span data-scrub-counter="${attr(player.caps)}">${esc(player.caps)}</span></dd></div>
-        <div><dt>Goals</dt><dd><span data-scrub-counter="${attr(player.goals)}">${esc(player.goals)}</span></dd></div>
-      </dl>
-      <a class="btn btn--solid" href="${attr(player.url)}" data-magnetic><span>Full profile</span>${ICONS.arrow}</a>
-      ${
-        config.video
-          ? `<button class="embed" type="button"
-              data-embed
-              data-embed-provider="${attr(config.video.provider)}"
-              data-embed-id="${attr(config.video.id)}"
-              data-embed-title="${attr(`${player.name} — ${config.video.label}`)}">
-        <img src="${attr(config.image)}" alt="" width="529" height="760" loading="lazy" decoding="async">
-        <span class="embed__play" aria-hidden="true"></span>
-        <span class="embed__label">${esc(config.video.label)}</span>
-      </button>`
-          : ''
-      }
-    </div>
-
-    <p class="strike__hint" data-strike-hint aria-hidden="true">${esc(config.caption)}</p>
-  </div>
-</section>`;
-}
 
 export function clients(site) {
   return `<section class="clients section" id="clients">
@@ -343,7 +259,6 @@ export function renderHome({ site, players, news, taremiModel = false }) {
       about(site),
       servicesTeaser(site),
       roster(site, players),
-      strike(site, players),
       latestNews(site, news),
       partners(site),
       closing(site),

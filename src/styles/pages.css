@@ -216,144 +216,7 @@ a.office__row:hover { color: var(--white); }
 @media (max-width: 620px) { .form__grid { grid-template-columns: 1fr; } }
 .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.6rem; }
 
-/* ---------------------------------------------------------------- strike
- * The scrubbed Taremi sequence. Authored as the finished frame so the
- * no-JS / reduced-motion rendering is a composed still; motion.js sets the
- * start states and scrolls through them.
- */
-.strike { position: relative; background: var(--scene-bg); }
-.strike__pin {
-  /* The ball's rest position is derived from these, so it sits on the boot.
-     The boot lands at 65% across and 12% down the figure's box (see
-     POSES.strike in src/scripts/kicker.js). */
-  --fig-left: clamp(0rem, 4vw, 6rem);
-  --fig-size: clamp(210px, 27vw, 380px);
-  --fig-bottom: clamp(1rem, 5vh, 3rem);
-  --ball-size: clamp(36px, 4.4vw, 66px);
-
-  position: relative; overflow: hidden;
-  /* Fills the viewport while pinned. Capping this below 100svh left a strip
-     of the next section visible under a pinned scene, and made the scene
-     scroll away through its own leftover height once the pin released. */
-  min-height: 100svh;
-  display: grid; align-items: end;
-  padding: calc(var(--header-h) + 2rem) var(--gutter) clamp(2rem, 6vh, 4rem);
-}
-.strike__pitch { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .28; }
-.strike__pitch line, .strike__pitch path, .strike__pitch circle {
-  fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke;
-}
-
-
-
-.strike__speed { position: absolute; left: 0; bottom: 22%; z-index: 1; display: grid; gap: 10px; width: clamp(120px, 22vw, 280px); }
-.strike__speed span {
-  display: block; height: 2px; border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent));
-  opacity: .5; margin-left: calc(var(--i) * 9px);
-}
-
-.strike__ball {
-  position: absolute; z-index: 3;
-  width: var(--ball-size); aspect-ratio: 1;
-  left: calc(var(--fig-left) + .65 * var(--fig-size) - .5 * var(--ball-size));
-  bottom: calc(var(--fig-bottom) + .88 * var(--fig-size) - .5 * var(--ball-size));
-}
-.strike__ball-core { display: block; width: 100%; height: 100%; }
-.strike__ball svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .55)); }
-/* Comet streak. It sits on the untransformed wrapper so it never spins with
- * the ball, and points back along the flight. */
-.strike__tail {
-  position: absolute; top: 50%; right: 55%; z-index: -1;
-  width: clamp(90px, 13vw, 220px); height: 34%;
-  transform-origin: right center; translate: 0 -50%;
-  border-radius: 999px;
-  background: linear-gradient(270deg, rgba(5, 237, 255, .85), rgba(5, 237, 255, 0));
-}
-
-.strike__flash {
-  position: absolute; z-index: 3;
-  left: calc(var(--fig-left) + .65 * var(--fig-size) - 50px);
-  bottom: calc(var(--fig-bottom) + .88 * var(--fig-size) - 50px);
-  width: 100px; aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, .95), rgba(5, 237, 255, .35) 45%, transparent 70%);
-  opacity: 0; pointer-events: none;
-}
-
-/* Kept clear of the copy panel, which lands bottom-right. The wrapper carries
- * the layout position so JS can measure it; the svg inside carries the
- * animation. */
-.strike__net-box {
-  position: absolute; z-index: 1; right: clamp(2rem, 11vw, 14rem); top: clamp(2.5rem, 9vh, 5.5rem);
-  width: clamp(170px, 24vw, 320px);
-}
-.strike__net { width: 100%; height: auto; transform-origin: center bottom; }
-.strike__mesh line { stroke: rgba(236, 252, 255, .32); stroke-width: 1; }
-.strike__frame { fill: none; stroke: var(--white); stroke-width: 3; }
-
-.strike__shock {
-  position: absolute; z-index: 2; right: clamp(6rem, 19vw, 24rem); top: clamp(6rem, 18vh, 12rem);
-  width: clamp(70px, 10vw, 150px); aspect-ratio: 1; border-radius: 50%;
-  border: 2px solid var(--accent); opacity: 0;
-}
-
-.strike__copy {
-  position: relative; z-index: 4; justify-self: end; max-width: 27rem;
-  padding: clamp(1.2rem, 3vw, 2rem);
-  border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: var(--header-bg);
-  backdrop-filter: blur(14px);
-}
-.strike__kicker { font-size: var(--step--1); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
-.strike__title { font-size: var(--step-3); text-transform: uppercase; letter-spacing: -.03em; margin-top: .4rem; }
-.strike__sub { color: var(--fg-muted); font-size: var(--step--1); margin-top: .35rem; }
-.strike__stats { display: flex; gap: clamp(1.5rem, 4vw, 3rem); margin: 1.3rem 0; }
-.strike__stats dt { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--fg-faint); }
-.strike__stats dd { margin: .2rem 0 0; font-size: var(--step-3); font-weight: 800; line-height: 1; letter-spacing: -.04em; }
-.strike__hint {
-  position: absolute; inset: auto auto clamp(.8rem, 2vh, 1.4rem) 50%; transform: translateX(-50%);
-  font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: var(--fg-faint); white-space: nowrap;
-}
-
-@media (max-width: 860px) {
-  .strike__pin { align-content: end; gap: 1.2rem; }
-  .strike__player { width: 44vw; opacity: .55; }
-  .strike__copy { justify-self: stretch; max-width: none; }
-  .strike__net-box { width: 42vw; top: clamp(4rem, 13vh, 8rem); right: 1rem; }
-  .strike__hint { display: none; }
-}
-
 /* ------------------------------------------------------- horizontal rail */
-
-/* ------------------------------------------------------- the kick figure
- * Original stroke figure, posed by src/scripts/kicker.js. It replaces the
- * static cutout as the moving element; the photograph stays in the copy
- * panel, where it does the job of saying who this is.
- */
-.strike__figure {
-  position: absolute; left: var(--fig-left); bottom: var(--fig-bottom);
-  z-index: 2; width: var(--fig-size); aspect-ratio: 1;
-}
-.kicker { width: 100%; height: 100%; overflow: visible; }
-.kicker line {
-  stroke: var(--white); stroke-width: 9; stroke-linecap: round;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .5));
-}
-.kicker__torso { stroke-width: 13 !important; }
-.kicker__limbs--near line { stroke: var(--accent); }
-.kicker__head { fill: var(--white); }
-
-.strike__portrait {
-  width: 54px; height: 54px; margin: 0 0 .9rem; overflow: hidden;
-  border-radius: 50%; border: 1px solid var(--line-strong);
-  background: rgba(0, 52, 88, .5);
-}
-.strike__portrait img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-
-@media (max-width: 860px) {
-  .strike__pin { --fig-size: 46vw; --fig-left: 0rem; }
-  .strike__figure { opacity: .9; }
-}
 
 /* ------------------------------------------------------------- live wire */
 .wire__bar {
@@ -676,7 +539,7 @@ a.office__row:hover { color: var(--white); }
   display: flex; align-items: center;
   width: 100%; margin-inline: auto; padding-inline: var(--gutter);
   gap: clamp(60px, 12vw, 200px);
-  font-family: "Playfair Display", "Bodoni MT", Didot, "Times New Roman", Georgia, serif;
+  font-family: var(--display);
   font-weight: 400; font-style: normal;
   font-size: clamp(2.6rem, 8.8vw, 9.5rem);
   line-height: .9; letter-spacing: .01em; text-transform: uppercase;
@@ -1090,7 +953,14 @@ a.office__row:hover { color: var(--white); }
    at the far corner. A single radial does the whole thing. */
 .spot__wash {
   position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  /* Three layers, painted front to back. The vignette pulls the corners down
+     so the frame has edges; the hairline grid is a pitch, faint enough to be
+     texture rather than a diagram, and it is what stops the ground reading as
+     a flat swatch of blue behind a cutout. The radial is the light itself. */
   background:
+    radial-gradient(120% 100% at 50% 46%, transparent 42%, rgba(2, 4, 12, .55) 100%),
+    repeating-linear-gradient(90deg, rgba(160, 200, 255, .05) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgba(160, 200, 255, .04) 0 1px, transparent 1px 96px),
     radial-gradient(130% 120% at 6% 108%, #1b4fe0 0%, #12309a 26%, #0a1852 52%, #05091c 78%, #04060d 100%);
   /* Fades out as the field takes over, so the cards end up in space rather
      than on a poster. */
@@ -1123,14 +993,78 @@ a.office__row:hover { color: var(--white); }
 }
 .spot__title-soft { color: #6f9bff; }
 
-.spot__facts { margin: 0; display: grid; gap: clamp(.35rem, 1vw, .7rem); }
-.spot__fact {
-  display: flex; gap: .5ch; align-items: baseline;
-  font-size: clamp(1rem, 2.1vw, 1.45rem); line-height: 1.35;
+/* Who the panel is about, under the section's own heading. The heading names
+   what this is ("Our client spotlight"); this names him, which the panel was
+   leaving entirely to the card. */
+.spot__name {
+  margin: 0 0 clamp(1.4rem, 3.4vw, 2.2rem);
+  display: grid; gap: .45rem;
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem); font-weight: 500; line-height: 1.1;
+  letter-spacing: -.01em;
 }
-.spot__fact dt { margin: 0; color: rgba(234, 244, 251, .82); }
-.spot__fact dt::after { content: ":"; }
-.spot__fact dd { margin: 0; color: #fff; }
+.spot__pos {
+  font-size: .72rem; font-weight: 400; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .5);
+}
+
+/* The record, as a record.
+ *
+ * It was a column of "Label: value" sentences down the left third, which is
+ * how you write a list and not how you show a figure -- 34, 79 and 43 read as
+ * words in a paragraph, and the panel left most of its own width empty. Two
+ * columns of label-over-value fills that width, and the figures go up into the
+ * display face at a size that makes them the thing you look at.
+ *
+ * Hairline rules on the top edge of each cell rather than a border on the
+ * grid: a rule per cell survives an odd number of facts, where a grid border
+ * leaves the last row open on one side. */
+.spot__facts {
+  margin: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(1.2rem, 3vw, 2.6rem);
+}
+.spot__fact {
+  padding: clamp(.7rem, 1.6vw, 1rem) 0;
+  border-top: 1px solid rgba(234, 244, 251, .14);
+}
+.spot__fact dt {
+  margin: 0 0 .35rem;
+  font-size: .66rem; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .5);
+}
+.spot__fact dd {
+  margin: 0; color: #fff; line-height: 1.05;
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem); font-weight: 500;
+  /* Club names are long and the column is not wide. Wrapping is better than
+     the overflow that a nowrap would give, but it should break between words
+     only -- "Olym / piacos" is worse than either. */
+  overflow-wrap: break-word;
+}
+/* The figures. Serif, larger, and tabular so age, caps and goals line up down
+   the column instead of shifting with the width of a 1. */
+.spot__fact[data-kind="num"] dd {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.spot__cta {
+  margin-top: clamp(1.4rem, 3.4vw, 2.2rem);
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-size: .74rem; letter-spacing: .2em; text-transform: uppercase;
+  color: #fff; text-decoration: none;
+  border-bottom: 1px solid rgba(234, 244, 251, .28);
+  padding-bottom: .5rem;
+  transition: border-color .3s ease, gap .3s ease;
+  /* The panel is pointer-events: none so the cards behind it stay reachable,
+     and it fades out well before the section ends. An invisible element still
+     takes clicks, so this is only reachable while the panel is actually up --
+     otherwise it sits over the open field swallowing them. */
+  pointer-events: none;
+}
+.spot__pin.is-panel .spot__cta { pointer-events: auto; }
+.spot__cta:hover { border-color: var(--accent); gap: 1rem; }
+.spot__cta svg { width: 1em; height: 1em; }
 
 /* The word the fan stands in front of.
  *
@@ -1227,6 +1161,52 @@ a.office__row:hover { color: var(--white); }
 }
 .spot-card--lead .spot-card__name {
   font-size: .8rem; color: rgba(234, 244, 251, .8);
+}
+
+/* The lead card's light and its ground.
+ *
+ * A cutout on a gradient has nothing holding it in the frame -- it reads as a
+ * sticker laid on the background rather than as something standing in the
+ * scene. The halo is light coming off it, wider than the card and behind it;
+ * the cast is the shadow it drops, laid flat on the floor with a rotateX so
+ * it is an ellipse in perspective rather than a smudge stuck to its feet.
+ *
+ * Both fade with --fan: once the card has walked into the middle of the fan it
+ * is one of a row, and a single card still lit and casting would say it was
+ * standing somewhere the others are not. */
+.spot-card__halo, .spot-card__cast {
+  position: absolute; pointer-events: none;
+  opacity: calc(1 - var(--fan, 1) * .8);
+}
+.spot-card__halo {
+  inset: -22% -30%;
+  transform: translateZ(-40px);
+  background: radial-gradient(closest-side, rgba(122, 168, 255, .5) 0%, rgba(92, 130, 230, .22) 46%, transparent 78%);
+  filter: blur(24px);
+}
+.spot-card__cast {
+  left: 50%; bottom: -7%; width: 108%; height: 20%;
+  transform: translateX(-50%) rotateX(72deg);
+  transform-origin: 50% 100%;
+  background: radial-gradient(closest-side, rgba(2, 5, 16, .78) 0%, rgba(2, 5, 16, .34) 52%, transparent 76%);
+  filter: blur(10px);
+}
+
+/* A slow rise and fall while the card is being held up, so the panel is not a
+   still photograph. It stops the moment the fan starts, because the fan is
+   already moving it and two owners of one transform is the animation winning.
+   Written on a wrapper property the fan does not touch: the card's transform
+   belongs to the scrub. */
+@media (prefers-reduced-motion: no-preference) {
+  .spot-card--lead .spot-card__link {
+    animation: spot-float 6s var(--ease-in-out) infinite;
+    animation-play-state: running;
+  }
+  .spot__pin:not(.is-panel) .spot-card--lead .spot-card__link { animation-play-state: paused; }
+}
+@keyframes spot-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -1.6%; }
 }
 
 /* --- what the field leaves you with ------------------------------------- */

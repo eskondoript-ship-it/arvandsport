@@ -319,7 +319,7 @@ function engageFailsafe() {
   gsap.set(
     '[data-reveal], .word__inner, .line__inner, .ch, [data-hero-eyebrow], [data-hero-actions] > *,' +
       ' [data-hero-scroll], .player-card, .news-card, .service, .person, .office, [data-clip],' +
-      ' [data-strike] *, [data-rail-track]',
+      ' [data-rail-track]',
     { clearProps: 'all' },
   );
 }

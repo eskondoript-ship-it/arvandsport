@@ -48,7 +48,11 @@ export function initSpotlight(root = document) {
     end: 'bottom bottom',
     onUpdate: (self) => {
       section.style.setProperty('--p', self.progress.toFixed(4));
-      /* The closing link is only clickable once it is actually there. */
+      /* Either link is clickable only while it is on screen. Both are
+         invisible for most of the section, and an invisible element still
+         takes clicks -- without these the panel's link sits over the open
+         field swallowing them, and the closing one sits over the panel. */
+      pin.classList.toggle('is-panel', self.progress < 0.5);
       pin.classList.toggle('is-open', self.progress > 0.82);
     },
   });
@@ -57,12 +61,13 @@ export function initSpotlight(root = document) {
      a visitor who lands halfway down the page and scrolls up should not meet
      the section mid-move with --p still at its default. */
   section.style.setProperty('--p', '0');
+  pin.classList.add('is-panel');
 
   previous = () => {
     trigger.kill();
     section.classList.remove('is-live');
     section.style.removeProperty('--p');
-    pin.classList.remove('is-open');
+    pin.classList.remove('is-open', 'is-panel');
   };
   return previous;
 }

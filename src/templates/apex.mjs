@@ -1,9 +1,9 @@
 /**
  * The homepage's opening: the match-ball study, told over three chapters.
  *
- *   01  the ball turns, the camera closes in
- *   02  the strike — the shell opens along its seams and crosses to wireframe
- *   03  the camera comes round to the owner and the agency's figures
+ *   01  who we are — the ball turns, the camera closes in
+ *   02  what we do — the shell opens along its seams and crosses to wireframe
+ *   03  the record — the camera pulls round and the agency's figures arrive
  *
  * This is the same scene as the page at /experience/, not a version of it. The
  * WebGL half is literally that app's own components, bundled by

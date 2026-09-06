@@ -103,8 +103,14 @@ export function spotlight(site, players = []) {
   if (!lead) return '';
 
   const values = facts(lead);
+  /* A figure and a club name are not the same kind of thing and should not be
+     set the same way. The panel reads as a record rather than as a list of
+     sentences, so the numbers go in the display face at figure size and the
+     names stay in the body face -- which needs the difference stated here,
+     since the stylesheet cannot tell 34 from Al Wasl. */
+  const NUMERIC = new Set(['age', 'height', 'caps', 'goals']);
   const rows = (config.rows || [])
-    .map((key) => [config.labels?.[key] || key, values[key]])
+    .map((key) => [config.labels?.[key] || key, values[key], NUMERIC.has(key) ? 'num' : 'text'])
     .filter(([, value]) => value !== null && value !== undefined && value !== '');
 
   /* The rest of the roster, in the order they are listed, one per slot. More
@@ -125,6 +131,12 @@ export function spotlight(site, players = []) {
       ${others.map((p, i) => fieldCard(p, SLOTS[i], i)).join('\n      ')}
 
       <article class="spot-card spot-card--lead" data-spotlight-lead>
+        <!-- Light behind the card and a contact shadow under it. Two empty
+             spans rather than pseudo-elements: the card is in a preserve-3d
+             stage, so these need their own transforms to sit behind it and to
+             lie flat on the ground, and one element cannot do both. -->
+        <span class="spot-card__halo" aria-hidden="true"></span>
+        <span class="spot-card__cast" aria-hidden="true"></span>
         <a class="spot-card__link" href="${attr(lead.url)}">
           ${picture(lead.image, {
             widths: PORTRAIT_WIDTHS,
@@ -144,15 +156,19 @@ export function spotlight(site, players = []) {
         <span class="spot__title-soft">${esc(config.kicker)}</span>
         ${esc(config.title)}
       </h2>
+      <p class="spot__name">${esc(lead.name)}<span class="spot__pos">${esc(
+        [lead.position?.detail, lead.nationality].filter(Boolean).join(' · '),
+      )}</span></p>
       <dl class="spot__facts">
         ${rows
           .map(
-            ([label, value], i) => `<div class="spot__fact" style="--i:${i}">
+            ([label, value, kind], i) => `<div class="spot__fact" data-kind="${attr(kind)}" style="--i:${i}">
           <dt>${esc(label)}</dt><dd>${esc(String(value))}</dd>
         </div>`,
           )
           .join('\n        ')}
       </dl>
+      <a class="spot__cta" href="${attr(lead.url)}"><span>Full profile</span>${ICONS.arrow}</a>
     </div>
 
     <div class="spot__outro" data-spotlight-outro aria-hidden="true">
