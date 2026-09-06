@@ -94,11 +94,17 @@ export function sceneState(progress: number): SceneState {
   return {
     spin: approach,
     dolly: approach,
-    /* Contact opens beat two and lasts a twentieth of the page -- long enough
-       to be scrolled through rather than past. */
-    contact: pulse(span(p, 0.185, 0.05)),
-    struck: span(p, 0.185, 0.075),
-    kick: power2Out(span(p, 0.2, 0.14)),
+    /* Contact opens beat two. Both windows start together and `contact` is two
+       thirds the length of `struck`, which is not decoration: it puts the peak
+       of the pulse at struck 0.33, and Boot.tsx places the boot on the ball at
+       exactly that number. Change one length without the other and the boot
+       swings through empty space again.
+
+       Lengthened from 0.05 and 0.075 -- the strike went past faster than it
+       could be read. */
+    contact: pulse(span(p, 0.185, 0.08)),
+    struck: span(p, 0.185, 0.12),
+    kick: power2Out(span(p, 0.2, 0.19)),
     /* Eased at both ends: the camera is chasing something, and a chase that
        starts and stops at a constant rate reads as a slide. */
     arrive: power3InOut(span(p, 0.3, 0.2)),

@@ -65,6 +65,11 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
     const a = sceneState(scrollState.progress);
     const t = state.clock.elapsedTime;
 
+    /* Read once at the top: the ball's flight needs it as much as the camera
+     * does, and the ball is positioned first. */
+    const aspect = state.size.width / Math.max(1, state.size.height);
+    const portrait = aspect < 1;
+
     /* --- the ball itself --- */
     if (ball.current) {
       /* An idle drift under the scrubbed rotation, so it is never dead still.
@@ -95,13 +100,27 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
        * time the sphere is forming the ball is back at the origin it forms
        * around. */
       const settle = (1 - a.arrive * 0.85) * (1 - a.globe);
-      /* Twice as far as it went before. The camera is pulling in across the
-       * same stretch, so a metre of travel read as almost none -- the ball
-       * looked like it was being nudged rather than struck. */
+      /* Struck towards the viewer, not across the frame.
+       *
+       * Most of the travel is +z now, which is the camera's side of the scene:
+       * the ball leaves the boot and comes at whoever is reading, which is what
+       * a strike looks like from behind the striker and is the only angle where
+       * a kick reads as force rather than as an object sliding sideways. A
+       * little +x and +y keep it off dead centre so it does not simply grow.
+       *
+       * It cannot come all the way to the lens -- at z 2.6 against a camera
+       * about five out, a unit ball fills the frame and the next beat has to
+       * start from a wall of glass -- so 2.0 is as near as it gets. */
+      /* How far towards the camera, which is not the same number on a phone.
+       * A portrait frame is narrow and the camera is already close, so the
+       * same two units of approach put a unit ball across ninety percent of
+       * the screen -- it stopped reading as a ball coming at you and started
+       * reading as the scene being replaced by glass. */
+      const toward = portrait ? 1.05 : 2.0;
       ball.current.position.set(
-        (flight * 2.3 - contact * 0.3) * settle,
-        Math.sin(flight * Math.PI * 0.85) * 1.5 * settle,
-        flight * -1.1 * settle,
+        (flight * 0.55 - contact * 0.3) * settle,
+        Math.sin(flight * Math.PI * 0.85) * 1.1 * settle,
+        flight * toward * settle,
       );
     }
 
@@ -177,6 +196,11 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
        units across and has to fit the frame whole, which at this field of view
        needs about eight units of distance. */
     range += a.arrive * 3.4;
+    /* And the camera gives a little ground as the ball comes at it, so the gap
+       closes but never to nothing. Less than the ball travels, or the approach
+       would cancel itself out and the strike would read as the ball standing
+       still while the world moved. */
+    range += a.kick * (portrait ? 0.45 : 0.8);
     /* The globe gathers at about the ball's own size, so the camera comes back
        in from wherever the descent and the exploded diagram had pushed it. */
     range -= a.globe * 3.2;
@@ -198,8 +222,6 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
      * opens and then grows by exactly how far the panels travel, so the
      * exploded diagram frames itself rather than needing a second number kept
      * in step with EXPLODE_DISTANCE. */
-    const aspect = state.size.width / Math.max(1, state.size.height);
-    const portrait = aspect < 1;
     if (portrait) {
       const FILL = 0.78;
       const contentRadius = (1 + a.explode * EXPLODE_DISTANCE) * (1 - a.globe * 0.45);
@@ -252,7 +274,11 @@ export default function SoccerModel({ procedural = false, onPanelsReady }: Socce
        used to be, which reads as the floor rising rather than as a dive. */
     lookAt.set(
       a.kick * 0.55 - bias,
-      a.kick * 0.4 - a.arrive * 1.6 + a.globe * 1.5,
+      /* Aimed lower through the strike on a phone, which rides the ball up the
+         frame and off the copy. The copy sits across the middle of a portrait
+         screen and the ball is struck straight through it; moving the aim is
+         cheaper than moving the ball, and leaves the flight itself alone. */
+      a.kick * 0.4 - a.arrive * 1.6 + a.globe * 1.5 - (portrait ? a.kick * 0.75 : 0),
       0,
     );
     camera.lookAt(lookAt);

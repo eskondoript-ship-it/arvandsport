@@ -84,17 +84,23 @@ export default function Boot() {
      * The first pass had the boot arriving at the ball's position at struck
      * 0.5, by which point the ball had already been struck and left: a boot
      * swinging through empty space in the bottom left while the ball flew out
-     * of the top right. */
+     * of the top right.
+     *
+     * It swings out of the screen towards the viewer as well as across, because
+     * that is where it sends the ball. Coming from behind the ball in z is also
+     * what puts the boot between the camera and nothing -- swung the other way
+     * it would arrive in front of the ball and hide the contact it is making. */
     root.current.position.set(
-      -3.0 + swing * 5.8,
+      -2.2 + swing * 4.2,
       -1.7 + swing * 1.8 + follow * 0.25,
-      0.4 - swing * 0.8,
+      -1.9 + swing * 3.4,
     );
 
-    /* Toe leading on the way in, rolling over through contact. */
+    /* Toe leading on the way in, rolling over through contact, and turning to
+     * follow the ball out towards the viewer. */
     root.current.rotation.set(
       -0.25 + follow * 0.5,
-      -0.9 + swing * 1.1,
+      -1.5 + swing * 1.6,
       -0.5 + swing * 0.8,
     );
 
