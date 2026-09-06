@@ -2520,18 +2520,31 @@ a.office__row:hover { color: var(--white); }
   position: absolute; pointer-events: none;
   opacity: calc(1 - var(--fan, 1) * .8);
 }
+/* Both of these were blurred with `filter` and neither needs to be. A gradient
+   is already a blur -- it is the same falloff, computed once when the layer is
+   rasterised rather than as a post-pass over it every time the layer moves --
+   and these sit inside a stage whose children are transformed on every frame of
+   the scrub. Extra stops carry the softness the filter was adding. */
 .spot-card__halo {
   inset: -22% -30%;
   transform: translateZ(-40px);
-  background: radial-gradient(closest-side, rgba(122, 168, 255, .5) 0%, rgba(92, 130, 230, .22) 46%, transparent 78%);
-  filter: blur(24px);
+  background: radial-gradient(closest-side,
+    rgba(122, 168, 255, .42) 0%,
+    rgba(108, 150, 245, .3) 28%,
+    rgba(92, 130, 230, .16) 52%,
+    rgba(80, 115, 210, .06) 70%,
+    transparent 86%);
 }
 .spot-card__cast {
-  left: 50%; bottom: -7%; width: 108%; height: 20%;
+  left: 50%; bottom: -7%; width: 112%; height: 22%;
   transform: translateX(-50%) rotateX(72deg);
   transform-origin: 50% 100%;
-  background: radial-gradient(closest-side, rgba(2, 5, 16, .78) 0%, rgba(2, 5, 16, .34) 52%, transparent 76%);
-  filter: blur(10px);
+  background: radial-gradient(closest-side,
+    rgba(2, 5, 16, .72) 0%,
+    rgba(2, 5, 16, .48) 34%,
+    rgba(2, 5, 16, .2) 58%,
+    rgba(2, 5, 16, .06) 74%,
+    transparent 88%);
 }
 
 /* A slow rise and fall while the card is being held up, so the panel is not a

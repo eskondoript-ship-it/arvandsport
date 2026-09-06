@@ -3,7 +3,7 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Lightformer, Grid, AdaptiveDpr, Preload } from '@react-three/drei';
 import { EffectComposer, SelectiveBloom, Selection, Select, Vignette } from '@react-three/postprocessing';
-import { Component, Suspense, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 
 import SoccerModel from '@/components/SoccerModel';
@@ -93,90 +93,128 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
      renderer to apply the new value. */
   const touch = useMemo(isTouch, []);
 
+  /**
+   * Stop rendering when the hero is not on screen.
+   *
+   * A Canvas is `frameloop="always"` by default, and always means always: this
+   * scene kept drawing a transmissive ball through a bloom and a vignette for
+   * the whole visit, behind every section below the hero. It was affordable
+   * when only desktops ran it and it is not now.
+   *
+   * Measured on a phone viewport, parked on the client spotlight: 7 frames in
+   * two seconds, 383ms each. With the canvas out of the document, 75 frames at
+   * 16.7ms. The section was not heavy -- it was being rendered on the leftovers
+   * of a 3D scene nobody could see.
+   *
+   * An observer on the shell rather than a scroll handler, because the question
+   * is exactly the one IntersectionObserver answers, and it answers it off the
+   * main thread. The margin restarts the loop just before the hero comes back,
+   * so it is drawing by the time it is visible.
+   */
+  const shell = useRef<HTMLDivElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
+
+  useEffect(() => {
+    const node = shell.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      { rootMargin: '15% 0px' },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <Canvas
-      /* Fixed behind the copy, so it must never eat the scroll. */
-      className="!pointer-events-none"
-      /* A phone's 3x panel is the single most expensive thing about this scene
-         and the least visible: the ball is soft-edged glass behind type, and
-         1.5x is already past the point where its silhouette reads as aliased.
-         AdaptiveDpr below drops it further if frames are still being missed. */
-      dpr={touch ? [1, 1.5] : [1, 2]}
-      gl={{
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-        toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.05,
-      }}
-      camera={{ position: [0, 0.25, 6.4], fov: 42, near: 0.1, far: 60 }}
-      onCreated={() => setLightsReady(true)}
-    >
-      {/* Key and fill, plus an environment built in-scene rather than fetched.
-          drei's HDRI presets pull a file off a CDN at runtime, which a static
-          export sitting on Pages should not depend on; lightformers give the
-          same soft studio reflections out of geometry that ships with the JS. */}
-      <ambientLight intensity={0.35} />
-      <directionalLight ref={keyLight} position={[4.5, 6, 5]} intensity={2.1} color="#ffffff" />
-      <directionalLight ref={fillLight} position={[-6, -1.5, -3]} intensity={1.1} color="#7fb6ff" />
+    <div ref={shell} style={{ position: 'absolute', inset: 0 }}>
+      <Canvas
+        /* Paused rather than torn down: the renderer, the model and the compiled
+           materials all survive, so coming back is a frame rather than a rebuild.
+           The last frame stays painted, which nobody sees -- it is off screen. */
+        frameloop={onScreen ? 'always' : 'never'}
+        /* Fixed behind the copy, so it must never eat the scroll. */
+        className="!pointer-events-none"
+        /* A phone's 3x panel is the single most expensive thing about this scene
+           and the least visible: the ball is soft-edged glass behind type, and
+           1.5x is already past the point where its silhouette reads as aliased.
+           AdaptiveDpr below drops it further if frames are still being missed. */
+        dpr={touch ? [1, 1.5] : [1, 2]}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.05,
+        }}
+        camera={{ position: [0, 0.25, 6.4], fov: 42, near: 0.1, far: 60 }}
+        onCreated={() => setLightsReady(true)}
+      >
+        {/* Key and fill, plus an environment built in-scene rather than fetched.
+            drei's HDRI presets pull a file off a CDN at runtime, which a static
+            export sitting on Pages should not depend on; lightformers give the
+            same soft studio reflections out of geometry that ships with the JS. */}
+        <ambientLight intensity={0.35} />
+        <directionalLight ref={keyLight} position={[4.5, 6, 5]} intensity={2.1} color="#ffffff" />
+        <directionalLight ref={fillLight} position={[-6, -1.5, -3]} intensity={1.1} color="#7fb6ff" />
 
-      <Environment resolution={256}>
-        <Lightformer form="rect" intensity={1.5} position={[0, 4, 2]} scale={[8, 3, 1]} color="#ffffff" />
-        <Lightformer form="rect" intensity={1.4} position={[-5, 0, 1]} scale={[3, 6, 1]} color="#5aa9ff" />
-        <Lightformer form="rect" intensity={1.1} position={[5, -1, -2]} scale={[3, 6, 1]} color="#ff7a45" />
-        <Lightformer form="circle" intensity={1.6} position={[0, -4, 3]} scale={4} color="#20304a" />
-      </Environment>
+        <Environment resolution={256}>
+          <Lightformer form="rect" intensity={1.5} position={[0, 4, 2]} scale={[8, 3, 1]} color="#ffffff" />
+          <Lightformer form="rect" intensity={1.4} position={[-5, 0, 1]} scale={[3, 6, 1]} color="#5aa9ff" />
+          <Lightformer form="rect" intensity={1.1} position={[5, -1, -2]} scale={[3, 6, 1]} color="#ff7a45" />
+          <Lightformer form="circle" intensity={1.6} position={[0, -4, 3]} scale={4} color="#20304a" />
+        </Environment>
 
-      {/* Tactical floor, well under the ball and fading out before the edge of
-          frame so it reads as a grid rather than as a plane with a border. */}
-      <Grid
-        position={[0, -2.1, 0]}
-        args={[40, 40]}
-        cellSize={0.6}
-        cellThickness={0.5}
-        cellColor="#1b2733"
-        sectionSize={3}
-        sectionThickness={0.9}
-        sectionColor="#2b4457"
-        fadeDistance={26}
-        fadeStrength={1.4}
-        infiniteGrid
-      />
+        {/* Tactical floor, well under the ball and fading out before the edge of
+            frame so it reads as a grid rather than as a plane with a border. */}
+        <Grid
+          position={[0, -2.1, 0]}
+          args={[40, 40]}
+          cellSize={0.6}
+          cellThickness={0.5}
+          cellColor="#1b2733"
+          sectionSize={3}
+          sectionThickness={0.9}
+          sectionColor="#2b4457"
+          fadeDistance={26}
+          fadeStrength={1.4}
+          infiniteGrid
+        />
 
-      <Selection>
-        {/* autoClear off: the composer draws over the transparent canvas rather
-            than wiping the alpha the page background shows through. */}
-        {/* MSAA on the composer's own buffers, which is a full-screen cost and
-            not a cheap one on a mobile GPU. The context is already antialiased,
-            so dropping this on touch loses the extra smoothing on the bloom's
-            edges and nothing else. */}
-        <EffectComposer autoClear={false} multisampling={touch ? 0 : 4}>
-          <SelectiveBloom
-            lights={lightsReady ? [keyLight, fillLight] : []}
-            luminanceThreshold={0.72}
-            luminanceSmoothing={0.22}
-            intensity={1.15}
-            mipmapBlur
-          />
-          <Vignette offset={0.24} darkness={0.72} />
-        </EffectComposer>
+        <Selection>
+          {/* autoClear off: the composer draws over the transparent canvas rather
+              than wiping the alpha the page background shows through. */}
+          {/* MSAA on the composer's own buffers, which is a full-screen cost and
+              not a cheap one on a mobile GPU. The context is already antialiased,
+              so dropping this on touch loses the extra smoothing on the bloom's
+              edges and nothing else. */}
+          <EffectComposer autoClear={false} multisampling={touch ? 0 : 4}>
+            <SelectiveBloom
+              lights={lightsReady ? [keyLight, fillLight] : []}
+              luminanceThreshold={0.72}
+              luminanceSmoothing={0.22}
+              intensity={1.15}
+              mipmapBlur
+            />
+            <Vignette offset={0.24} darkness={0.72} />
+          </EffectComposer>
 
-        {/* Two filters, deliberately. The selection decides which objects may
-            bloom at all -- the ball and its impact ring, never the grid or the
-            photograph -- and the luminance threshold decides what within them
-            is bright enough, which is how the shaded white panels stay matte
-            while the neon edges flare. */}
-        <Select enabled>
-          <ModelBoundary fallback={<ProceduralBall />}>
-            <Suspense fallback={<ProceduralBall />}>
-              <SoccerModel onPanelsReady={onReady && (() => onReady())} />
-            </Suspense>
-          </ModelBoundary>
-        </Select>
-      </Selection>
+          {/* Two filters, deliberately. The selection decides which objects may
+              bloom at all -- the ball and its impact ring, never the grid or the
+              photograph -- and the luminance threshold decides what within them
+              is bright enough, which is how the shaded white panels stay matte
+              while the neon edges flare. */}
+          <Select enabled>
+            <ModelBoundary fallback={<ProceduralBall />}>
+              <Suspense fallback={<ProceduralBall />}>
+                <SoccerModel onPanelsReady={onReady && (() => onReady())} />
+              </Suspense>
+            </ModelBoundary>
+          </Select>
+        </Selection>
 
-      <AdaptiveDpr pixelated={false} />
-      <Preload all />
-    </Canvas>
+        <AdaptiveDpr pixelated={false} />
+        <Preload all />
+      </Canvas>
+    </div>
   );
 }
