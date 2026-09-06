@@ -7,7 +7,9 @@ import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNo
 import * as THREE from 'three';
 
 import SoccerModel from '@/components/SoccerModel';
+import Stadium, { STADIUM_FROM } from '@/components/Stadium';
 import { buildProceduralPanels } from '@/lib/ball';
+import { scrollState } from '@/lib/scroll';
 
 /* ------------------------------------------------------------------ *
  * GLB fallback
@@ -56,6 +58,35 @@ function ProceduralBall() {
         </mesh>
       ))}
     </group>
+  );
+}
+
+/**
+ * Mount the stadium only once the scroll is within reach of its chapter.
+ *
+ * This is what makes the bowl affordable: 781KB over the wire, requested at
+ * the moment it is nearly needed rather than alongside the ball. Mounting is
+ * the fetch -- useGLTF asks for the file when the component first renders --
+ * so this component and the loading policy are the same thing.
+ *
+ * It watches the scroll from inside the frame loop instead of subscribing,
+ * because the scene is already reading scrollState every frame and one more
+ * comparison there is free. The flag only ever goes from false to true: a
+ * visitor who scrolls back up keeps the stadium they already paid for, and
+ * unmounting it would drop the model and re-fetch it on the way back down.
+ */
+function StadiumWhenNeeded() {
+  const [wanted, setWanted] = useState(false);
+
+  useFrame(() => {
+    if (!wanted && scrollState.progress >= STADIUM_FROM) setWanted(true);
+  });
+
+  if (!wanted) return null;
+  return (
+    <Suspense fallback={null}>
+      <Stadium />
+    </Suspense>
   );
 }
 
@@ -179,6 +210,11 @@ export default function SoccerCanvas({ onReady }: SoccerCanvasProps = {}) {
           fadeStrength={1.4}
           infiniteGrid
         />
+
+        {/* The bowl, deliberately outside <Selection> -- it is already a
+            self-lit wireframe and letting the bloom find it turned a drawing
+            into a smear of light. */}
+        <StadiumWhenNeeded />
 
         <Selection>
           {/* autoClear off: the composer draws over the transparent canvas rather

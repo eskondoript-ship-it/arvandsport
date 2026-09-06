@@ -15,7 +15,10 @@ to run — and this is the map of which to reach for.
 | Ships as | From | Command |
 |---|---|---|
 | `experience/public/models/soccer-ball.glb` | `assets-src/trionda.glb` | `python3 tools/glb-panels.py` |
-| `static/assets/img/ui/ball-sheet.webp` and `ball-still.webp` | the ball GLB above | `node tools/render-sprite.mjs` |
+| `static/assets/img/ui/ball-sheet.webp` and `ball-still.webp` | the ball GLB above | `node tools/render-sprite.mjs --size 240` |
+| `static/assets/img/ui/ball-sheet-sm.webp` and `ball-still-sm.webp` | the same GLB | `node tools/render-sprite.mjs --suffix -sm --size 120` |
+| `experience/public/models/stadium.glb` | `assets-src/stadium.3ds` | `node tools/convert-model.mjs assets-src/stadium.3ds experience/public/models/stadium.glb --up z --no-normals --max-tris 100000` |
+| `static/assets/video/pitch.{webm,mp4}` and `img/ui/pitch-poster.webp` | a supplied clip | see **The clip** below |
 
 After any of them: rebuild. `npm run build` at the root copies
 `experience/public/` into `dist/assets/scene/`, and `dist/` is committed.
@@ -78,7 +81,56 @@ PLAYWRIGHT_PATH=/path/to/node_modules/playwright/index.mjs \
 ```
 
 Re-render it whenever the ball model changes. There is no check that will catch
-a stale sprite for you.
+a stale sprite for you. **Both sheets, at both sizes** — the desktop one and
+the `-sm` one at half the tile — and the grid it prints at the end has to match
+`COLS`/`ROWS` in `src/scripts/apex.js` and `background-size` in
+`src/styles/pages.css`. Nothing checks that either; a mismatch shows as the
+sprite slicing across two tiles.
+
+## Any other model
+
+`tools/convert-model.mjs` takes .3ds, .fbx, .obj or .glb and writes the GLB the
+scene loads, centred on its own bounding box and normalised to a unit radius —
+so a component can place it without knowing anything about how its author
+worked. It flattens materials to one (archive models name texture files that
+are not in the archive) and `--no-normals` drops normals for anything drawn as
+a wireframe or with a basic material, which was a third of the stadium's file.
+
+`--up z` is the one to get right: 3ds and most CAD exports are Z-up and three
+is Y-up. A model that comes out lying on its side has this wrong.
+
+It prints the triangle count. Anything over about 40,000 wants a reason: the
+stadium is 95,682 and 781KB over the wire, which is why `Stadium.tsx` is only
+mounted once the scroll is within reach of its chapter rather than loaded with
+the hero.
+
+## The clip
+
+The scrubbed video under `static/assets/video/`. A clip has to be re-encoded
+before it can be scrubbed, and the source arrived needing all of it: variable
+frame rate, 4K, and two and a half seconds of black at the head of a
+five-second file.
+
+```bash
+FF=$(python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
+"$FF" -i source.mp4 -ss 2.26 -an \
+  -vf "scale=1280:720:flags=lanczos,fps=30" \
+  -c:v libx264 -profile:v high -pix_fmt yuv420p -crf 26 \
+  -g 10 -keyint_min 10 -sc_threshold 0 -movflags +faststart \
+  static/assets/video/pitch.mp4
+"$FF" -i static/assets/video/pitch.webm ...   # VP9, same flags, -crf 34
+```
+
+Each flag is load-bearing: `fps=30` makes it constant-rate so a seek lands
+where it was asked to, `-g 10` keeps a seek within ten frames of a keyframe,
+`+faststart` puts the index at the front so the browser can seek before it has
+the whole file, `-an` drops audio nothing will ever play, and `-ss` **after**
+`-i` seeks accurately — before `-i` it snaps to a keyframe and lets the black
+back in.
+
+Check the head of any new clip for black frames before shipping it. Sample a
+few timestamps and look at the mean brightness; a clip that opens on black is a
+scrub where nothing happens for the first third.
 
 ## After any of this
 

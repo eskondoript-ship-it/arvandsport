@@ -896,6 +896,43 @@
     </div>
   </div>
 </section>
+<section class="film" data-film aria-labelledby="film-title">
+  <div class="film__pin" data-film-pin>
+    <div class="film__frame">
+      <!-- muted + playsinline are not preferences: without both, a phone
+           refuses to show an inline video at all and opens it fullscreen
+           instead. disablePictureInPicture and the controls being absent keep
+           it scenery rather than a player. -->
+      <video
+        class="film__video"
+        data-film-video
+        poster="/assets/img/ui/pitch-poster.webp"
+        preload="none"
+        muted
+        playsinline
+        disablePictureInPicture
+        aria-hidden="true"
+        tabindex="-1">
+        <source src="./assets/video/pitch.webm" type="video/webm">
+        <source src="./assets/video/pitch.mp4" type="video/mp4">
+      </video>
+      <span class="film__vignette" aria-hidden="true"></span>
+      <span class="film__scanline" aria-hidden="true"></span>
+    </div>
+
+    <div class="film__copy">
+      <p class="film__kicker">The match</p>
+      <h2 class="film__title" id="film-title">Where the work ends up</h2>
+      <p class="film__body">Contracts, transfers and fixtures are the job. Ninety minutes on a pitch is what they are for — and arranging them, in either seat, is what the licences are for.</p>
+    </div>
+
+    <!-- The readout, in the instrument language the hero uses. It is written
+         to from film.js as a plain number; nothing here is tweened. -->
+    <p class="film__meter" aria-hidden="true">
+      <span data-film-count>000</span><span class="film__meter-of"> / 100</span>
+    </p>
+  </div>
+</section>
 <section class="latest section" id="news">
   <div class="shell">
     <header class="section-head section-head--left" data-n="07" data-reveal>

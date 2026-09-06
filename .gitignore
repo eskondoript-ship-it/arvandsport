@@ -3,3 +3,10 @@ node_modules/
 *.log
 __pycache__/
 *.pyc
+
+# Scratch directories the model and sprite tools create inside experience/ so
+# esbuild can resolve three from there. They clean themselves up on success; a
+# tool that crashes leaves one behind, and one has been committed before.
+experience/.sprite-*
+experience/.convert-*
+experience/.prev-*

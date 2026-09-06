@@ -579,7 +579,7 @@ a.office__row:hover { color: var(--white); }
    scene does not reach -- no WebGL2, Save-Data, a bundle that never arrives --
    and on any of those a still is a poor version of it.
 
-   Phones get their own sheet at half the frame size -- 472KB against 1599 --
+   Phones get their own sheet at half the frame size -- 316KB against 1078 --
    the layout is identical, so the frame arithmetic in src/scripts/apex.js and
    the background-size here are the same for both and only the URL differs.
    The single still is what is left for anyone who asked for less motion. */
@@ -1290,4 +1290,108 @@ a.office__row:hover { color: var(--white); }
 .spot:not(.is-live) .spot__stage { translate: 15% 0; }
 @media (max-width: 760px) {
   .spot:not(.is-live) .spot__stage { translate: 0 22%; }
+}
+
+/* ================================================================ film ===
+ *
+ * A clip scrubbed by the scroll. Three viewports of section with one sticky
+ * screen inside it, so the browser holds the frame and src/scripts/film.js
+ * only has to decide which frame of the video to show.
+ *
+ * Everything below renders a finished still on its own: the poster is on the
+ * video element, the copy is over it, and none of this needs the class
+ * film.js adds. That is the no-JS and reduced-motion rendering, and it is a
+ * photograph with a caption rather than a black box.
+ *
+ * Dark in both themes with its own tokens, for the reason the hero and the
+ * spotlight carry theirs -- the ground here is footage, and copy reading --fg
+ * on a light page would come out near-black over it.
+ */
+.film {
+  position: relative;
+  min-height: 300svh;
+  background: #04060d;
+  color: #eaf4fb;
+  --fg: #eaf4fb;
+  --fg-muted: rgba(234, 244, 251, .7);
+  --line: rgba(234, 244, 251, .18);
+  --accent: var(--cyan-400);
+}
+.film__pin {
+  position: sticky; top: 0; height: 100svh; overflow: hidden;
+  display: grid; align-items: end;
+}
+
+.film__frame { position: absolute; inset: 0; z-index: 0; }
+.film__video,
+.film__frame > img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover;
+  /* The clip is broadcast footage upscaled to 4K by whoever exported it, so it
+     is soft to begin with. Held back a little and cooled, it sits under the
+     copy as ground rather than competing with it. */
+  filter: saturate(.72) contrast(1.06) brightness(.66);
+}
+
+/* Darkened at the edges and heavily at the foot, which is where the copy sits.
+   A gradient rather than a flat scrim: a scrim over the whole frame dims the
+   footage everywhere to solve a problem that only exists at the bottom. */
+.film__vignette {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(4, 6, 13, .94) 0%, rgba(4, 6, 13, .55) 26%, rgba(4, 6, 13, .1) 52%, transparent 70%),
+    radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(4, 6, 13, .5) 100%);
+}
+/* One hairline travelling with the scrub, so the frame reads as an instrument
+   showing footage rather than as a video with text on it. --p is written by
+   nothing: it is a static decoration, and the movement it needs it gets from
+   the picture behind it. */
+.film__scanline {
+  position: absolute; left: 0; right: 0; top: 0; height: 1px; z-index: 2;
+  background: linear-gradient(90deg, transparent, rgba(5, 237, 255, .5), transparent);
+  opacity: .5;
+}
+
+.film__copy {
+  position: relative; z-index: 3;
+  width: min(100% - (var(--gutter) * 2), var(--shell));
+  margin-inline: auto;
+  padding-bottom: clamp(3.5rem, 12vh, 7rem);
+  max-width: min(100% - (var(--gutter) * 2), 44rem);
+}
+.film__kicker {
+  margin: 0 0 .9rem; font-size: .7rem; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(234, 244, 251, .55);
+}
+.film__title {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 5.6vw, 3.8rem);
+  font-weight: 400; line-height: 1.04; letter-spacing: -.03em;
+}
+.film__body {
+  margin: 0; max-width: 46ch;
+  font-size: clamp(1rem, 1.6vw, 1.15rem); line-height: 1.6;
+  color: rgba(234, 244, 251, .72);
+}
+
+.film__meter {
+  position: absolute; z-index: 3; right: var(--gutter); bottom: clamp(1.5rem, 5vh, 3rem);
+  margin: 0; font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: .72rem; letter-spacing: .18em; color: rgba(234, 244, 251, .45);
+}
+.film__meter-of { color: rgba(234, 244, 251, .25); }
+/* The readout counts frames nobody is scrubbing until the scrub exists. */
+.film:not(.is-live) .film__meter { display: none; }
+
+@media (max-width: 760px) {
+  .film { min-height: 260svh; }
+  .film__copy { padding-bottom: clamp(3rem, 10vh, 5rem); }
+}
+
+/* Asked for less motion: no scrub, no fetch, and the poster is the section.
+   film.js never initialises here -- canAnimate() is false -- so the video
+   element keeps preload="none" and stays a still. */
+@media (prefers-reduced-motion: reduce) {
+  .film { min-height: 100svh; }
+  .film__scanline { display: none; }
 }

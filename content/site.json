@@ -188,6 +188,23 @@
     },
     "fieldCaption": "and the rest of the roster"
   },
+  "film": {
+    "_note": "The scroll-scrubbed clip. `sources` is the only thing that decides what plays -- swap the files under static/assets/video/ and re-run the build. They are listed best-first; the browser takes the first type it can decode. The clip must be encoded constant-frame-rate with a short keyframe interval or scrubbing stutters; tools/README notes the ffmpeg line that produced this one. The copy states nothing about who is in the footage, and must not: this is match footage used as texture, not a claim about representation.",
+    "sources": [
+      {
+        "src": "/assets/video/pitch.webm",
+        "type": "video/webm"
+      },
+      {
+        "src": "/assets/video/pitch.mp4",
+        "type": "video/mp4"
+      }
+    ],
+    "poster": "/assets/img/ui/pitch-poster.webp",
+    "kicker": "The match",
+    "title": "Where the work ends up",
+    "body": "Contracts, transfers and fixtures are the job. Ninety minutes on a pitch is what they are for — and arranging them, in either seat, is what the licences are for."
+  },
   "formerClients": {
     "title": "Former Clients",
     "items": [

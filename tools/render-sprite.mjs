@@ -241,9 +241,12 @@ fs.writeFileSync(png, Buffer.from(data.split(',')[1], 'base64'));
 const convert = spawnSync('python3', ['-c', `
 from PIL import Image
 sheet = Image.open(${JSON.stringify(png)}).convert('RGBA')
-# 1.6MB at 48 frames, against 987KB at 30 and 340KB for the matte ball this
-# replaced. The glass costs more to encode -- refraction puts detail
-# everywhere the flat print did not -- and frames cost linearly on top.
+# 1078KB at 48 frames on 240px tiles. It was 1.6MB when the tiles were 300px
+# and 987KB at 30 frames of 300px; the glass costs more to encode than the
+# matte ball this replaced -- refraction puts detail everywhere the flat print
+# did not -- and frames cost linearly on top of that. 240 is the lever that
+# actually worked, and it costs nothing visible: the sprite is drawn at 430px
+# at its very largest, and it was already being upscaled from 300.
 # Dropping the quality is not the lever it looks like: at 50 the 30-frame
 # sheet still came to 925KB, because most of the weight is the alpha channel,
 # which WebP stores losslessly either way.

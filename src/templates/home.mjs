@@ -2,6 +2,7 @@ import { layout, esc, attr, splitWords, ICONS } from './layout.mjs';
 import { sectionHead, playerCard, articleCard, personCard, statBlock } from './partials.mjs';
 import { apex } from './apex.mjs';
 import { spotlight } from './spotlight.mjs';
+import { film } from './film.mjs';
 
 
 export function about(site) {
@@ -259,6 +260,7 @@ export function renderHome({ site, players, news, taremiModel = false }) {
       about(site),
       servicesTeaser(site),
       roster(site, players),
+      film(site),
       latestNews(site, news),
       partners(site),
       closing(site),
